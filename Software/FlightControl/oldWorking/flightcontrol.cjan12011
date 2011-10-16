@@ -1,0 +1,210 @@
+#include "setup.h"
+#include "twi_master_driver.h"
+#include <avr/io.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <stddef.h>
+#include <util/delay.h>
+#include <avr/interrupt.h>
+
+#define CPU_SPEED 2000000
+#define BAUDRATE 100000
+#define TWI_BAUDSETTING TWI_BAUD(CPU_SPEED, BAUDRATE)
+#define Accel (0xA6 >> 1)
+#define Roll 0x60
+
+#define servoini 46
+#define motorini 32
+#define motorup 44
+#define motorhover 44
+#define servoconst 1
+#define motorconst 1
+
+#define AccelRead 0x32
+#define RollRead 0x1D
+
+#define TC_GetOverflowFlag( _tc ) ( (_tc)->INTFLAGS & TC0_OVFIF_bm )
+#define TC_ClearOverflowFlag( _tc ) ( (_tc)->INTFLAGS = TC0_OVFIF_bm )
+
+
+TWI_Master_t twiMaster;
+
+int main( void )
+{
+	int delay; //tc delay count variabable
+	int servoa = servoini;
+	int servob = servoini;
+	int motora = motorini;
+	int motorb = motorini + 1;
+	uint8_t setupBuffer[2];
+	setupBuffer[0] = 0x2D;
+	setupBuffer[1] = 0x08;
+	uint8_t ACCELreadBuffer = AccelRead;
+	uint8_t ROLLreadBuffer = RollRead;
+	
+	Setup(); //sets up servoPWM motorPWM, ledflashcounter, found in setup.h
+	
+	/* Initialize TWI master. */
+	TWI_MasterInit(&twiMaster,
+	               &TWIC,
+	               TWI_MASTER_INTLVL_LO_gc,
+	               TWI_BAUDSETTING);
+
+	/* Enable LO interrupt level. */
+	PMIC.CTRL |= PMIC_LOLVLEN_bm;
+	sei();
+
+	int t = 0; //variable to alternate accel and roll meter
+
+	TWI_MasterWriteRead(&twiMaster, Accel, setupBuffer, 2, 0);
+	
+	TCD0.CCA = servoa;
+	TCD0.CCB = motora;
+	TCD0.CCC = servob;
+	TCD0.CCD = motorb;	
+	
+	for(delay = 0; delay <=200; delay++)
+	{
+		while(TC_GetOverflowFlag( &TCD0 ) == 0){}
+		TC_ClearOverflowFlag( &TCD0 );
+	}
+
+	for(;(motora <= motorup) && (motorb <= motorup); motora+=1, motorb+=1)
+	{
+		TCD0.CCB = motora;
+		TCD0.CCD = motorb;
+
+		while(TC_GetOverflowFlag( &TCD0 ) == 0){}
+		TC_ClearOverflowFlag( &TCD0 );
+	}
+
+	for(delay = 0; delay <= 200; delay++)
+	{
+		while(TC_GetOverflowFlag( &TCD0 ) == 0){}
+		TC_ClearOverflowFlag( &TCD0 );
+	}
+
+	while(1)
+	{
+
+		if(54 <= motora)
+		{
+			motora = 50;
+		}
+		
+		if(54 <= motorb)
+		{
+			motorb = 50;
+		}
+	
+		if(54 <= servoa)
+		{
+			servoa = 54;
+		}
+
+		if(54 <= servob)
+		{
+			servob = 54;
+		}
+
+		if(40 >= motora)
+		{
+			motora = 40;
+		}
+
+		if(40 >= motorb)
+		{
+			motorb = 40;
+		}
+
+		if(40 >= servoa)
+		{
+			servoa = 30;
+		}
+
+		if(40 >= servob)
+		{
+			servob = 40;
+		}
+
+		//Set Motor PWM
+		TCD0.CCA = servoa;
+		TCD0.CCB = motora;
+		TCD0.CCC = servob;
+		TCD0.CCD = motorb;
+
+		if(15000 > TCC0.CNT)
+		{	
+			PORTF.OUT ^= (0x01);
+		}
+		
+		if(TWIM_STATUS_READY == twiMaster.status)
+		{
+			if(1 == t)
+			{			
+				t = 2;
+				TWI_MasterWriteRead(&twiMaster, Accel, &ACCELreadBuffer, 1, 6);
+				
+			}
+			else
+			{
+				t = 1;
+				TWI_MasterWriteRead(&twiMaster, Roll, &ROLLreadBuffer, 1, 6);
+			}
+		}
+
+		
+		//if z accelleration is greater than 1 g, slow down motors
+		if(((0x01 != (twiMaster.readData[5] & 0x01)) | (24 >= (twiMaster.readData[4]))) & (0x02 == (twiMaster.readData[6] & 0x02)))
+		{
+				motora -= motorconst;
+				motorb -= motorconst;
+		}
+
+		//if z accelleration is less than 1 g, speed up
+		if(((0x01 == (twiMaster.readData[5] & 0x01)) & (24 <= (twiMaster.readData[4]))) | (0x02 != (twiMaster.readData[6] & 0x02)))
+		{
+			motora += motorconst;
+			motorb += motorconst;
+		}
+		
+		if(20 >= (twiMaster.readData[0]))
+		{
+			//if x accell is greater in backward dir, tilt motors forward
+			if(0x02 == (twiMaster.readData[1] & 0x02))
+			{
+				servoa += servoconst;
+				servob += servoconst;
+			}
+			
+			//if x accell is greater in forward dir, tilt motors back
+			else
+			{
+				servoa -= servoconst;
+				servob -= servoconst;
+			}
+		}
+
+		if((10 >= (twiMaster.readData[2])) | (0x01 == ((twiMaster.readData[3]) & 0x01)))
+		{
+			if(0x02 == ((twiMaster.readData[3]) & 0x02))
+			{
+				motora += 1;
+				motorb -= 1;
+			}
+			else
+			{
+				motorb += 1;
+				motora -= 1;
+			}
+		}
+	}
+	return 0;
+}
+
+/*! TWIC Master Interrupt vector. */
+ISR(TWIC_TWIM_vect)
+{
+	TWI_MasterInterruptHandler(&twiMaster);
+}
+

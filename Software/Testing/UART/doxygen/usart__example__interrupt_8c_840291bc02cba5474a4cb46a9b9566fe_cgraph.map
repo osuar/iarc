@@ -1,0 +1,5 @@
+<area shape="rect" href="$usart__driver_8c.html#73739bc5a8060fa175df2dd43bb6174a" title="Initializes buffer and selects what USART module to use." alt="" coords="105,5,321,32">
+<area shape="rect" href="$usart__driver_8c.html#36cca099e37ec451e52efebe4c60180e" title="Get received data (5&#45;8 bit character)." alt="" coords="121,56,305,83">
+<area shape="rect" href="$usart__driver_8c.html#c65d5461255def6cd49b05a88d5aa411" title="Test if there is data in the receive software buffer." alt="" coords="104,107,323,133">
+<area shape="rect" href="$usart__driver_8c.html#c6a0c12350c501c1b8189aca778f5129" title="Put data (5&#45;8 bit character)." alt="" coords="123,157,304,184">
+<area shape="rect" href="$usart__driver_8c.html#ecbd49900666abf476cf5cce10fb372a" title="Test if there is data in the transmitter software buffer." alt="" coords="372,157,572,184">

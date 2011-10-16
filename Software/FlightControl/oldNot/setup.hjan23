@@ -1,0 +1,118 @@
+//heartjoh@onid.oregonstate.edu, terrazaj@onid.orst.edu, newmana@onid.orst.edu
+#include "stdlib.h"
+#include <stdio.h>
+#include <avr/io.h>
+#include <stddef.h>
+#include <util/delay.h>
+#include <avr/interrupt.h>
+
+#if !defined(S_SPLINT_S)
+#include "twi_master_driver.h"
+#endif 	  				 	 
+
+#define motorRAccelx 0
+#define motorRAccely -5
+#define motorRAccelz 25
+#define motorRRollx (0 - 0)
+#define motorRRolly 0
+#define motorRRollz 0
+
+#define motorLAccelx 0
+#define motorLAccely 5
+#define motorLAccelz 25
+#define motorLRollx (0 + 0)
+#define motorLRolly 0
+#define motorLRollz 0
+
+#define servoRAccelx -1
+#define servoRAccely 0
+#define servoRAccelz 0
+#define servoRRollx 0
+#define servoRRolly 0
+#define servoRRollz 0
+
+#define servoLAccelx 1
+#define servoLAccely 0
+#define servoLAccelz 0
+#define servoLRollx 0
+#define servoLRolly 0
+#define servoLRollz 0
+
+#define motorreg 3200
+#define servoreg 2600
+
+
+int returnvalue;
+int valuecount;
+
+void PWMSetup( void )
+{
+
+	//Setup PWM
+	TCD0.CTRLA = TC_CLKSEL_DIV1_gc;
+	TCD0.CTRLB = TC_WGMODE_SS_gc | TC0_CCBEN_bm | TC0_CCAEN_bm | TC0_CCCEN_bm | TC0_CCDEN_bm;
+	TCD0.PER = 40000;
+}
+
+
+
+void SetuprythmTC( void )
+{
+	TCC1.CTRLA = TC_CLKSEL_DIV256_gc;
+	TCC1.CTRLB = TC_WGMODE_NORMAL_gc | TC1_CCAEN_bm;
+	TCC1.INTCTRLB = (uint8_t) TC_CCAINTLVL_HI_gc;	
+	TCC1.PER = 312;
+	TCC1.CCA = 312;
+}
+
+void Setup( void )
+{
+	//enable pullups
+	PORTCFG.MPCMASK = 0x03;
+	PORTC.PIN0CTRL = (PORTC.PIN0CTRL & ~PORT_OPC_gm) | PORT_OPC_PULLUP_gc;
+
+	PMIC.CTRL |= PMIC_LOLVLEN_bm;
+	PMIC.CTRL |= PMIC_MEDLVLEN_bm;
+	PMIC.CTRL |= PMIC_HILVLEN_bm;
+	sei();
+
+	PORTF.DIR = 0x01; //LED output
+	PORTD.DIR = 0xFF;
+	PORTC.DIR |= ( 1<<3 ) | ( 1<<2 ); //pwr for IMU
+	PORTC.OUT |= ( 1<<3 ); //Set PORTC imu power (pin 3 hi pin 2 lo)
+	PWMSetup();
+	SetuprythmTC();
+}
+	
+int MotorLValueFunk(int Accelavgx, int Accelavgy, int Accelavgz, int Rollavgx, int Rollavgy, int Rollavgz)
+{
+	returnvalue = motorreg + (motorLAccelx * Accelavgx) + (motorLAccely * Accelavgy) + (motorLAccelz * Accelavgz);
+	returnvalue += (motorLRollx * Rollavgx) + (motorLRolly * Rollavgy) + (motorLRollz * Rollavgz);
+	return returnvalue;
+}
+
+int MotorRValueFunk(int Accelavgx, int Accelavgy, int Accelavgz, int Rollavgx, int Rollavgy, int Rollavgz)
+{
+	returnvalue = motorreg + (motorRAccelx * Accelavgx) + (motorRAccely * Accelavgy) + (motorRAccelz * Accelavgz);
+	returnvalue += (motorRRollx * Rollavgx) + (motorRRolly * Rollavgy) + (motorRRollz * Rollavgz);
+	return returnvalue;
+}
+int ServoLValueFunk(int Accelavgx, int Accelavgy, int Accelavgz, int Rollavgx, int Rollavgy, int Rollavgz)
+{
+	returnvalue = servoreg;
+	returnvalue += (servoLAccelx * Accelavgx);
+	returnvalue += (servoLAccely * Accelavgy);
+	returnvalue += (servoLAccelz * Accelavgz);
+	returnvalue += (servoLRollx * Rollavgx) + (servoLRolly * Rollavgy) + (servoLRollz * Rollavgz);
+	return returnvalue;
+}
+
+int ServoRValueFunk(int Accelavgx, int Accelavgy, int Accelavgz, int Rollavgx, int Rollavgy, int Rollavgz)
+{
+	returnvalue = servoreg;
+	returnvalue += (servoRAccelx * Accelavgx);
+	returnvalue +=(servoRAccely * Accelavgy); 
+	returnvalue += (servoRAccelz * Accelavgz);
+	returnvalue += (servoRRollx * Rollavgx) + (servoRRolly * Rollavgy) + (servoRRollz * Rollavgz);
+	return returnvalue;
+}

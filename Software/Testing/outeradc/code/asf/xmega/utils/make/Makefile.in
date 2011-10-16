@@ -1,0 +1,253 @@
+# Hey Emacs, this is a -*- makefile -*-
+##############################################################################
+# Goals available on make command line:
+#
+# [all]                   Default goal: build the project.
+# clean                   Clean up the project.
+# rebuild                 Rebuild the project.
+# doc                     Build the documentation.
+# cleandoc                Clean up the documentation.
+# rebuilddoc              Rebuild the documentation.
+# Copyright (c) 2009 Atmel Corporation. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice,
+# this list of conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+# this list of conditions and the following disclaimer in the documentation
+# and/or other materials provided with the distribution.
+#
+# 3. The name of Atmel may not be used to endorse or promote products derived
+# from this software without specific prior written permission.
+#
+# 4. This software may only be redistributed and used in connection with an
+# Atmel AVR product.
+#
+# THIS SOFTWARE IS PROVIDED BY ATMEL "AS IS" AND ANY EXPRESS OR IMPLIED
+# WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT ARE
+# EXPRESSLY AND SPECIFICALLY DISCLAIMED. IN NO EVENT SHALL ATMEL BE LIABLE FOR
+# ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# ** ** ** *** ** ** ** ** ** ** ** ** ** ** **
+# ENVIRONMENT SETTINGS
+# ** ** ** *** ** ** ** ** ** ** ** ** ** ** **
+DOCGEN  ?= doxygen
+
+# Output target file
+target  := $(PROJECT).elf
+
+CROSS   ?= avr-
+AS      := $(CROSS)as
+CC      := $(CROSS)gcc
+OBJCOPY := $(CROSS)objcopy
+OBJDUMP := $(CROSS)objdump
+SIZE    := $(CROSS)size
+RM      := rm --force
+
+# Strings for beautifying output
+MSG_COMPILING       = "CC      $@"
+MSG_ASSEMBLING      = "AS      $@"
+MSG_LINKING         = "LN      $@"
+MSG_IHEX_IMAGE      = "OBJCOPY $@"
+MSG_CLEAN_FILES     = "CLEAN   $(clean-files)"
+MSG_CLEAN_DOC       = "CLEAN   $(DOC_PATH)"
+MSG_GENERATING_DOC  = "DOXYGEN $(DOC_PATH)"
+MSG_CREATE_DOXYFILE = "DOXYGEN $(DOC_CFG)"
+MSG_SIZE            = "SIZE    $@"
+
+# Don't use make's built-in rules and variables
+MAKEFLAGS       += -rR
+
+# Don't print 'Entering directory ...'
+MAKEFLAGS       += --no-print-directory
+
+#
+# Hide command output by default, but allow the user to override this
+# by adding V=1 on the command line.
+#
+# This is inspired by the Kbuild system used by the Linux kernel.
+#
+ifdef V
+  ifeq ("$(origin V)", "command line")
+    VERBOSE = $(V)
+  endif
+endif
+ifndef VERBOSE
+  VERBOSE = 0
+endif
+
+ifeq ($(VERBOSE), 1)
+  Q =
+else
+  Q = @
+endif
+
+asflags-gnu-y           := $(ASFLAGS)
+cflags-gnu-y            := $(CFLAGS)
+cppflags-gnu-y          := $(CPPFLAGS)
+cpuflags-gnu-y          := $(CPUFLAGS)
+ldflags-gnu-y           := $(LDFLAGS)
+flashflags-gnu-y        := $(FLASHFLAGS)
+eepromflags-gnu-y       := $(EEPROMFLAGS)
+clean-files             :=
+
+clean-files             += $(wildcard $(PROJECT).elf $(PROJECT).map)
+clean-files             += $(wildcard $(PROJECT).hex $(PROJECT).eep)
+
+# Always enable warnings. And be very careful about implicit
+# declarations.
+cflags-gnu-y    += -Wall -Wstrict-prototypes -Wmissing-prototypes
+cflags-gnu-y    += -Werror-implicit-function-declaration
+# IAR doesn't allow arithmetic on void pointers, so warn about that.
+cflags-gnu-y    += -Wpointer-arith
+
+# Preprocessor flags.
+cppflags-gnu-y  += $(INC_PATH:%=-I%) $(DEFS)
+
+# CPU specific flags.
+cpuflags-gnu-y  += -mmcu=$(MCU)
+
+# Dependency file flags.
+depflags        = -MD -MP -MQ $@
+
+# Debug specific flags.
+dbgflags-gnu-y  += -gdwarf-2
+
+# Optimization specific flags.
+optflags-gnu-y  = -Os
+
+# Relax compilation and linking.
+cflags-gnu-y    += -mrelax
+asflags-gnu-y   += -mrelax
+ldflags-gnu-y   += --relax
+
+# Always preprocess assembler files.
+asflags-gnu-y   += -x assembler-with-cpp
+# Compile C files using the GNU99 standard.
+cflags-gnu-y    += -std=gnu99
+
+# Use signed character type when compiling.
+cflags-gnu-y    += -fsigned-char
+
+# Separate each function and data into its own separate section to allow
+# garbage collection of unused sections.
+cflags-gnu-y    += -ffunction-sections -fdata-sections
+
+# Garbage collect unreferred sections when linking.
+ldflags-gnu-y   += --gc-sections
+
+a_flags = $(cpuflags-gnu-y) $(depflags) $(cppflags-gnu-y) $(asflags-gnu-y) -D__ASSEMBLY__
+c_flags = $(cpuflags-gnu-y) $(dbgflags-gnu-y) $(depflags) $(optflags-gnu-y) $(cppflags-gnu-y) $(cflags-gnu-y)
+l_flags = $(cpuflags-gnu-y) $(optflags-gnu-y) $(ldflags-gnu-y) -Wl,-Map=$(basename $@).map,--cref,--relax,--gc-sections
+
+# Intel Hex file production flags
+flashflags-gnu-y        += -R .eeprom -R .usb_descriptor_table
+
+# Eeprom file production flags
+eepromflags-gnu-y       += -j .eeprom
+eepromflags-gnu-y       += --set-section-flags=.eeprom="alloc,load"
+eepromflags-gnu-y       += --change-section-lma .eeprom=0
+
+# Source files list and part informations must already be included before
+# running this makefile
+
+# Create object files list from source files list.
+obj-y                   := $(addsuffix .o,$(basename $(CSRCS) $(ASSRCS)))
+# Create dependency files list from source files list.
+dep-files               := $(wildcard $(foreach f,$(obj-y),$(basename $(f)).d))
+
+clean-files             += $(wildcard $(obj-y))
+clean-files             += $(dep-files)
+
+# Default target
+.PHONY: all
+all: $(target) $(PROJECT).hex
+
+# Clean target
+.PHONY: clean
+clean:
+	@echo $(MSG_CLEAN_FILES)
+	$(Q)$(RM) $(clean-files)
+
+# Rebuild the project.
+.PHONY: rebuild
+rebuild: clean all
+
+.PHONY: objfiles
+objfiles: $(obj-y)
+
+# Create object files from C source files.
+%.o: %.c
+	@echo $(MSG_COMPILING)
+	$(Q)$(CC) $(c_flags) -c $< -o $@
+
+# Preprocess & assemble: create object files from assembler source files.
+%.o: %.s
+	@echo $(MSG_ASSEMBLING)
+	$(Q)$(CC) $(a_flags) -c $< -o $@
+
+# Include all dependency files to add depedency to all header files in use.
+include $(dep-files)
+
+# Link object files into an ELF file
+$(target): $(obj-y)
+	@echo $(MSG_LINKING)
+	$(Q)$(CC) $(l_flags) $(obj-y) -o $(target)
+	@echo $(MSG_SIZE)
+	$(Q)$(SIZE) -B $(target)
+
+# Create an Intel HEX file from the project ELF file
+%.hex: $(target)
+	@echo $(MSG_IHEX_IMAGE)
+	$(Q)$(OBJCOPY) -O ihex $(flashflags-gnu-y)  $< $@
+
+# Create the EEPROM Intel HEX file
+%.eep: $(target)
+	@echo "Create EEPROM file"
+	$(Q)$(OBJCOPY) $(eepromflags-gnu-y) -O ihex $< $@  || exit 0
+
+# Create the project function listing file
+%.lss: $(target)
+	@echo "Create lss file"
+	$(Q)$(OBJDUMP) -h -S $< > $@
+
+# Build the documentation.
+.PHONY: doc
+doc: doxyfile
+	@echo $(MSG_GENERATING_DOC)
+	$(Q)$(DOCGEN) $(DOC_CFG)
+
+# sed commands to run on doxyfile template
+# TODO: Get proper project name
+#       Needs list of header files instead of header paths
+#       Set BOARD, CPU and ARCH
+#       Fetch config symbols
+doxyfile_sedflags  = -e 's,@PROJECT_NAME@,$(PROJECT),'
+doxyfile_sedflags += -e 's,@INPUT@,$(CSRCS) $(INC_PATH),'
+doxyfile_sedflags += -e 's,@OUTPUT@,$(DOC_PATH),'
+
+# Generate doxyfile
+.PHONY: doxyfile
+doxyfile: $(DOC_CFG)
+$(DOC_CFG): $(UTIL_PATH)/make/doxyfile.in $(UTIL_PATH)/make/Makefile.in
+	@echo $(MSG_CREATE_DOXYFILE)
+	$(Q)sed $(doxyfile_sedflags) < $< > $@ || rm -f $@
+
+# Clean up the documentation.
+.PHONY: cleandoc
+cleandoc:
+	@echo $(MSG_CLEAN_DOC)
+	-$(Q)$(RM) --recursive $(DOC_PATH)
+
+# Rebuild the documentation.
+.PHONY: rebuilddoc
+rebuilddoc: cleandoc doc

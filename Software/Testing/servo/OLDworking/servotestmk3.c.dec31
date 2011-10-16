@@ -1,0 +1,24 @@
+#include "stdlib.h"
+#include "avr/io.h"
+#include "util/delay.h"
+#include "servotestmk3.h"
+
+int main(void)
+{
+	int i;
+	Config32MHzClock();
+	PWMsetup();
+	/*for(i = 30; i <= 65; i += 1)
+	{	
+		TCC0.CCB = i;
+		TCC0.CCA = i;
+		_delay_ms(12000);
+		_delay_ms(12000);
+		_delay_ms(12000);
+	}*/
+	TCC0.CCB = 46;
+	TCC0.CCA = 46;
+	return 0;
+}
+
+

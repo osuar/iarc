@@ -1,0 +1,18 @@
+,"Inventory of Relevant Parts",,,,,
+,"Part Name","Qty","Qty Needed for 2 Copters",,"ordering",
+,"Motor Controller",4,4,,,
+,"Motors",4,4,,,
+,"Xmega Board",2,2,,,
+,"XBee",1,2,,,
+,"IR Range Sensors",3,6,"http://www.sparkfun.com/commerce/product_info.php?products_id=8958",3,
+,"Propellers",4,4,,,
+,"Airframe",0,2,,,
+,"Motor Mounts","?","?",,,
+,"Motor Servos",4,6,,4,"http://www.hobbypartz.com/9gexidimeges.html"
+,"Battery",3,2,,3,"http://www.hobbyking.com/hobbyking/store/uh_viewItem.asp?idProduct=6306"
+,"Battery Charger",1,1,,"maybe 1",
+,"Wireless Camera",0,2,,,
+,"IMU",1,2,"http://www.sparkfun.com/commerce/product_info.php?products_id=10121",1,
+,"Magnetometer",1,2,"http://www.sparkfun.com/commerce/product_info.php?products_id=7915",,
+,"Sensor servo",4,,,4,
+,"5V/3.3V Power Supply",2,"?",,,

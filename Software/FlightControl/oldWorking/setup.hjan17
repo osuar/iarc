@@ -1,0 +1,37 @@
+#include "stdlib.h"
+#include <stdio.h>
+#include <avr/io.h>
+#include <stddef.h>
+#include <util/delay.h>
+#include <avr/interrupt.h>
+
+#include "twi_master_driver.h"
+
+void PWMSetup( void )
+{
+	TCD0.CTRLA = TC_CLKSEL_DIV64_gc;
+	TCD0.CTRLB = TC_WGMODE_SS_gc | TC0_CCBEN_bm | TC0_CCAEN_bm | TC0_CCCEN_bm | TC0_CCDEN_bm;
+	TCD0.PER = 625;
+}
+
+
+void delaySetup( void )
+{
+	TCC0.CTRLA = TC_CLKSEL_DIV1_gc;
+	TCC0.PER = 25000;
+}
+
+void Setup( void )
+{
+	//enable pullups
+	PORTCFG.MPCMASK = 0x03;
+	PORTC.PIN0CTRL = (PORTC.PIN0CTRL & ~PORT_OPC_gm) | PORT_OPC_PULLUP_gc;
+
+	PORTF.DIR = 0x01; //LED output
+	PORTD.DIR = 0b00001111;
+	PORTC.DIR |= ( 1<<3 ) | ( 1<<2 ); //pwr for IMU
+	PORTC.OUT |= ( 1<<3 ); //Set PORTC imu power (pin 3 hi pin 2 lo)
+	PWMSetup();
+	delaySetup();
+}
+	

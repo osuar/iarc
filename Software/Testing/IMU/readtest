@@ -1,0 +1,21 @@
+#include "avr/io.h"
+#include "twi_master_driver.h"
+#include "avr_compiler.h"
+
+#define BAUDRATE 100000
+#define TWI_BAUDSETTING TWI_BAUD(CPU_SPEED, BAUDRATE)
+#define slaveWrite 0xA6
+#define slaveX 0x32
+#define slaveRead 0xA7
+#define TWIM_READ_BUFFER_SIZE 1
+
+void pinsetup( void )
+{
+	PORTD.DIR = 0xFF;
+	PORTC.MPCMASK = 0x03; Config PINCCTRL register
+	PORTC.PIN0CTRL = (PORTC.PIN0CTRL & ~PORT_OPC_gm ) | PORT_OPC_PULLUP_gc; //enable pull-up to get a defined level on switches
+
+	TWI_MasterInit(&twiMaster, &TWIC, TWI_MASTER_INTLVL_LO_gc, TWI_BAUDSETTING);
+	TWI_MasterWrite(&twiMaster, slaveWrite, slaveX, 1);
+	TWI_MasterWrite(&twiMaster, slaveRead, 1)
+	PORTD.OUT = readData[0];

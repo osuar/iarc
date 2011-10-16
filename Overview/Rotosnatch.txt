@@ -1,0 +1,3 @@
+Part of the mission involves retrieving a flash drive. Initially it was planned to try and use something like an auto-grabber to pick it up. However, it was pointed out that the dexterity and depth perception required to do so is a lot to expect from an average person, much less an autonomous flying contratpion.
+John Hart came up with the idea to have two wheels rotating towards the center to 'suck up' any objects about the size of the flash drive. He made a prototype out of his sons erector set which performed extremely well, capable of consistantly picking up flash drives at any orientation to the rotary pickup device while hanging from a string.
+A second prototype is currently being refined to be assembled.

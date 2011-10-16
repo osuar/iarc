@@ -1,0 +1,2 @@
+Lower pwm- counter clockwise
+Higher pwm- clockwise

@@ -1,0 +1,132 @@
+/**
+@author Daniel Sidlauskas Miller with advisement from Gary Miller
+
+Flight control program for Oregon State University Robitcs Club Autonomous Aerial Team
+
+*/
+
+#include <stdlib.h>
+#include "avr_compiler.h"
+#include "twi_master_driver.h"
+#include "aux.h"
+
+//
+TWI_Master_t imu;
+
+volatile int servol = SERVOINI;
+volatile int servor = SERVOINI;
+
+volatile int dataflag = 0;
+
+
+int main( void )
+{
+	//Accelerometer buffer vars
+	uint8_t accelsetupbuffer[2] = {0x2D, 0x08};
+	uint8_t accelstartbyte = 0x32;
+	uint8_t accelreadbuffer[3];
+
+	//flags and transfers
+	int newdata = 0;
+	int datatransfer;
+
+	//Set PORTD and PORTF to ouput for signaling
+	PORTD.DIR = 0xff;
+	PORTF.DIR = 0x01;
+
+	//Enable interrupts
+	PMIC.CTRL |= PMIC_LOLVLEN_bm | PMIC_MEDLVLEN_bm | PMIC_HILVLEN_bm;
+	sei();	
+
+	//Pulse width modulation setup for servos, port D
+	TCD0.CTRLA = TC_CLKSEL_DIV1_gc;
+	TCD0.CTRLB = TC_WGMODE_SS_gc | TC0_CCAEN_bm | TC0_CCCEN_bm;
+	TCD0.PER = 40000;
+
+	//Set interrupt to update each motor value
+	TCD0.INTCTRLB = TC_CCAINTLVL_HI_gc | TC_CCCINTLVL_HI_gc;
+
+	//Enable pullup resistors for imu
+	PORTCFG.MPCMASK = 0x03;
+	PORTC.PIN0CTRL = (PORTC.PIN0CTRL & ~PORT_OPC_gm) | PORT_OPC_PULLUP_gc;
+
+	//Start Two Wire interface with IMU on PORTC (PIN1 = SDA, PIN2 = SCL, PIN4 = 3.3V, PIN3 = GND)
+	PORTC.DIR = 0x0C;
+	PORTC.OUT = 0x08;	
+	TWI_MasterInit(&imu, &TWIC, TWI_MASTER_INTLVL_LO_gc, TWI_BAUDSETTING);	
+	
+	//Setup Accelerometer
+	while(imu.status != TWIM_STATUS_READY){}
+	TWI_MasterWriteRead(&imu, ACCEL, accelsetupbuffer, 2, 0);
+
+	//infinite loop
+	while(1)
+	{
+		//if TCD0 overflow flag set, ask for more IMU data (update once per motor pwm cycle)
+		if(TC_GetOverflowFlag( &TCD0 ) != 0)
+		{
+			//if status not  ready, call for help
+			while(imu.status != TWIM_STATUS_READY)
+			{
+				PORTD.OUT ^= 0x80;
+			}
+
+			TC_ClearOverflowFlag( &TCD0 );
+			TWI_MasterWriteRead(&imu, ACCEL, &accelstartbyte, 1, 6);
+		}
+
+		//if new accel data received, process new data
+		if(1 == dataflag)
+		{
+			dataflag = 0;			
+
+			//Process 2 bytes for X, Y, Z
+			for(datatransfer = 0; datatransfer <= 4; datatransfer += 2)
+			{
+				//if twos compliment bit set, flip bits and subtract
+				if((imu.readData[datatransfer + 1] & 0x02) == 0x02)
+				{
+					accelreadbuffer[datatransfer / 2] -= (~imu.readData[datatransfer]);
+					accelreadbuffer[datatransfer / 2] -= (256 * ~imu.readData[datatransfer]);
+				}
+				else
+				{
+					accelreadbuffer[datatransfer / 2] += imu.readData[datatransfer];
+					accelreadbuffer[datatransfer / 2] += 256 * imu.readData[datatransfer + 1];
+				}				
+			}
+			newdata = 1;
+		}
+
+		//if new data, update motor compare values
+		if(1 == newdata)
+		{
+			newdata = 0;
+			servol = ServoLValueFunk(accelreadbuffer[0], accelreadbuffer[1], accelreadbuffer[2]);
+			servor = ServoRValueFunk(accelreadbuffer[0], accelreadbuffer[1], accelreadbuffer[2]);
+			accelreadbuffer[0] = 0;
+			accelreadbuffer[1] = 0;
+			accelreadbuffer[2] = 0;
+		}
+	}
+	return 0;
+}
+
+//Motor update interrupts
+ISR(TCD0_CCA_vect)
+{
+	TCD0.CCA = servol;
+}
+
+ISR(TCD0_CCC_vect)
+{
+	TCD0.CCC = servor;
+}
+
+//IMU data received interrupt
+ISR(TWIC_TWIM_vect)
+{
+	PORTF.OUT ^= 0x01; //flash LED if reading properly
+	TWI_MasterInterruptHandler(&imu);
+	dataflag = 1;
+}

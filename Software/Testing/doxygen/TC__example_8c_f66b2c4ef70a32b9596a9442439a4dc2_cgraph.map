@@ -1,0 +1,6 @@
+<area shape="rect" href="$TC__driver_8c.html#1a5b3ccf2b872dcdf8f4162e5cdc6e81" title="Configures clock source for the Timer/Counter 0." alt="" coords="137,5,308,32">
+<area shape="rect" href="$TC__driver_8c.html#309a2ca4eaf39437b57ca13edb23b70b" title="Configures the Timer/Counter 0 for input capture operation." alt="" coords="137,56,308,83">
+<area shape="rect" href="$TC__driver_8c.html#e6b05576247ef4109e9249ea4f8e6b28" title="Enables compare/capture channels for Timer/Counter 0." alt="" coords="137,107,308,133">
+<area shape="rect" href="$TC__driver_8c.html#ef27c3126f89d13b02732de352bff21f" title="Configures clock source for the Timer/Counter 1." alt="" coords="137,157,308,184">
+<area shape="rect" href="$TC__driver_8c.html#8d41d6b130f6fd3928e8198e9bf9512b" title="Configures the Timer/Counter 1 for input capture operation." alt="" coords="137,208,308,235">
+<area shape="rect" href="$TC__driver_8c.html#41d8a44ed53255f2bb991a2aab3bf031" title="Enables compare/capture channels for Timer/Counter 1." alt="" coords="137,259,308,285">

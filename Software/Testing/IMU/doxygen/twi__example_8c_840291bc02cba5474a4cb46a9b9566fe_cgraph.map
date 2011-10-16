@@ -1,0 +1,5 @@
+<area shape="rect" id="node3" href="$twi__master__driver_8c.html#b1277cf32fec820fe46a459bf909cc92" title="Initialize the TWI module." alt="" coords="137,5,244,33">
+<area shape="rect" id="node5" href="$twi__master__driver_8c.html#e2df1a753496e0f05e4488a174b77598" title="TWI write and/or read transaction." alt="" coords="115,55,267,83">
+<area shape="rect" id="node7" href="$twi__slave__driver_8c.html#14b9327d32373a2481e23bec041cbd7e" title="Initalizes TWI slave driver structure." alt="" coords="111,106,271,134">
+<area shape="rect" id="node9" href="$twi__slave__driver_8c.html#7516e604cb0aacddd8d1016a54039752" title="Initialize the TWI module." alt="" coords="105,157,276,185">
+<area shape="rect" id="node11" href="$twi__example_8c.html#9b34519fcb79c06eb895c65a2f0aac61" title="TWIC_SlaveProcessData" alt="" coords="108,207,273,235">

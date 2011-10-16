@@ -1,0 +1,5 @@
+This years Oregon State University Robotics club Autonomous Aerial Vehicle Team is constructing a dual rotor flight platform to accomplish the goals of the International Aerial Robotics Competition: Mission 6. The motors will be mounted on either side of a T-shaped frame with heavy batteries and rotary pickup device being mounted at the bottum. The large amount of mass at the bottum of the flight platform should provide a degree of innate stability in our flight platform by making the natural position of it to be upright.
+The motors' pitch can be controlled by a set of servos which can be used to control the movement of the flight platform as it navigates through the building.
+The flight platform is currently made primarily out of aluminum and with all components on board weighs around one kilogram. Each motor can lift about this much and the weight limit for the competition is 1.5 kilograms, so at this time weight is not a primary concern.
+In the future we plan to experiment with carbon fiber to make a lighter, less sharp egded frame. 
+

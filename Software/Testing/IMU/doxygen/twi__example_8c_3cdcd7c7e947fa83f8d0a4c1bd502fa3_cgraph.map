@@ -1,0 +1,5 @@
+<area shape="rect" id="node3" href="$twi__master__driver_8c.html#40cfd4c598eea01787e882103aec2c31" title="Common TWI master interrupt service routine." alt="" coords="97,81,279,109">
+<area shape="rect" id="node5" href="$twi__master__driver_8c.html#6caacb51c49b3ed35facbfc96c273bfa" title="TWI master arbitration lost and bus error interrupt handler." alt="" coords="329,5,599,33">
+<area shape="rect" id="node7" href="$twi__master__driver_8c.html#0e30fdc903a8a0a0236db3932be9410c" title="TWI master read interrupt handler." alt="" coords="381,55,547,83">
+<area shape="rect" id="node9" href="$twi__master__driver_8c.html#3d02fc8e54cb69ea83cc557937cc4fec" title="TWI transaction finished handler." alt="" coords="648,106,856,134">
+<area shape="rect" id="node12" href="$twi__master__driver_8c.html#54f64ace29879153f809a8f7179e638f" title="TWI master write interrupt handler." alt="" coords="381,157,547,185">

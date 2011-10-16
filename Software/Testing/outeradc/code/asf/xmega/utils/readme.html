@@ -1,0 +1,110 @@
+<!-- XMEGA_START -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+	<link rel="stylesheet" type="text/css" href="../docsrc/stylesheet.css">
+	<title>AVR XMEGA Utils</title>
+</head>
+<body>
+
+<div id="container">
+<div id="header"></div>
+<div id="wrapper">
+<div id="content">
+<p align="left" class="whs2"><a href="../readme.html">Back to main page</a></p>
+
+<h1 align="center" class="whs1">AVR Software Framework: XMEGA Utils</h1>
+
+<p align="center" class="whs2">Copyright &copy; 2010 Atmel Corporation</p>
+
+<h2>Introduction</h2>
+
+<p>
+This directory contains files that are used by all other directories of the
+framework: it holds several linker script files, IAR &amp; GCC pre-compiled
+libraries of some Software Framework modules, and C/C++ files with general
+usage defines, macros and functions.
+</p>
+
+<h2>AVR XMEGA Utils</h2>
+
+<p>This directory contains the following:</p>
+
+<h3><a href="./assembler.h"><b>assembler.h</b></a></h3>
+<p>
+	This file enables to get an abstraction layer for IAR &amp; GCC
+	assemblers.
+</p>
+
+<h3><a href="./compiler.h"><b>compiler.h</b></a></h3>
+<p>
+	This file defines commonly used types and macros for both GCC and IAR
+	compilers.
+</p>
+
+<h3><a href="./interrupt.h"><b>interrupt.h</b></a></h3>
+<p>
+	This file defines global interrupt management for 8- and 32-bit
+	AVR.
+</p>
+
+<h3><a href="./parts.h"><b>parts.h</b></a></h3>
+<p>
+	This file defines macros for checking GCC and IAR part definitions.
+</p>
+
+<h3><a href="./progmem.h"><b>progmem.h</b></a></h3>
+<p>
+	This file defines macros for locating and accessing data in program
+	memory.
+</p>
+
+<h3><a href="./status_codes.h"><b>status_codes.h</b></a></h3>
+<p>
+	This file defines various status codes returned by functions,
+	indicating success or failure as well as what kind of failure.
+</p>
+
+<h3><a href="./assembler/"><b>/assembler folder</b></a></h3>
+<p>
+	This module gathers a set of an Assembler abstraction layer for IAR
+	&amp; GCC.
+</p>
+
+<h3><a href="./bit_handling/"><b>/bit_handling folder</b></a></h3>
+<p>
+	This module gives function to compute the number of trailing zero from
+	an unsigned value.
+</p>
+
+<h3><a href="./interrupt/"><b>/interrupt folder</b></a></h3>
+<p>
+	This module defines Global interrupt management for 8-bit AVR.
+</p>
+
+<h3><a href="./preprocessor/"><b>/preprocessor folder</b></a></h3>
+<p>
+	This module gathers a set of useful C preprocessor macros. It is
+	composed of the files:
+</p>
+
+<ul>
+	<li><a href="./preprocessor/mrepeat.h">mrepeat.h</a>: C preprocessor
+	repeating set of macros,</li>
+	<li><a href="./preprocessor/preprocessor.h">preprocessor.h</a>: include
+	of all header files of this module (so that applications only use to
+	include this file),</li>
+	<li><a href="./preprocessor/stringz.h">stringz.h</a>: C preprocessor
+	stringenizer set of macros,</li>
+	<li><a href="./preprocessor/tpaste.h">tpaste.h</a>: C preprocessor
+	token manipulation set of macros.</li>
+</ul>
+
+<hr align="center" width="50%" class="whs4">
+
+<p class="legalfooter">AVR is a registered trademark of Atmel Corporation.</p>
+
+</div></div></div>
+</body></html>
+<!-- XMEGA_END -->

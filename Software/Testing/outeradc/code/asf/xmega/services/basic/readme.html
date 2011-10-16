@@ -1,0 +1,138 @@
+<!-- XMEGA_START -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+	<link rel="stylesheet" type="text/css" href="../../docsrc/stylesheet.css">
+	<title>XMEGA Basic Services</title>
+</head>
+<body>
+
+<div id="container">
+<div id="header"></div>
+<div id="wrapper">
+<div id="content">
+
+<p align="left" class="whs2"><a href="../readme.html">Back to services page</a></p>
+
+<h1 align="center" class="whs1">AVR Software Framework: XMEGA Basic Services</h1>
+
+<p align="center" class="whs2">Copyright &copy; 2010 Atmel Corporation</p>
+
+<h2>Introduction</h2>
+
+<p>
+This directory contains basic services software for the AVR&reg; XMEGA&trade;
+Flash Microcontroller family.
+</p>
+
+<h2>Basic Services for AVR XMEGA</h2>
+
+<p>
+Table legend:
+</p>
+
+<table border=1>
+<tr>
+	<td style="background-color: rgb(  9, 101, 181);" width="16"></td>
+	<td>Service supports this AVR XMEGA series.</td>
+</tr><tr>
+	<td style="background-color: rgb(181, 194, 207);" width="16"></td>
+	<td>Service not applicable for this AVR XMEGA series.</td>
+</tr>
+</table>
+
+<br>
+
+<table border=1>
+<tr>
+	<th></th>
+	<th></th>
+	<th style="white-space: nowrap;">XMEGA A1</th>
+	<th style="white-space: nowrap;">XMEGA A3</th>
+	<th style="white-space: nowrap;">XMEGA A3B</th>
+	<th style="white-space: nowrap;">XMEGA A4</th>
+	<th style="white-space: nowrap;">XMEGA D3</th>
+	<th style="white-space: nowrap;">XMEGA D4</th>
+</tr><tr>
+	<td align="left"><a href="./clock/readme.html">Clock</a></td>
+	<td align="left">Manage clock sources, oscillators, PLL, DFLL, system clocks, etc.</td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+</tr><tr>
+	<td align="left"><a href="./cpu/readme.html">CPU basics</a></td>
+	<td align="left">An interface to chip-specific reset cause types and protected register access, with example of usage.</td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+</tr><tr>
+	<td align="left"><a href="./gpio/readme.html">GPIO</a></td>
+	<td align="left">An interface to General Purpose Input/Output, with example of usage.</td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+</tr><tr>
+	<td align="left"><a href="./hugemem/readme.html">Hugemem</a></td>
+	<td align="left">An interface to huge memory, used to increase memory space for 8-bit AVR beyound 2-byte pointers.</td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+</tr><tr>
+	<td align="left"><a href="./serial/readme.html">Serial</a></td>
+	<td align="left">An interface to serial communication.</td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+</tr><tr>
+	<td align="left"><a href="./sleepmgr/readme.html">Sleep Manager</a></td>
+	<td align="left">Ensure that the device is not put to sleep in deeper sleep modes than the system allows.</td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+</tr><tr>
+	<td align="left"><a href="./spi/readme.html">SPI</a></td>
+	<td align="left">SPI Master Management.</td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+</tr><tr>
+	<td align="left"><a href="./twi/readme.html">TWI</a></td>
+	<td align="left">TWI Master Management.</td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+	<td style="background-color: rgb(9, 101, 181);" width="16"></td>
+</tr>
+</table>
+
+<hr align="center" width="50%" class="whs4">
+
+<p class="legalfooter">AVR is a registered trademark of Atmel Corporation.</p>
+
+</div></div></div>
+</body></html>
+<!-- XMEGA_END -->

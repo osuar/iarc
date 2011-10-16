@@ -1,0 +1,114 @@
+<!DOCTYPE html
+    PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+ <title>mechanical: DuctWhole.SLDPRT - Autonomous Aerial 2011 - Trac</title><link rel="start" href="/projects/iarc2011/wiki" /><link rel="search" href="/projects/iarc2011/search" /><link rel="help" href="/projects/iarc2011/wiki/TracGuide" /><link rel="stylesheet" href="/projects/iarc2011/chrome/common/css/trac.css" type="text/css" /><link rel="stylesheet" href="/projects/iarc2011/chrome/common/css/code.css" type="text/css" /><link rel="icon" href="/favicon.ico" type="image/x-icon" /><link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" /><link rel="up" href="/projects/iarc2011/wiki/mechanical" title="mechanical" /><link rel="alternate" href="/projects/iarc2011/attachment/wiki/mechanical/DuctWhole.SLDPRT?format=raw" title="Original Format" type="application/octet-stream; charset=iso-8859-15" /><style type="text/css">
+</style>
+ <script type="text/javascript" src="/projects/iarc2011/chrome/common/js/trac.js"></script>
+ <link rel="stylesheet" href="/projects/iarc2011/chrome/common/css/bs.css" type="text/css" />
+ <link rel="stylesheet" href="/social/_css/css.css?viewtype=default" type="text/css" />
+</head>
+<body>
+<script type="text/javascript" src="/social/pg/api/rest/js?method=topbar"></script>
+<script type="text/javascript" src="/social/pg/api/rest/js?method=loginlink"></script>
+
+
+<div id="banner">
+
+<div id="header">
+<div style="float:right;">
+<img src="/projects/admin/chrome/common/wordmark.gif"/>
+</div>
+<a id="logo" href="http://beaversource.oregonstate.edu/projects/iarc2011"><img src="/projects/admin/chrome/site/logo.png" alt="" /><h1>Autonomous Aerial 2011</h1></a></div>
+
+<form id="search" action="/projects/iarc2011/search" method="get">
+ <div>
+  <label for="proj-search">Search:</label>
+  <input type="text" id="proj-search" name="q" size="10" accesskey="f" value="" />
+  <input type="submit" value="Search" />
+  <input type="hidden" name="wiki" value="on" />
+  <input type="hidden" name="changeset" value="on" />
+  <input type="hidden" name="ticket" value="on" />
+ </div>
+</form>
+
+
+
+<div id="metanav" class="nav"></div>
+</div>
+
+<div id="mainnav" class="nav"><ul><li class="first"><a href="/projects/iarc2011/wiki">Home</a></li><li><a href="/projects/iarc2011/timeline">History</a></li><li><a accesskey="3" href="/projects/iarc2011/roadmap">Roadmap</a></li><li><a href="/projects/iarc2011/wiki/TitleIndex">Pages</a></li><li><a href="/projects/iarc2011/report/3264">Tickets</a></li><li class="last"><a href="/projects/iarc2011/browser">Browse Source</a></li></ul></div>
+<div id="main">
+
+
+
+
+<div id="ctxtnav" class="nav"></div>
+
+<div id="content" class="attachment">
+
+
+ <h1><a href="/projects/iarc2011/wiki/mechanical">mechanical</a>: DuctWhole.SLDPRT</h1>
+ <table id="info" summary="Description"><tbody><tr>
+   <th scope="col">
+    File DuctWhole.SLDPRT, 0.7 MB 
+    (added by ferrignp,  1 day ago)
+   </th></tr><tr>
+   <td class="message"></td>
+  </tr>
+ </tbody></table>
+ <div id="preview">
+   <strong>HTML preview not available</strong>. To view the file,
+   <a href="/projects/iarc2011/attachment/wiki/mechanical/DuctWhole.SLDPRT?format=raw">download the file</a>.
+ </div>
+ 
+
+
+</div>
+<script type="text/javascript">searchHighlight()</script>
+<div id="altlinks"><h3>Download in other formats:</h3><ul><li class="first last"><a href="/projects/iarc2011/attachment/wiki/mechanical/DuctWhole.SLDPRT?format=raw">Original Format</a></li></ul></div>
+
+</div>
+
+<div id="footer">
+ <hr />
+ <p>We're here to answer your questions and comments!<br/> Send us an email at <a href="mailto:bsc-help@engr.orst.edu">bsc-help at engr.orst.edu</a></p>
+ <p><a href="http://beaversource.oregonstate.edu/projects/admin/wiki/BeaversourceInTheClassroom">About</a></p>
+ <p><a href="http://beaversource.oregonstate.edu/projects/admin/wiki/LicensingInBeaversource">License</a></p>
+ <p><a href="http://beaversource.oregonstate.edu/projects/admin/wiki/Documentation">Tutorials</a></p>
+
+ <a id="tracpowered" href="http://trac.edgewall.org/"><img src="/projects/iarc2011/chrome/common/trac_logo_mini.png" height="30" width="107"
+   alt="Trac Powered"/></a>
+ <p class="left">
+  Powered by <a href="/projects/iarc2011/about"><strong>Trac 0.10.5</strong></a><br />
+  By <a href="http://www.edgewall.org/">Edgewall Software</a>.
+ </p>
+
+<p>
+<a href="http://elgg.org/"><img src="/social/mod/bsctheme/graphics/elgg_powered.png" title="Elgg powered" border="0" alt="Elgg powered" align="left"/></a>&nbsp;
+</p>
+<p>
+<a href="http://www.nsf.gov/"><img src="/social/mod/bsctheme/graphics/nsf.gif" height="40" 
+    alt="Sponsored by: NSF"/></a>
+Sponsored by: NSF <br />under project: CCF-0722362</p>
+
+ <p class="right">
+  This project licensed under the Lesser GPL
+ </p>
+</div>
+
+
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+    var pageTracker = _gat._getTracker("UA-12120330-1");
+pageTracker._trackPageview();
+} catch(err) {}</script>
+ </body>
+</html>
+

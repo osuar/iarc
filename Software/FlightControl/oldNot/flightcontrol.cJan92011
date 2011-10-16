@@ -1,0 +1,297 @@
+#include "setup.h"
+#include "avr_compiler.h"
+#include "twi_master_driver.h"
+#include <avr/io.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <stddef.h>
+#include <avr/interrupt.h>
+
+#define infall 0xF0 //Accell, increase to increase sensitivity
+#define inconst 0x03 //Roll, decrease to increase sensitivity
+
+#define awayfall 0x10 //Accell, decrease to increase sensitivity
+#define awayconst 0xFD //Roll, increase to increase sensitivity
+
+#define lefttilt 0x10 //Accel, decrease
+#define leftroll 0x03 //Roll, decrease
+
+#define righttilt 0xF0 //Accel, increase
+#define rightroll 0xFD //Roll, increase
+
+#define fallconst 0xF0 //Accel, increase
+#define riseconst 0x10 //Accel, decrease
+
+#define counterclockconst 0x03 //roll, decrease
+#define clockwiseconst 0xFC //roll, increase
+
+#define CPU_SPEED 2000000
+#define BAUDRATE 100000
+#define TWI_BAUDSETTING TWI_BAUD(CPU_SPEED, BAUDRATE)
+
+#define servoconst 1
+#define motorconst 1
+
+#define servoLini 46
+#define servoRini 44
+#define servomin 40
+#define servomax 50
+
+#define motorstart 32
+#define motorini 52
+#define motormin 49
+#define motormax 55
+
+#define Accel (0xA6 >> 1)
+#define Roll (0xD0 >> 1)
+#define RollRead 0x1D
+#define AccelRead 0x32
+
+#define TC_GetOverflowFlag( _tc ) ( (_tc)->INTFLAGS & TC0_OVFIF_bm )
+#define TC_ClearOverflowFlag( _tc ) ( (_tc)->INTFLAGS = TC0_OVFIF_bm )
+
+TWI_Master_t twiMaster;
+
+int delaycount;
+
+int motorL;
+int motorR;
+int servoL;
+int servoR;
+
+int cycles;
+
+int delaytc(cycles)
+{
+	for(delaycount = 0; delaycount <= cycles; delaycount++)
+	{
+		while(0 == TC_GetOverflowFlag( &TCD0 )){}
+		TC_ClearOverflowFlag( &TCD0 );
+	}
+	return 0;
+}
+
+int minmax( void )
+{
+	if(motormin >= motorL)
+	{
+		motorL = motormin;
+	}
+
+	if(motormax <= motorL)
+	{
+		motorL = motormax;
+	}
+
+	if(motormin >= motorR)
+	{
+		motorR = motormin;
+	}
+
+	if(motormax <= motorR)
+	{
+		motorR = motormax;
+	}
+
+	if(servomin >= servoL)
+	{
+		servoL = servomin;
+	}
+
+	if(servomax <= servoL)
+	{
+		servoL = servomax;
+	}
+
+	if(servomin >= servoR)
+	{
+		servoR = servomin;
+	}
+
+	if(servomax <= servoR)
+	{
+		servoR = servomax;
+	}
+	return 0;
+}
+
+int main( void )
+{
+
+uint8_t AccelsetupBuffer[2];
+	AccelsetupBuffer[0] = 0x2D;
+	AccelsetupBuffer[1] = 0x08;
+
+uint8_t RollsetupBuffer[2];
+	RollsetupBuffer[0] = 0x16;
+	RollsetupBuffer[1] = 0x18;
+
+int ACCELreadBuffer[6];
+int ROLLreadBuffer[6];
+uint8_t Rollbuffer = RollRead;
+uint8_t Accelbuffer = AccelRead;
+
+int readchoice;
+int readvar = 0;
+	
+	Setup();	
+
+	motorL = motorstart;
+	motorR = motorstart;
+	servoL = servoLini;
+	servoR = servoRini;
+	
+	TCD0.CCA = servoL;
+	TCD0.CCB = motorL;
+	TCD0.CCC = servoR;
+	TCD0.CCD = motorR;
+
+	PMIC.CTRL |= PMIC_LOLVLEN_bm;
+	sei();
+
+	TWI_MasterInit(&twiMaster, &TWIC, TWI_MASTER_INTLVL_LO_gc, TWI_BAUDSETTING);
+	while(twiMaster.status != TWIM_STATUS_READY){}
+	TWI_MasterWriteRead(&twiMaster, Accel, AccelsetupBuffer, 2, 0);
+	while(twiMaster.status != TWIM_STATUS_READY){}
+	TWI_MasterWriteRead(&twiMaster, Roll, RollsetupBuffer, 2, 0);
+
+	delaytc(100);
+
+	for(; motorR <= motorini; motorR++, motorL++)
+	{
+		TCD0.CCB = motorL;
+		TCD0.CCD = motorR;
+		delaytc(10);
+
+	}
+
+	while(1)
+	{
+		minmax();
+		TCD0.CCA = servoL;
+		TCD0.CCB = motorL;
+		TCD0.CCC = servoR;
+		TCD0.CCD = motorR;
+
+		if(twiMaster.status == TWIM_STATUS_READY)
+		{
+			if(1 == readchoice)
+			{
+				TWI_MasterWriteRead(&twiMaster, Roll, &Rollbuffer, 1, 6);
+				readchoice = 2;
+				while(twiMaster.status != TWIM_STATUS_READY){}
+				for(readvar = 0; readvar <= 5; readvar++)
+				{
+					ROLLreadBuffer[readvar] = twiMaster.readData[readvar];
+				}
+			}
+			else
+			{
+				TWI_MasterWriteRead(&twiMaster, Accel, &Accelbuffer, 1, 6);
+				readchoice = 1;
+				while(twiMaster.status != TWIM_STATUS_READY){}
+				for(readvar = 0; readvar <= 5; readvar+=1)
+				{
+					ACCELreadBuffer[readvar] = twiMaster.readData[readvar];
+				}
+			}
+		}
+
+		//if rising, slow down motors
+		if(((ACCELreadBuffer[5] & 0x01) == 0x01) && (ACCELreadBuffer[4] >= riseconst))
+		{
+			motorL -= motorconst;
+			motorR -= motorconst;
+		}
+
+		if(((ACCELreadBuffer[5] & 0x01) != 0x01) && (ACCELreadBuffer[4] <= fallconst))
+		{
+			motorR += motorconst;
+			motorL += motorconst;
+		}
+		
+		//if tilt left/right, speed up one motor, slow down the other
+
+		//right tilt
+		if(
+			(
+				(
+					(
+						ACCELreadBuffer[3] & 0x02
+					) 
+					== 0x02
+				)
+					&& 
+					(
+						ACCELreadBuffer[2]
+						<= righttilt
+					)
+				)
+				&& 
+				(
+					(
+						ROLLreadBuffer[1] & 0x80
+					) 
+						!= 0x80
+					)
+					&& 
+					(
+						ROLLreadBuffer[1] 
+						>= rightroll
+					)
+				)
+			
+		{
+			motorR += motorconst;
+			motorL -= motorconst;
+		}
+
+		//left tilt
+		if((((ACCELreadBuffer[3] & 0x02) != 0x02) && (ACCELreadBuffer[2] >= lefttilt)) && ((ROLLreadBuffer[1] & 0x80) == 0x80) && (ROLLreadBuffer[1] <= leftroll)) 
+		{
+			motorL += motorconst;
+			motorR -= motorconst;
+		}
+
+		//fall in/away, tilt servos opposite dir
+
+		//away
+		if((((ACCELreadBuffer[1] & 0x02) != 0x02) && (ACCELreadBuffer[0] >= awayfall)) && ((ROLLreadBuffer[2] & 0x80) == 0x80) && (ROLLreadBuffer[2] <= awayconst))
+		{
+			servoR -= servoconst;
+			servoL += servoconst;
+		}
+
+		//in 
+		if((((ACCELreadBuffer[1] & 0x02) == 0x02) && (ACCELreadBuffer[0] <= infall)) && ((ROLLreadBuffer[2] & 0x80) != 0x80) && (ROLLreadBuffer[2] >= inconst))
+		{
+			servoR += servoconst;
+			servoL -= servoconst;
+		}
+		/*
+		//rotate clockwise/counterclockwise, tilt servos opposite eachother to resist
+
+		//clockwise
+		if(((ROLLreadBuffer[4] & 0x80) == 0x80) && (ROLLreadBuffer[4] <= clockwiseconst))
+		{
+			servoR -= servoconst;
+			servoL -= servoconst;
+		}
+
+		//counterclockwise
+		if(((ROLLreadBuffer[4] & 0x80) != 0x80) && (ROLLreadBuffer[4] >= counterclockconst))
+		{
+			servoL -= servoconst;
+			servoR -= servoconst;
+		}
+		*/
+		while(TC_GetOverflowFlag( &TCC0 ) == 0){}
+		TC_ClearOverflowFlag( &TCC0 );
+	}
+	return 0;
+}
+
+ISR(TWIC_TWIM_vect)
+{
+	TWI_MasterInterruptHandler(&twiMaster);
+}

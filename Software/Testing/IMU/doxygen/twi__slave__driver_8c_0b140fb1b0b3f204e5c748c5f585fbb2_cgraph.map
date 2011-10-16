@@ -1,0 +1,6 @@
+<area shape="rect" id="node3" href="$twi__slave__driver_8c.html#b96f35de69dbc4fa7dcd0ca605e79323" title="TWI address match interrupt handler." alt="" coords="429,5,640,33">
+<area shape="rect" id="node5" href="$twi__slave__driver_8c.html#0486374e93f591d085238b105f804af9" title="TWI transaction finished function." alt="" coords="689,106,887,134">
+<area shape="rect" id="node7" href="$twi__slave__driver_8c.html#947368a10697462e8afadfe34a7a6274" title="TWI data interrupt handler." alt="" coords="228,106,380,134">
+<area shape="rect" id="node15" href="$twi__slave__driver_8c.html#d41cfd81c56ee94ef6d147221881b131" title="TWI stop condition interrupt handler." alt="" coords="228,182,380,210">
+<area shape="rect" id="node9" href="$twi__slave__driver_8c.html#bb3eb0f58aa8d023748a66b952c34b51" title="TWI slave read interrupt handler." alt="" coords="457,106,612,134">
+<area shape="rect" id="node12" href="$twi__slave__driver_8c.html#1d1d99fa64ae60b098cf23f767c6212e" title="TWI slave write interrupt handler." alt="" coords="456,157,613,185">

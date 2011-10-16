@@ -1,0 +1,72 @@
+<!-- XMEGA_START -->
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html lang="en">
+<head>
+	<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+	<link rel="stylesheet" type="text/css" href="../docsrc/stylesheet.css">
+	<title>AVR XMEGA Boards</title>
+</head>
+<body>
+
+<div id="container">
+<div id="header"></div>
+<div id="wrapper">
+<div id="content">
+<p align="left" class="whs2"><a href="../readme.html">Back to main page</a></p>
+
+<h1 align="center" class="whs1">AVR Software Framework: XMEGA - the /boards folder</h1>
+
+<p align="center" class="whs2">Copyright &copy; 2010 Atmel Corporation</p>
+
+<h2>Introduction</h2>
+
+<p>
+This folder contains a software abstraction for each AVR&reg; XMEGA&trade;
+series board, providing an access to each hardware resources of the boards.
+</p>
+
+<h2>Boards for AVR XMEGA</h2>
+
+<p>This directory contains the following:</p>
+
+<dl>
+<dt><b>Boards for 8/16-bit AVR XMEGA Flash Microcontroller family.</b></dt>
+<dd>
+	<a href="./xplain/readme.html">Xplain Evaluation Kit</a>: Software
+	abstraction for accessing the hardware resources available on the
+	Xplain kit. When using this board, the BOARD preprocessor define should
+	be set equal to XPLAIN (<i><b>Example on gcc</b>: -D BOARD=XPLAIN</i>).
+</dd>
+<!-- USBXMEGA_START 
+<dd>
+	<a href="./xplain_a1/readme.html">Xplain-A1 Evaluation Kit</a>:
+	Software abstraction for accessing the hardware resources available on
+	the Xplain-A1. When using this board, the BOARD preprocessor define
+	should be set equal to XPLAIN_A1 (<i><b>Example on gcc</b>: -D
+	BOARD=XPLAIN_A1</i>).
+</dd>
+USBXMEGA_END -->
+</dl><dl>
+<dt><b>Generic boards for 8/16-bit AVR XMEGA Flash Microcontroller family.</b></dt>
+<dd>
+	<a href="./stk600/readme.html">STK600 Starter Kit</a>: Software
+	abstractions for accessing the hardware resources available on the
+	STK600. This folder contains a collection of supported AVR XMEGA
+	routing cards for STK600.
+</dd>
+</dl><dl>
+<dt><b>Standard board header file</b>: <a href="board.h">board.h</a></dt>
+<dd>
+	<b>Implied mechanism</b>: all applications source code must only
+	include <i>board.h</i> but the BOARD preprocessor define should be set
+	to the target board name.
+</dd>
+</dl>
+
+<hr align="center" width="50%" class="whs4">
+
+<p class="legalfooter">AVR is a registered trademark of Atmel Corporation.</p>
+
+</div></div></div>
+</body></html>
+<!-- XMEGA_END -->

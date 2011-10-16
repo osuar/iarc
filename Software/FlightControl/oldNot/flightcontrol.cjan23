@@ -1,0 +1,225 @@
+#include "setup.h"
+#if !defined(S_SPLINT_S)
+#include "avr_compiler.h"	
+#endif			 	 
+#include "twi_master_driver.h"
+
+#include <avr/io.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+#define CPU_SPEED 2000000
+#define BAUDRATE 100000
+#define TWI_BAUDSETTING TWI_BAUD(CPU_SPEED, BAUDRATE)
+
+//IMU addresses
+#define Accel (0xA6 >> 1)
+#define Roll (0xD0 >> 1)
+#define RollRead 0x1D
+#define AccelRead 0x32
+
+#define Rollxreg 0
+#define Rollyreg 0
+#define Rollzreg 0
+
+#define Accelxreg 0
+#define Accelyreg 0
+#define Accelzreg 266
+
+//motor constants
+#define motorstart 2048
+#define motormax 3840
+#define motormid 3200
+#define servoini 2600
+
+#define TC_GetOverflowFlag( _tc ) ( (_tc)->INTFLAGS & TC0_OVFIF_bm )
+#define TC_ClearOverflowFlag( _tc ) ( (_tc)->INTFLAGS = TC0_OVFIF_bm )
+
+//global vars
+	TWI_Master_t twiMaster;
+	
+	volatile int motorL = motorstart;
+	volatile int motorR = motorstart;
+	volatile int servoL = servoini;
+	volatile int servoR = servoini;
+
+	int Transcount;
+	volatile int Readvar = 1;
+	int RollreadCount = 0;
+	int AccelreadCount = 0;
+
+	int Accelavg[3];
+	int Rollavg[3];
+
+//function or tc based delays
+int delaytc(int cycles)
+{
+	int delaycount;
+	for(delaycount = 0; delaycount <= cycles; delaycount++)
+	{
+		while(0 == TC_GetOverflowFlag( &TCD0 )){}
+		TC_ClearOverflowFlag( &TCD0 );
+	}
+	return 0;
+}
+
+int main( void )
+{	
+	//define regular motor values
+		int Rollreg[3];
+		Rollreg[0] = Rollxreg;
+		Rollreg[1] = Rollyreg;
+		Rollreg[2] = Rollzreg;
+	
+		int Accelreg[3];
+		Accelreg[0] = Accelxreg;
+		Accelreg[1] = Accelyreg;
+		Accelreg[2] = Accelzreg;
+	//initialize interrupts, pwm, input/output
+		Setup();
+	//Initialize motors
+		TCD0.CCA = servoR;
+		TCD0.CCB = motorR;
+		TCD0.CCC = servoL;
+		TCD0.CCD = motorL;
+	
+
+	//twi Setup
+		int AccelreadBuffer[3] = {0 , 0 , 0};
+		int RollreadBuffer[3] = {0 , 0 , 0};
+		uint8_t Rollbuffer = RollRead;
+		uint8_t Accelbuffer = AccelRead;
+		
+		uint8_t AccelsetupBuffer[2];
+		AccelsetupBuffer[0] = 0x2D;
+		AccelsetupBuffer[1] = 0x08;
+
+		uint8_t RollsetupBuffer[2];
+		RollsetupBuffer[0] = 0x16;
+		RollsetupBuffer[1] = 0x18;		
+		
+		TWI_MasterInit(&twiMaster, &TWIC, TWI_MASTER_INTLVL_MED_gc, TWI_BAUDSETTING);
+		while(twiMaster.status != TWIM_STATUS_READY){}
+		TWI_MasterWriteRead(&twiMaster, Accel, AccelsetupBuffer, 2, 0);
+		while(twiMaster.status != TWIM_STATUS_READY){}
+		TWI_MasterWriteRead(&twiMaster, Roll, RollsetupBuffer, 2, 0);	
+
+	//delay while motors spin up
+		delaytc(100);
+
+	//takeoff by acceleratign motors to max and staying for 2 secs, set motors to mid values
+		motorR = motormax;
+		motorL = motormax;
+		TCD0.CCB = motorR;
+		TCD0.CCD = motorL;
+		delaytc(100);
+		motorL = motormid;
+		motorR = motormid;
+		TCD0.CCB = motorR;
+		TCD0.CCD = motorL;
+	//enter flight control loop
+		//enable TC interrupts
+
+	do	
+	{
+		if(3 == Readvar)
+		{
+			Readvar = 2;
+			RollreadCount ++;
+			for(Transcount = 0; Transcount <= 4; Transcount += 2)
+			{
+				if((twiMaster.readData[Transcount] & 0x80) == 0x80)
+				{
+					RollreadBuffer[(Transcount)/2] -= ((~(twiMaster.readData[Transcount]) & ~(0x01)) >> 1);
+				}
+				else
+				{
+					RollreadBuffer[(Transcount)/2] += ((twiMaster.readData[Transcount] & ~(0x01)) >> 1);
+				}
+			}
+		}
+		if(4 == Readvar)
+		{
+			Readvar = 1;
+			AccelreadCount ++;
+			for(Transcount = 1; Transcount <= 5; Transcount += 2)
+			{
+				if((twiMaster.readData[Transcount] & 0x02) == 0x02)
+				{
+					PORTD.OUT ^= 0x80;
+					AccelreadBuffer[(Transcount - 1)/2] = -(((8 * ~(twiMaster.readData[Transcount])) + ((~(twiMaster.readData[Transcount - 1]) & ~(0x1F)) >> 5)));
+				}
+				else
+				{
+					PORTD.OUT ^= 0x40;
+					AccelreadBuffer[(Transcount - 1)/2] = (8 * twiMaster.readData[Transcount]) + ((twiMaster.readData[Transcount - 1] & ~(0x1F)) >> 5);
+				}
+			}
+		}
+
+		//Alternate reading accel and roll, read flags set in interrupt at bottum
+		if(twiMaster.status == TWIM_STATUS_READY)
+		{
+			if(1 == Readvar)
+			{
+				Readvar = 5;
+				TWI_MasterWriteRead(&twiMaster, Roll, &Rollbuffer, 1, 6);
+			}
+			if(2 == Readvar)
+			{
+				Readvar = 6;
+				TWI_MasterWriteRead(&twiMaster, Accel, &Accelbuffer, 1, 6);
+			}
+		}
+
+	//Every PWM cycle update values based on averages from IMU
+		if((TC_GetOverflowFlag( &TCD0 ) != 0) && (AccelreadCount >= 1) && (RollreadCount >= 1))
+		{
+			TC_ClearOverflowFlag( &TCD0 );
+
+			for(Transcount = 0; Transcount <= 2; Transcount ++)
+			{
+				Accelavg[Transcount] = (AccelreadBuffer[Transcount]) - Accelreg[Transcount];
+				Rollavg[Transcount] = (RollreadBuffer[Transcount]) - Rollreg[Transcount];
+				
+				//reset vars
+				AccelreadBuffer[Transcount] = 0;
+				RollreadBuffer[Transcount] = 0;
+			}
+			AccelreadCount = 0;
+			RollreadCount = 0;
+
+			//Update motor values based on data
+			motorL = MotorLValueFunk(Accelavg[0], Accelavg[1], Accelavg[2], Rollavg[0], Rollavg[1], Rollavg[2]);
+			motorR = MotorRValueFunk(Accelavg[0], Accelavg[1], Accelavg[2], Rollavg[0], Rollavg[1], Rollavg[2]);
+			servoL = ServoLValueFunk(Accelavg[0], Accelavg[1], Accelavg[2], Rollavg[0], Rollavg[1], Rollavg[2]);
+			servoR = ServoRValueFunk(Accelavg[0], Accelavg[1], Accelavg[2], Rollavg[0], Rollavg[1], Rollavg[2]);
+
+
+		}
+	}while(1);
+	return 0;
+}
+
+ISR(TWIC_TWIM_vect)
+{
+	TWI_MasterInterruptHandler(&twiMaster);
+	if(5 == Readvar)
+	{
+	Readvar = 3;
+	}
+	else if(6 == Readvar)
+	{
+	Readvar = 4;
+	}
+	PORTD.OUT ^= 0x20;
+}
+
+ISR(TCC1_CCA_vect)
+{
+		TCD0.CCA = servoR;
+		TCD0.CCB = motorR;
+		TCD0.CCC = servoL;
+		TCD0.CCD = motorL;
+
+}

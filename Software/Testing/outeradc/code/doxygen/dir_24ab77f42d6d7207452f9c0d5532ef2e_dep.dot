@@ -1,0 +1,13 @@
+digraph G {
+  compound=true
+  node [ fontsize="10", fontname="FreeSans"];
+  edge [ labelfontsize="10", labelfontname="FreeSans"];
+  subgraph clusterdir_a7bcfa2730fbeefe7dba1bd250c84d68 {
+    graph [ bgcolor="#ddddee", pencolor="black", label="sleepmgr" fontname="FreeSans", fontsize="10", URL="dir_a7bcfa2730fbeefe7dba1bd250c84d68.html"]
+  dir_24ab77f42d6d7207452f9c0d5532ef2e [shape=box, label="xmega", style="filled", fillcolor="#eeeeff", pencolor="black", URL="dir_24ab77f42d6d7207452f9c0d5532ef2e.html"];
+  }
+  dir_a3daf184e2a07ef4b49807f50f1e84df [shape=box label="asf_adc_example_polled" URL="dir_a3daf184e2a07ef4b49807f50f1e84df.html"];
+  dir_e74a7c641d1b032fbb218d42b422d49b [shape=box label="utils" fillcolor="white" style="filled" color="red" URL="dir_e74a7c641d1b032fbb218d42b422d49b.html"];
+  dir_24ab77f42d6d7207452f9c0d5532ef2e->dir_a3daf184e2a07ef4b49807f50f1e84df [headlabel="1", labeldistance=1.5 headhref="dir_000028_000037.html"];
+  dir_24ab77f42d6d7207452f9c0d5532ef2e->dir_e74a7c641d1b032fbb218d42b422d49b [headlabel="2", labeldistance=1.5 headhref="dir_000028_000029.html"];
+}
