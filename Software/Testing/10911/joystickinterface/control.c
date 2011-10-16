@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <Joystick.h>
-
 int main(void){
 	FILE * xbee;
 	xbee = fopen("/dev/ttyUSB0", "w+");

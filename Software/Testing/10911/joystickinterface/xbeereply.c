@@ -1,9 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include "support.h"
-#include "../../drivers/avr_compiler.h"
 #include "../../drivers/usart_driver.h"
-
+#include "../../drivers/twi_master_driver.h"
+#include "../../drivers/avr_compiler.h"
+#include "support.h"
 USART_data_t xbee;
 volatile char readdata = 0;
 volatile char input;
@@ -21,7 +21,7 @@ PMIC_LOLVLEN_bm | PMIC_MEDLVLEN_bm | PMIC_HILVLEN_bm;
 	while(1){
 		if(readdata){
 			readdata = 0;
-			senchar(&xbee, input);
+			sendchar(&xbee, input);
 		}
 	}
 }
