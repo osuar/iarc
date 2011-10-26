@@ -1,3 +1,14 @@
+
+THIS IS THE "OFF THE SHELF CODE" THAT WE PLAN TO USE FOR THE QUAD ROTOR. HOWEVER, IT WAS WRITTEN FOR ARDUINO SO WE NEED TO PORT IT TO XMEGA. GO! 
+(The authors "README" is below.)
+v
+v
+v
+v
+v
+
+
+
 AeroQuad Flight Software Source Code 2.4.2
 ========================================
 [http://www.aeroquad.com](http://www.aeroquad.com)
