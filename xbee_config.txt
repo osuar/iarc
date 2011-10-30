@@ -1,0 +1,26 @@
+XBee configuration
+  ID: PAN ID
+  CH: channel (0x00 to 0x1f)
+  DH: destination high 32-bit
+  DL: destination low 32-bit
+  MY: own 16-bit address
+  BD: baudrate
+
+---
+
+XBee A:
+  ATID: 3836
+  ATCH: 11
+  ATDH: 0
+  ATDL: 1
+  ATMY: 0
+  ATBD: 5
+
+XBee B:
+  ATID: 3836
+  ATCH: 11
+  ATDH: 0
+  ATDL: 0
+  ATMY: 1
+  ATBD: 5
+
