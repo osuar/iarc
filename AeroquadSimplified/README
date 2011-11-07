@@ -1,0 +1,21 @@
+This is a simplified version of the Aeroquad code. Im in the proccess of going through and deleting everything that is not needed, and commenting stuff. This should help people that are trying to get familiar with the code to only look at what is important. When Im done this code should be in a state very similar to what we are going to initially implement on the quadrotor and could possibly be the base for producing that code. However, please note that this code is not being edited in a way so that it will still compile, this is just being used as a resource/framework.
+
+Thing I've done with this code:
+
+- Only included files that are important to us. Some files that may seem important like Accel, Gyro, or Recieve mostly just initialize stuff and GetData. We can do these thing just fine already. The files that are important are the one with the math and other useful functions. The running code is still in AeroQuad.pde. The bulk of the important stuff that we need to copy is in AQMath, FlightAngle, and FlightControl. In AeroQuad and PID is the framework for their PID which we will also want to attempt to atleast learn from.
+
+- Deleted code that wasnt applicable to us. This makes each file MUCH easier to understand and look at. For example, there were chunks of code that applied only to wiimotes, or only to aeroquads with magnotometers. I deleted all this unecessary code. I also deleted stuff that Daniel has already done. For example, I got rid of all initialize functions because Daniel already has functions to initialize the hardware and sensors. Also, code that retrieved, smoothed, or filtered sensor data I removed. Daniel is confident that we are able to do this for ourselves and can simplify this to just feeding the functional data to the math functions.
+
+- Went through all the remaining files and commented them. I didnt add comments explaining how the code works, instead I explained how it is useful to us and what we need to do with it. In some of the more complicated files like FlightAngle, it may be better to treat as a "black box" type deal. For example, the DCM code in FlightAngle. We may want to simply copy this code the way it is, change its inputs to fit our needs (ie: make them chars etc.) and takes its outputs as modified data.
+
+
+
+This is still a work in progress and needs refinement. But I think its a good approach to getting some basic working code on the Quadrotor.
+
+-Kyle Dillon.
+
+
+
+
+
+
