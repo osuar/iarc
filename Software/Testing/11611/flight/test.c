@@ -24,8 +24,8 @@ int main(void){
 
 
 
-	char rollcash[3] = {0,0,0};
-	int accelcash[3] = {0,0,0};
+	char gyrocache[3] = {0,0,0};
+	int accelcache[3] = {0,0,0};
 	int accelint[] = {0, 0, 0};
 
 	char rolhisx[50];
@@ -111,8 +111,8 @@ int main(void){
 						acchisx,
 						acchisy,
 						acchisz,
-						accelcash,
-						rollcash, 
+						accelcache,
+						gyrocache, 
 						&readyset, 
 						&rollstartbyte, 
 						&accelstartbyte);
@@ -128,15 +128,15 @@ int main(void){
 				TCC0.INTFLAGS = 0x01;
 
 
-				getroll(rollcash, &imu, &rollstartbyte);
+				getroll(gyrocache, &imu, &rollstartbyte);
 				if(accelflag == 1){
 					accelflag = 0;
-					getaccel(accelcash, &imu, &accelstartbyte);
+					getaccel(accelcache, &imu, &accelstartbyte);
 				}
 				else{
 					accelflag = 1;
 					for(i = 0; i < 3; i ++){
-						accelcash[i] = accelint[i] + accelnorm[i];
+						accelcache[i] = accelint[i] + accelnorm[i];
 					}
 				}
 

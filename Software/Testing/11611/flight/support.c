@@ -184,7 +184,7 @@ void ValueFunk(int accelx, int accely, int accelz, int rollx, int rolly, int rol
 
 }
 
-void getroll(char *rollcash, TWI_Master_t *imu, uint8_t *rollstartbyte){
+void getroll(char *gyrocache, TWI_Master_t *imu, uint8_t *rollstartbyte){
 	int i;
 	do{
 		while(imu->status != TWIM_STATUS_READY);
@@ -192,11 +192,11 @@ void getroll(char *rollcash, TWI_Master_t *imu, uint8_t *rollstartbyte){
 		while(imu->result == TWIM_RESULT_UNKNOWN);
 	}while(!(imu->readData[0] & 0x01));
 	for(i = 0; i < 5; i += 2){
-		rollcash[i/2] += ((char)(imu->readData[i + 3]));
+		gyrocache[i/2] += ((char)(imu->readData[i + 3]));
 	}
 }
 
-void getaccel(int *accelcash, TWI_Master_t *imu, uint8_t *accelstartbyte){
+void getaccel(int *accelcache, TWI_Master_t *imu, uint8_t *accelstartbyte){
 	int i;
 	do{
 		while(imu->status != TWIM_STATUS_READY);
@@ -206,16 +206,16 @@ void getaccel(int *accelcash, TWI_Master_t *imu, uint8_t *accelstartbyte){
 
 	for(i = 0; i < 5; i += 2){
 		if(imu->readData[i + 3] & 0x80){
-			accelcash[i/2] -= 256 * (~imu->readData[i + 3] + 1);
-			accelcash[i/2] -= (~imu->readData[i + 2] + 1);
+			accelcache[i/2] -= 256 * (~imu->readData[i + 3] + 1);
+			accelcache[i/2] -= (~imu->readData[i + 2] + 1);
 		}
 		else{
-			accelcash[i/2] += 256 * imu->readData[i + 3];
-			accelcash[i/2] += (imu->readData[i + 2]);
+			accelcache[i/2] += 256 * imu->readData[i + 3];
+			accelcache[i/2] += (imu->readData[i + 2]);
 		}
 	}
 	for(i = 0; i < 3; i ++){
-			accelcash[i] = accelcash[i] >> 2;
+			accelcache[i] = accelcache[i] >> 2;
 	}
 }
 
@@ -353,8 +353,8 @@ char updateoffset(TWI_Master_t * imu,
 		int * acchisx,
 		int * acchisy,
 		int * acchisz,
-		int * accelcash,
-		char * rollcash, 
+		int * accelcache,
+		char * gyrocache, 
 		char * readyset, 
 		uint8_t * rollstartbyte, 
 		uint8_t * accelstartbyte){
@@ -364,20 +364,20 @@ char updateoffset(TWI_Master_t * imu,
 	if(!*readyset){
 		for(i = 0; i < 50; i ++){
 			for(j = 0; j < 3; j ++){
-				rollcash[j] = 0;
-				accelcash[j] = 0;
+				gyrocache[j] = 0;
+				accelcache[j] = 0;
 			}
 			while(!(TCC0.INTFLAGS & 0x01));
 			TCC0.INTFLAGS |= 0x01;
-			getroll(rollcash, imu, rollstartbyte);
-			getaccel(accelcash, imu, accelstartbyte);
+			getroll(gyrocache, imu, rollstartbyte);
+			getaccel(accelcache, imu, accelstartbyte);
 
-			acchisx[i] = accelcash[0];
-			acchisy[i] = accelcash[1];
-			acchisz[i] = accelcash[2];
-			rolhisx[i] = rollcash[0];
-			rolhisy[i] = rollcash[1];
-			rolhisz[i] = rollcash[2];
+			acchisx[i] = accelcache[0];
+			acchisy[i] = accelcache[1];
+			acchisz[i] = accelcache[2];
+			rolhisx[i] = gyrocache[0];
+			rolhisy[i] = gyrocache[1];
+			rolhisz[i] = gyrocache[2];
 		}
 		//*readyset = 1; for real time offsetting
 	}
@@ -391,14 +391,14 @@ char updateoffset(TWI_Master_t * imu,
 			rolhisy[i] = rolhisy[i - 1];
 			rolhisz[i] = rolhisz[i - 1];
 		}
-		getroll(rollcash, imu, rollstartbyte);
-		getaccel(accelcash, imu, accelstartbyte);
-		acchisx[0] = accelcash[0];
-		acchisy[0] = accelcash[1];
-		acchisz[0] = accelcash[2];
-		rolhisx[0] = rollcash[0];
-		rolhisy[0] = rollcash[1];
-		rolhisz[0] = rollcash[2];
+		getroll(gyrocache, imu, rollstartbyte);
+		getaccel(accelcache, imu, accelstartbyte);
+		acchisx[0] = accelcache[0];
+		acchisy[0] = accelcache[1];
+		acchisz[0] = accelcache[2];
+		rolhisx[0] = gyrocache[0];
+		rolhisy[0] = gyrocache[1];
+		rolhisz[0] = gyrocache[2];
 	}
 	return getoffset(acchisx, acchisy, acchisz, rolhisx, rolhisy, rolhisz, accelnorm, rollnorm);
 }

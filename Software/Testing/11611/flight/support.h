@@ -88,9 +88,9 @@ Source for functions prototyped here found in aux.c
 
 #define LITTLE_ENDIAN   1
 
-void getroll(char *rollcash, TWI_Master_t *imu, uint8_t *rollstartbyte);
+void getroll(char *gyrocache, TWI_Master_t *imu, uint8_t *rollstartbyte);
 
-void getaccel(int *accelcash, TWI_Master_t *imu, uint8_t *accelstartbyte);
+void getaccel(int *accelcache, TWI_Master_t *imu, uint8_t *accelstartbyte);
 
 void sendchar( USART_data_t * uart, char buffer);
 
@@ -121,8 +121,8 @@ char updateoffset(TWI_Master_t * imu,
 		int * acchisx,
 		int * acchisy,
 		int * acchisz,
-		int * accelcash,
-		char * rollcash, 
+		int * accelcache,
+		char * gyrocache, 
 		char * readyset, 
 		uint8_t * rollstartbyte, 
 		uint8_t * accelstartbyte);
