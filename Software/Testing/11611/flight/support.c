@@ -119,7 +119,7 @@ unsigned char outputlong(char* bytes, unsigned char min){
 	return realout;
 }
 
-void ValueFunk(int accelx, int accely, int accelz, int rollx, int rolly, int rollz, short int *servol, short int *servor, short int *motorl, short int *motorr){
+void ValueFunk(int accelx, int accely, int accelz, int gyrox, int gyroy, int gyroz, short int *servol, short int *servor, short int *motorl, short int *motorr){
 	
 	accely += absval(accelx);
 	accely += absval(accelz);
@@ -128,9 +128,9 @@ void ValueFunk(int accelx, int accely, int accelz, int rollx, int rolly, int rol
 	*servol += SERVOLAX * accelx;
 	*servol += SERVOLAY * accely;
 	*servol += SERVOLAZ * accelz;
-	*servol += SERVOLRX * rollx * absval(rollx);
-	*servol += SERVOLRY * rolly * absval(rolly) / 8;
-	*servol += SERVOLRZ * rollz;
+	*servol += SERVOLRX * gyrox * absval(gyrox);
+	*servol += SERVOLRY * gyroy * absval(gyroy) / 8;
+	*servol += SERVOLRZ * gyroz;
 	if(*servol >= MAXSERVO){
 		*servol = MAXSERVO;
 	}
@@ -142,9 +142,9 @@ void ValueFunk(int accelx, int accely, int accelz, int rollx, int rolly, int rol
 	*servor += SERVORAX * accelx;
 	*servor += SERVORAY * accely;
 	*servor += SERVORAZ * accelz;
-	*servor += SERVORRX * rollx * absval(rollx);
-	*servor += SERVORRY * rolly * absval(rolly) / 8;
-	*servor += SERVORRZ * rollz;
+	*servor += SERVORRX * gyrox * absval(gyrox);
+	*servor += SERVORRY * gyroy * absval(gyroy) / 8;
+	*servor += SERVORRZ * gyroz;
 	if(*servor >= MAXSERVO){
 		*servor = MAXSERVO;
 	}
@@ -157,9 +157,9 @@ void ValueFunk(int accelx, int accely, int accelz, int rollx, int rolly, int rol
 	*motorl += MOTORLAX * accelx;
 	*motorl += MOTORLAY * accely;
 	*motorl += MOTORLAZ * accelz;
-	*motorl += MOTORLRX * rollx;
-	*motorl += MOTORLRY * rolly;
-	*motorl += MOTORLRZ * rollz;
+	*motorl += MOTORLRX * gyrox;
+	*motorl += MOTORLRY * gyroy;
+	*motorl += MOTORLRZ * gyroz;
 	if(*motorl >= MAXMOTOR){
 		*motorl = MAXMOTOR;
 	}
@@ -171,10 +171,10 @@ void ValueFunk(int accelx, int accely, int accelz, int rollx, int rolly, int rol
 	*motorr += MOTORRAX * accelx;
 	*motorr += MOTORRAY * accely;
 	*motorr += MOTORRAZ * accelz;
-	*motorr += MOTORRRX * rollx;
-	*motorr += MOTORRRY* rolly;
-	*motorr += MOTORRRY * rolly;
-	*motorr += MOTORRRZ * rollz;
+	*motorr += MOTORRRX * gyrox;
+	*motorr += MOTORRRY* gyroy;
+	*motorr += MOTORRRY * gyroy;
+	*motorr += MOTORRRZ * gyroz;
 	if(*motorr >= MAXMOTOR){
 		*motorr = MAXMOTOR;
 	}
@@ -184,11 +184,11 @@ void ValueFunk(int accelx, int accely, int accelz, int rollx, int rolly, int rol
 
 }
 
-void getroll(char *gyrocache, TWI_Master_t *imu, uint8_t *rollstartbyte){
+void getgyro(char *gyrocache, TWI_Master_t *imu, uint8_t *gyrostartbyte){
 	int i;
 	do{
 		while(imu->status != TWIM_STATUS_READY);
-		TWI_MasterWriteRead(imu, ROLL, rollstartbyte, 1, 10);
+		TWI_MasterWriteRead(imu, GYRO, gyrostartbyte, 1, 10);
 		while(imu->result == TWIM_RESULT_UNKNOWN);
 	}while(!(imu->readData[0] & 0x01));
 	for(i = 0; i < 5; i += 2){
@@ -219,17 +219,17 @@ void getaccel(int *accelcache, TWI_Master_t *imu, uint8_t *accelstartbyte){
 	}
 }
 
-char getoffset(int *acchisx,int * acchisy,int * acchisz,char * rolhisx,char * rolhisy,char * rolhisz,int * accelnorm,char * rollnorm){
+char getoffset(int *acchisx,int * acchisy,int * acchisz,char * rolhisx,char * rolhisy,char * rolhisz,int * accelnorm,char * gyronorm){
 	int lowest[6];
 	int highest[6];
-	int rolltotal[3] = {0,0,0};
+	int gyrototal[3] = {0,0,0};
 	long long int acceltotal[3] = {0,0,0};
 	int i;
 
 /*
 	for(i = 0; i < 3; i ++){
 		accelnorm[i] = 0;
-		rollnorm[i] = 0;
+		gyronorm[i] = 0;
 	}
 */
 
@@ -288,9 +288,9 @@ char getoffset(int *acchisx,int * acchisy,int * acchisz,char * rolhisx,char * ro
 		acceltotal[0] += acchisx[i];
 		acceltotal[1] += acchisy[i];
 		acceltotal[2] += acchisz[i];
-		rolltotal[0] += rolhisx[i];
-		rolltotal[1] += rolhisy[i];
-		rolltotal[2] += rolhisz[i];
+		gyrototal[0] += rolhisx[i];
+		gyrototal[1] += rolhisy[i];
+		gyrototal[2] += rolhisz[i];
 	}
 	
 	for(i = 0; i < 6; i ++){
@@ -301,7 +301,7 @@ char getoffset(int *acchisx,int * acchisy,int * acchisz,char * rolhisx,char * ro
 	
 	for(i = 0; i < 3; i ++){
 		accelnorm[i] = acceltotal[i] / 50;
-		rollnorm[i] = rolltotal[i] / 50;
+		gyronorm[i] = gyrototal[i] / 50;
 	}
 	return 1;
 }
@@ -310,8 +310,8 @@ char getoffset(int *acchisx,int * acchisy,int * acchisz,char * rolhisx,char * ro
 void twiInitiate(TWI_Master_t *title,TWI_t *interface){
 	uint8_t accelsetupbuffer1[3] = {0x2C, 0b00001000, 0x08};
 	uint8_t accelsetupbuffer2[3] = {0x31, 0x00};
-	uint8_t rollsetupbuffer1[4] = {0x15, 19, 0b00011100, 0x11};
-	uint8_t rollsetupbuffer2[] = {0x3E, 0b00000001};
+	uint8_t gyrosetupbuffer1[4] = {0x15, 19, 0b00011100, 0x11};
+	uint8_t gyrosetupbuffer2[] = {0x3E, 0b00000001};
 
 	TWI_MasterInit(title, interface, TWI_MASTER_INTLVL_HI_gc, TWI_BAUDSETTING);
 
@@ -323,9 +323,9 @@ void twiInitiate(TWI_Master_t *title,TWI_t *interface){
 	TWI_MasterWriteRead(title, ACCEL, accelsetupbuffer2, 2, 0);
 	while(title->status != TWIM_STATUS_READY);
 	PORTF.OUT = 3;
-	TWI_MasterWriteRead(title, ROLL, rollsetupbuffer1, 4, 0);
+	TWI_MasterWriteRead(title, GYRO, gyrosetupbuffer1, 4, 0);
 	while(title->status != TWIM_STATUS_READY);
-	TWI_MasterWriteRead(title, ROLL, rollsetupbuffer2, 2, 0);
+	TWI_MasterWriteRead(title, GYRO, gyrosetupbuffer2, 2, 0);
 	while(title->status != TWIM_STATUS_READY);
 	interface->MASTER.CTRLB |= 0x0C;
 }
@@ -346,7 +346,7 @@ void uartInitiate(USART_data_t * title,USART_t * interface){
 /*Update Offset*/
 char updateoffset(TWI_Master_t * imu,
 		int * accelnorm,
-		char * rollnorm,
+		char * gyronorm,
 		char * rolhisx,
 		char * rolhisy,
 		char * rolhisz,
@@ -356,7 +356,7 @@ char updateoffset(TWI_Master_t * imu,
 		int * accelcache,
 		char * gyrocache, 
 		char * readyset, 
-		uint8_t * rollstartbyte, 
+		uint8_t * gyrostartbyte, 
 		uint8_t * accelstartbyte){
 	int i;
 	int j;
@@ -369,7 +369,7 @@ char updateoffset(TWI_Master_t * imu,
 			}
 			while(!(TCC0.INTFLAGS & 0x01));
 			TCC0.INTFLAGS |= 0x01;
-			getroll(gyrocache, imu, rollstartbyte);
+			getgyro(gyrocache, imu, gyrostartbyte);
 			getaccel(accelcache, imu, accelstartbyte);
 
 			acchisx[i] = accelcache[0];
@@ -391,7 +391,7 @@ char updateoffset(TWI_Master_t * imu,
 			rolhisy[i] = rolhisy[i - 1];
 			rolhisz[i] = rolhisz[i - 1];
 		}
-		getroll(gyrocache, imu, rollstartbyte);
+		getgyro(gyrocache, imu, gyrostartbyte);
 		getaccel(accelcache, imu, accelstartbyte);
 		acchisx[0] = accelcache[0];
 		acchisy[0] = accelcache[1];
@@ -400,7 +400,7 @@ char updateoffset(TWI_Master_t * imu,
 		rolhisy[0] = gyrocache[1];
 		rolhisz[0] = gyrocache[2];
 	}
-	return getoffset(acchisx, acchisy, acchisz, rolhisx, rolhisy, rolhisz, accelnorm, rollnorm);
+	return getoffset(acchisx, acchisy, acchisz, rolhisx, rolhisy, rolhisz, accelnorm, gyronorm);
 }
 
 int absval(int value){

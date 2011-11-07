@@ -12,10 +12,10 @@ Source for functions prototyped here found in aux.c
 #define ACCEL (0xA6 >> 1)
 #define BAUDRATE 100000
 #define TWI_BAUDSETTING TWI_BAUD(CPU_SPEED, BAUDRATE)
-#define ROLL (0xD0 >> 1)
+#define GYRO (0xD0 >> 1)
 
-#define DAMPENROLL 1
-#define INTEGRATEROLL 0
+#define DAMPENGYRO 1
+#define INTEGRATEGYRO 0
 #define DAMPENACCEL 1
 #define INTEGRATEACCEL 0
 
@@ -88,7 +88,7 @@ Source for functions prototyped here found in aux.c
 
 #define LITTLE_ENDIAN   1
 
-void getroll(char *gyrocache, TWI_Master_t *imu, uint8_t *rollstartbyte);
+void getgyro(char *gyrocache, TWI_Master_t *imu, uint8_t *gyrostartbyte);
 
 void getaccel(int *accelcache, TWI_Master_t *imu, uint8_t *accelstartbyte);
 
@@ -98,7 +98,7 @@ void sendstring( USART_data_t * uart, char *buffer);
 
 void CCPWrite( volatile uint8_t * address, uint8_t value );
 
-void ValueFunk(int accelx, int accely, int accelz, int rollx, int rolly, int rollz, short int *servol, short int *servor, short int *motorl, short int *motorr);
+void ValueFunk(int accelx, int accely, int accelz, int gyrox, int gyroy, int gyroz, short int *servol, short int *servor, short int *motorl, short int *motorr);
 
 unsigned char exponent(char* bytes);
 
@@ -106,7 +106,7 @@ char output(char* bytes, unsigned char min);
 
 unsigned char outputlong(char* bytes, unsigned char min);
 
-char getoffset(int *acchisx,int * acchisy,int * acchisz,char * rolhisx,char * rolhisy,char * rolhisz,int * accelnorm,char * rollnorm);
+char getoffset(int *acchisx,int * acchisy,int * acchisz,char * rolhisx,char * rolhisy,char * rolhisz,int * accelnorm,char * gyronorm);
 
 void twiInitiate(TWI_Master_t * title,TWI_t * interface);
 
@@ -114,7 +114,7 @@ void uartInitiate(USART_data_t * title,USART_t * interface);
 
 char updateoffset(TWI_Master_t * imu,
 		int * accelnorm,
-		char * rollnorm,
+		char * gyronorm,
 		char * rolhisx,
 		char * rolhisy,
 		char * rolhisz,
@@ -124,7 +124,9 @@ char updateoffset(TWI_Master_t * imu,
 		int * accelcache,
 		char * gyrocache, 
 		char * readyset, 
-		uint8_t * rollstartbyte, 
+		uint8_t * gyrostartbyte, 
 		uint8_t * accelstartbyte);
 	
+void updateDCM();
+
 int absval(int value);

@@ -20,7 +20,7 @@ int main(void){
 	char joyaxis[] = {0,0,0,0};
 
 	uint8_t accelstartbyte = 0x30;
-	uint8_t rollstartbyte = 0x1A;
+	uint8_t gyrostartbyte = 0x1A;
 
 
 
@@ -38,7 +38,7 @@ int main(void){
 	char readyset = 0;
 
 	int accelnorm[3] = {0,0,0};
-	char rollnorm[3] = {0,0,0};
+	char gyronorm[3] = {0,0,0};
 
 	char accelflag = 1;
 
@@ -104,7 +104,7 @@ int main(void){
 			case offset:
 				updateoffset(&imu,
 						accelnorm,
-						rollnorm,
+						gyronorm,
 						rolhisx,
 						rolhisy,
 						rolhisz,
@@ -114,7 +114,7 @@ int main(void){
 						accelcache,
 						gyrocache, 
 						&readyset, 
-						&rollstartbyte, 
+						&gyrostartbyte, 
 						&accelstartbyte);
 				state = stopped;
 
@@ -128,7 +128,7 @@ int main(void){
 				TCC0.INTFLAGS = 0x01;
 
 
-				getroll(gyrocache, &imu, &rollstartbyte);
+				getgyro(gyrocache, &imu, &gyrostartbyte);
 				if(accelflag == 1){
 					accelflag = 0;
 					getaccel(accelcache, &imu, &accelstartbyte);
