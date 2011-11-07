@@ -1,3 +1,8 @@
+This is just a very simply overview of the useful AeroQuad Code that we are looking to implement. May or may not be helpful >.>
+
+
+
+
 initialize() etc...
 
 
