@@ -14,7 +14,7 @@ COMMON = -mmcu=$(MCU)
 ## Compile options common for all C compilation units.
 CFLAGS = $(COMMON) -D__AVR_ATmega328p__
 CFLAGS += -D AVRGCC -Wall -gdwarf-2  -Os -fsigned-char
-CFLAGS += -MD -MP -MT $(*F).o -MF dep/$(@F).d 
+CFLAGS += -MD -MP -MT $(*F).o -MF dep/$(@F).d
 
 ## Assembly specific flags
 ASMFLAGS = $(COMMON)
@@ -37,7 +37,8 @@ HEX_EEPROM_FLAGS += --change-section-lma .eeprom=0
 ## Include Directories
 INCLUDES = -I /usr/lib/avr/include/
 
-SOURCES = adcadvise.c 
+SOURCES = tester.c util.c
+
 ## Objects that must be built in order to link
 OBJECTS = $(SOURCES:.c=.o)
 
@@ -69,7 +70,7 @@ $(TARGET): $(OBJECTS)
 ## Program
 program: all
 	avrdude -c avrispv2 -p m328p -P usb -e -U flash:w:$(PROJECT).hex 
-	#avrdude -p m328p -c buspirate -P /dev/ttyUSB0 -e -U flash:w:$(PROJECT).hex	
+	#avrdude -p m328p -c buspirate -P /dev/ttyUSB0 -e -U flash:w:$(PROJECT).hex
 ## Clean target
 .PHONY: clean
 clean:
