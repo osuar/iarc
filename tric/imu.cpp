@@ -1,3 +1,24 @@
+// ============================================================================
+// imu.cpp
+// ============================================================================
+// I, J, K unity vectors of global coordinate system
+//     I - east
+//     J - north
+//     K - zenith
+// i, j, k unity vectors of body coordinate system
+//     i - right
+//     j - forward
+//     k - up
+// ============================================================================
+// We keep track of the body frame in relation to the global coordinate frame.
+// That is, orientation is described in the global coordinate system.
+//
+//           [i.I i.J i.K]
+//     DCM = [j.I j.J j.K]
+//           [k.I k.J k.K]
+//
+// ============================================================================
+
 #include "imu.h"
 
 IMU::IMU() : myAcc(4, 2),   // range, bandwidth: DS p. 27
@@ -5,25 +26,14 @@ IMU::IMU() : myAcc(4, 2),   // range, bandwidth: DS p. 27
 {}
 
 void IMU::Init() {
-    // aVec = {0, 0, 0};
-    // gVec = {0, 0, 0};
-    // oVec = {0, 0, 0};
-    // oVecP = {0, 0, 0};
-    // oVecI = {0, 0, 0};
-    // tmpVec = {0, 0, 0};
-
-    // DCM = {{1, 0, 0},
-    //        {0, 1, 0},
-    //        {0, 0, 1}};
-    // tmpMat = {{0, 0, 0},
-    //           {0, 0, 0},
-    //           {0, 0, 0}};
     IMU::Reset();
     spln("IMU here!");
 
-/* Calibrate sensors if needed and find initial tricopter orientation. */
+    // Calibrate sensors. TODO: use accelerometer to find initial tricopter
+    // orientation.
     myGyr.Calibrate(500);
 
+    // Set initial DCM as the identity matrix.
     for (int i=0; i<3; i++)
         for (int j=0; j<3; j++)
             currentDCM[i][j] = (i==j) ? 1.0 : 0.0;
@@ -32,166 +42,127 @@ void IMU::Init() {
 }
 
 void IMU::Update() {
-    myGyr.Poll();
+    // ========================================================================
+    // Acelerometer
+    //     Frame of reference: BODY
+    //     Units: G (gravitational acceleration)
+    //     Purpose: Measure the acceleration vector aVec with components
+    //              codirectional with the i, j, and k vectors. Note that the
+    //              gravitational vector is the negative of the K vector.
+    // ========================================================================
     myAcc.Poll();
+    aVec[0] = myAcc.Get(0);
+    aVec[1] = myAcc.Get(1);
+    aVec[2] = myAcc.Get(2);
+    vNorm(aVec);
 
+    // TODO: FIX THIS: Calculate correction vector to bring currentDCM's K
+    // vector closer to aVec vector (K vector according to accelerometer)
+    vCrossP(aVec, currentDCM[2], wA);
+
+    // ========================================================================
+    // Gyroscope
+    //     Frame of reference: BODY
+    //     Units: rad/s
+    //     Purpose: Measure the rotation rate of the body about the body's i,
+    //              j, and k axes.
+    // ========================================================================
+    myGyr.Poll();
+    gVec[0] = myGyr.GetRate(0);
+    gVec[1] = myGyr.GetRate(1);
+    gVec[2] = myGyr.GetRate(2);
+
+    // Scale gVec by elapsed time (in seconds) to get angle w*dt in radians,
+    // then compute weighted average with the accelerometer correction vector.
     for (int i=0; i<3; i++) {
-        aVec[i] = myAcc.Get(i);
-        gVec[i] = myGyr.GetRate(i);
+        wdt[i] = gVec[i] * SYSINTRV/1000;
+        wdt[i] = (wdt[i] + ACC_WEIGHT*wA[i]) / (1.0 + ACC_WEIGHT);
     }
 
-    // XXX: just while I test...
-    //currentAngle[PITCH] = atan2(aVec[1], -aVec[2]);   // Pitch
-    //currentAngle[ROLL]  = atan2(aVec[0], -aVec[2]);   // Roll
-    //sp("cA[");
-    //sp(currentAngle[PITCH]);
-    //sp(" ");
-    //sp(currentAngle[ROLL]);
-    //sp("] ");
-    
-    #ifdef DEBUG
-    spln("IMU updated.");
-    #endif
-
-
-    // XXX Following code from PICQ
-    
-    //---------------
-    // I,J,K unity vectors of global coordinate system I-North,J-West,K-zenith
-    // i,j,k unity vectors of body's coordiante system  i-"nose", j-"left wing", k-"top"
-    //---------------
-    //            [I.i , I.j, I.k]
-    // DCM =      [J.i , J.j, J.k]
-    //            [K.i , K.j, K.k]  
-
-    //---------------
-    //Acelerometer
-    //---------------
-    //Accelerometer measures gravity vector G in body coordinate system
-    //Gravity vector is the reverse of K unity vector of global system expressed in local coordinates
-    //K vector coincides with the z coordinate of body's i,j,k vectors expressed in global coordinates (K.i , K.j, K.k)
-    //Acc can estimate global K vector(zenith) measured in body's coordinate systems (the reverse of gravitation vector)
-    Kacc[0] = aVec[0];
-    Kacc[1] = aVec[1];
-    Kacc[2] = aVec[2];
-    vNorm(Kacc);
-    //calculate correction vector to bring currentDCM's K vector closer to Acc vector (K vector according to accelerometer)
-    vCrossP(currentDCM[2], Kacc, wA);    // wA = Kgyro x     Kacc , rotation needed to bring Kacc to Kgyro
-
-    //---------------
-    //Magnetomer
-    //---------------
-    //calculate correction vector to bring currentDCM's I vector closer to Mag vector (I vector according to magnetometer)
-    //in the absense of magnetometer let's assume North vector (I) is always in XZ plane of the device (y coordinate is 0)
-    //Imag[0] = sqrt(1-currentDCM[0][2]*currentDCM[0][2]);
-    //Imag[1] = 0;
-    //Imag[2] = currentDCM[0][2];
+    // ========================================================================
+    // Direction Cosine Matrix
+    //     Frame of reference: GLOBAL
+    //     Units: None (unit vectors)
+    //     Purpose: Calculate the components of the body's i, j, and k unity
+    //              vectors in the global frame of reference.
+    // ========================================================================
+    // Skew the rotation vector and sum appropriate components by combining the
+    // skew symmetric matrix with the identity matrix. The math can be
+    // summarized as follows:
     //
-    //vCrossP(currentDCM[0], Imag, wM);    // wM = Igyro x Imag, roation needed to bring Imag to Igyro
+    // All of this is calculated in the BODY frame. If w is the angular
+    // velocity vector, let wdt (w*dt) be the angular rotation vector of the
+    // DCM over a time interval dt. Let wdt_i, wdt_j, and wdt_k be the
+    // components of wdt codirectional with the i, j, and k unity vectors,
+    // respectively. Also, let dr be the linear displacement vector of the DCM
+    // and dr_i, dr_j, and dr_k once again be the i, j, and k components,
+    // respectively.
+    //
+    // In very small dt, certain vectors approach orthogonality, so we can
+    // assume that (draw this out for yourself!):
+    //
+    //     dr_x = <    0,  dw_k, -dw_j>,
+    //     dr_y = <-dw_k,     0,  dw_i>, and
+    //     dr_z = < dw_j, -dw_i,     0>,
+    //
+    // which can be expressed as the rotation matrix:
+    //
+    //          [     0  dw_k -dw_j ]
+    //     dr = [ -dw_k     0  dw_i ]
+    //          [  dw_j -dw_i     0 ].
+    //
+    // This can then be multiplied by the current DCM and added to the current
+    // DCM to update the DCM. To minimize the number of calculations performed
+    // by the processor, however, we can combine the last two steps by
+    // combining dr with the identity matrix to produce:
+    //
+    //              [     1  dw_k -dw_j ]
+    //     dr + I = [ -dw_k     1  dw_i ]
+    //              [  dw_j -dw_i     1 ],
+    //
+    // which we multiply with the current DCM to produce the updated DCM
+    // directly.
+    // ========================================================================
+    dDCM[0][0] =       1;
+    dDCM[0][1] =  wdt[2];
+    dDCM[0][2] = -wdt[1];
+    dDCM[1][0] = -wdt[2];
+    dDCM[1][1] =       1;
+    dDCM[1][2] =  wdt[0];
+    dDCM[2][0] =  wdt[1];
+    dDCM[2][1] = -wdt[0];
+    dDCM[2][2] =       1;
 
-    //---------------
-    //currentDCM
-    //---------------
-    w[0] = gVec[0];   //rotation rate about body X axis in rad/s
-    w[1] = gVec[1];   //rotation rate about body Y axis in rad/s
-    w[2] = gVec[2];   //rotation rate about body Z axis in rad/s
-    for (int i=0; i<3; i++) {
-        w[i] = w[i] * SYSINTRV/1000;   // Scale by elapsed time (in s) to get angle in radians. NOTE: w is no longer omega; it is an actual angle (omega * dt).
-        // Compute weighted average with the accelerometer correction vector
-        w[i] = (w[i] + ACC_WEIGHT*wA[i] + MAG_WEIGHT*wM[i])/(1.0+ACC_WEIGHT+MAG_WEIGHT);
-    }
-    //if (loopCount % TELEMETRY_REST_INTERVAL == 0) {
-    //    sp("w(");
-    //    sp(w[0]*100);
-    //    sp(" ");
-    //    sp(w[1]*100);
-    //    sp(" ");
-    //    sp(w[2]*100);
-    //    sp(") ");
-    //}
-    
-    imu_dcm_rotate(currentDCM, w);
+    // Multiply the current DCM with the change in DCM and update.
+    mProduct(dDCM, currentDCM, currentDCM);
 
+    // Datafeed to serialmon.py for visualization.
     if (loopCount % TELEMETRY_REST_INTERVAL == 0) {
+        sp("DCM ");   // Index tag 'DCM'.
         for (int i=0; i<3; i++) {
-            sp("(");
-            sp(currentDCM[i][0]);
-            sp(" ");
-            sp(currentDCM[i][1]);
-            sp(" ");
-            sp(currentDCM[i][2]);
-            sp(") ");
+            for (int j=0; j<3; j++) {
+                sp(currentDCM[i][j]);
+                sp(" ");
+            }
         }
     }
-}
 
-//void IMU::deadReckoning() {
-//    // Update position and orientation regularly
-//    if (millis() - lastTime > IMU_SAMPLE_INTERVAL) {
-//        for (int i; i<3; i++) {
-//            curRot[i] = curRot[i] + myGyr.GetRate(i) * (IMU_SAMPLE_INTERVAL/1000);
-//        }
-//    }
-//
-//    // Update X position
-////  curPos[0] = accel.getX()*sec(gyro.getY         );
-//
-//}
+    // Orthogonalize the i and j unity vectors (DCMDraft2 Eqn. 19).
+    vDotP(currentDCM[0], currentDCM[1], errDCM);
+    vScale(currentDCM[1], -errDCM/2, dDCM[0]);   // i vector correction
+    vScale(currentDCM[0], -errDCM/2, dDCM[1]);   // j vector correction
+    vAdd(currentDCM[0], dDCM[0], currentDCM[0]);
+    vAdd(currentDCM[1], dDCM[1], currentDCM[1]);
+
+    // k = i x j
+    vCrossP(currentDCM[0], currentDCM[1], currentDCM[2]);
+
+    // Normalize all three vectors.
+    vNorm(currentDCM[0]);
+    vNorm(currentDCM[1]);
+    vNorm(currentDCM[2]);
+}
 
 void IMU::Reset() {
-    for (int i=0; i<3; i++) {
-        curRot[i] = 0;
-        curPos[i] = 0;
-    }
-}
-
-
-// Adjust values to make orthonormal (or at least closer to orthonormal)
-// Note: dcm and dcmResult can be the same.
-void imu_dcm_orthonormalize(float dcm[3][3]) {
-    //err = X . Y ,  X = X - err/2 * Y , Y = Y - err/2 * X  (DCMDraft2 Eqn.19)
-    float err;
-    vDotP((float*)(dcm[0]), (float*)(dcm[1]), err);
-    float delta[2][3];
-    vScale((float*)(dcm[1]), -err/2, (float*)(delta[0]));
-    vScale((float*)(dcm[0]), -err/2, (float*)(delta[1]));
-    vAdd((float*)(dcm[0]), (float*)(delta[0]), (float*)(dcm[0]));
-    vAdd((float*)(dcm[1]), (float*)(delta[0]), (float*)(dcm[1]));
-
-    //Z = X x Y  (DCMDraft2 Eqn. 20) , 
-    vCrossP((float*)(dcm[0]), (float*)(dcm[1]), (float*)(dcm[2]));
-    //re-nomralization
-    vNorm((float*)(dcm[0]));
-    vNorm((float*)(dcm[1]));
-    vNorm((float*)(dcm[2]));
-}
-
-// Rotate DCM matrix by a small rotation given by angular rotation vector dr.
-// See http://gentlenav.googlecode.com/files/DCMDraft2.pdf
-void imu_dcm_rotate(float dcm[3][3], float dr[3]) {
-    float dR[3];
-    float dcmT[3][3];   // DCM transpose.
-    
-    // Update matrix using formula R(t+1)= R(t) + dR(t) = R(t) + w x R(t)
-    for (int i=0; i<3; i++) {
-        // dr is in local coordinates. By crossing this with dcm, we get dR, which is dr expressed in global coordinates.
-        // Maybe I need the transpose of dcm?
-        vCrossP(dr, dcm[i], dR);
-
-        // YES dR MUST BE SUBTRACTED FROM DCM (this version, anyway). I SPENT
-        // EIGHT HOURS FIGURING THIS OUT. RAGING. VERY MUCH.
-        //
-        // TODO: Instead of this, I should try again what I tried at first:
-        // Change dr x dcm to dcm x dr. But actually, this might have something
-        // to do with the handedness of the coordinate system. Have I messed up
-        // somewhere?
-        for (int j=0; j<3; j++) {
-            dR[j] = -dR[j];
-        }
-        // Add dR (global description of change in orientation) to DCM.
-        vAdd(dcm[i], dR, dcm[i]);
-    }
-
-    imu_dcm_orthonormalize(dcm);
 }
 
