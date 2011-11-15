@@ -5,3 +5,4 @@
 *.hex
 *.map
 dep
+a.out
