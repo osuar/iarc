@@ -308,7 +308,7 @@ char getoffset(int *acchisx,int * acchisy,int * acchisz,char * rolhisx,char * ro
 
 /*TWI Master Initiate*/
 void twiInitiate(TWI_Master_t *title,TWI_t *interface){
-	uint8_t accelsetupbuffer1[3] = {0x2C, 0b00001000, 0x08};
+	uint8_t accelsetupbuffer1[3] = {0x2C, 0b00001001, 0x08};
 	uint8_t accelsetupbuffer2[3] = {0x31, 0x00};
 	uint8_t gyrosetupbuffer1[4] = {0x15, 19, 0b00011100, 0x11};
 	uint8_t gyrosetupbuffer2[] = {0x3E, 0b00000001};

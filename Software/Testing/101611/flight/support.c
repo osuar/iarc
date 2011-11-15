@@ -336,9 +336,11 @@ void uartInitiate(USART_data_t * title,USART_t * interface){
 	USART_InterruptDriver_Initialize(title, interface, USART_DREINTLVL_LO_gc);
 	USART_Format_Set(title->usart, USART_CHSIZE_8BIT_gc, USART_PMODE_DISABLED_gc, false);
 	USART_RxdInterruptLevel_Set(title->usart, USART_RXCINTLVL_HI_gc);
-	USART_Baudrate_Set(interface, 12 , 0);
+	USART_Baudrate_Set(interface, 22 , -2);
+	title->usart->CTRLB |= 0x04;
 	USART_Rx_Enable(title->usart);
 	USART_Tx_Enable(title->usart);
+	
 }
 
 /*Update Offset*/

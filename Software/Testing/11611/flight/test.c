@@ -4,6 +4,7 @@
 #include "../../drivers/twi_master_driver.h"
 #include "support.h"
 #include <stdio.h>
+#include "newsupport.h"
 
 USART_data_t xbee;
 
@@ -16,8 +17,9 @@ volatile char xbeecounter = 0;
 
 int main(void){
 	int i;
+	int motorSpeed[4];
 
-	char joyaxis[] = {0,0,0,0};
+	//char joyaxis[] = {0,0,0,0};
 
 	uint8_t accelstartbyte = 0x30;
 	uint8_t gyrostartbyte = 0x1A;
@@ -27,6 +29,7 @@ int main(void){
 	char gyrocache[3] = {0,0,0};
 	int accelcache[3] = {0,0,0};
 	int accelint[] = {0, 0, 0};
+	int gyroint[] = {0, 0, 0};
 
 	char rolhisx[50];
 	char rolhisy[50];
@@ -40,12 +43,13 @@ int main(void){
 	int accelnorm[3] = {0,0,0};
 	char gyronorm[3] = {0,0,0};
 
-	char accelflag = 1;
-
-
-
 
 	char xbeebuffer[100];
+
+	int dcmMatrix[9];
+	int targetMatrix[9];
+	dcmInit(dcmMatrix);
+	dcmInit(targetMatrix);
 
 	PORTD.DIR = 0x0F;
 	TCD0.CTRLA = TC_CLKSEL_DIV1_gc;
@@ -58,9 +62,17 @@ int main(void){
 
 	PORTE.DIR = 0x08;
 	PORTF.DIR = 0x03;
+	PORTC.DIR = 0b00001100;
+	PORTC.OUT = 0b00001000;
 
 	PMIC.CTRL |= PMIC_LOLVLEX_bm | PMIC_MEDLVLEX_bm | PMIC_HILVLEX_bm |
 		PMIC_LOLVLEN_bm | PMIC_MEDLVLEN_bm | PMIC_HILVLEN_bm;
+
+		TCD0.CCA = 2000;
+		TCD0.CCB = 2000;
+		TCD0.CCC = 2000;
+		TCD0.CCD = 2000;
+
 
 	sei();
 	uartInitiate(&xbee, &USARTE0);
@@ -71,6 +83,7 @@ int main(void){
 	while(1){
 		if(readdata){
 			readdata = 0;
+/*
 			for(i = 0; i < 4; i ++){
 				joyaxis[i] = input[3 + i] - 126;
 			}
@@ -91,6 +104,21 @@ int main(void){
 				sendstring(&xbee, xbeebuffer);
 			}
 			xbeecounter = 0;
+*/
+			if(input[0] == 'r'){
+				state = running;
+				sprintf(xbeebuffer, "running\n\r");
+				sendstring(&xbee, xbeebuffer);
+			}
+			else if(input[0] == 's'){
+				state = stopped;
+				sprintf(xbeebuffer, "stopped\n\r");
+				sendstring(&xbee, xbeebuffer);
+
+			}
+			else if(input[0] == 'o'){
+				state = offset;
+			}
 
 		}
 
@@ -129,16 +157,26 @@ int main(void){
 
 
 				getgyro(gyrocache, &imu, &gyrostartbyte);
-				if(accelflag == 1){
-					accelflag = 0;
-					getaccel(accelcache, &imu, &accelstartbyte);
+				getaccel(accelcache, &imu, &accelstartbyte);
+				for(i = 0; i < 3; i ++){
+					gyrocache[i] -= gyronorm[i];
+					accelcache[i] -= accelnorm[i];
 				}
-				else{
-					accelflag = 1;
-					for(i = 0; i < 3; i ++){
-						accelcache[i] = accelint[i] + accelnorm[i];
-					}
+
+				for(i = 0; i < 3; i ++){
+					accelint[i] = ((18 * accelint[i]) + (2 * accelcache[i]))/20;
+					gyroint[i] = ((15 * gyroint[i]) + (5 * gyrocache[i]))/20;
 				}
+
+				updateMatrix(accelint, gyroint, dcmMatrix);
+				sprintf(xbeebuffer, "%d %d %d\n\r", dcmMatrix[0], dcmMatrix[1], dcmMatrix[2]);
+				sendstring(&xbee, xbeebuffer);
+				updateMotor(dcmMatrix, targetMatrix, gyroint, motorSpeed);
+
+				
+				
+				//sprintf(xbeebuffer, "1 - %6d\n\r", motorSpeed[0]);
+				//sendstring(&xbee, xbeebuffer);
 
 				break;
 		}
@@ -149,6 +187,8 @@ int main(void){
 ISR(USARTE0_RXC_vect){
 	USART_RXComplete(&xbee);
 	input[xbeecounter] = USART_RXBuffer_GetByte(&xbee);
+	readdata = 1;
+/*
 
 	if((input[0] == ' ') && (xbeecounter == 0)){
 		xbeecounter ++;
@@ -169,12 +209,13 @@ ISR(USARTE0_RXC_vect){
 		}
 		xbeecounter ++;
 	}
+*/
 }
 
 ISR(USARTE0_DRE_vect){
 	USART_DataRegEmpty(&xbee);
 }
-ISR(TWIC_TWIM_vect){
+ISR(TWIC_TWIM_vect)
 	TWI_MasterInterruptHandler(&imu);
 }
 
