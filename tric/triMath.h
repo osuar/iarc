@@ -47,23 +47,6 @@ void vNorm (float v[3]) {
     v[2] /= tmp;
 }
 
-// Create equivalent skew symmetric matrix plus identity TODO: what does this do?
-// for v = {x,y,z} returns
-// m = {{1,-z,y}
-//      {z,1,-x}
-//      {-y,x,1}}
-void vSkew(float v[3], float mOut[3][3]) {
-    mOut[0][0] = 1;
-    mOut[0][1] = -v[2];
-    mOut[0][2] = v[1];
-    mOut[1][0] = v[2];
-    mOut[1][1] = 1;
-    mOut[1][2] = -v[0];
-    mOut[2][0] = -v[1];
-    mOut[2][1] = v[0];
-    mOut[2][2] = 1;
-}
-
 // 3x3 matrix transpose -- receive matrix mIn as input and output its transpose mOut.
 void mTranspose (float mIn[3][3], float mOut[3][3]) {
     int i, j;
@@ -115,28 +98,23 @@ int mInverse(int n, float mat[3][3]) {
     for (k = 0; k < n; k++) {
         // find pivot row, the row with biggest entry in current column
         tmp = 0;
-        for (i = k; i < n; i++)
-        {
-            if (fabs(mat[i][k]) >= tmp)   // Avoid using other functions inside abs()?
-            {
+        for (i = k; i < n; i++) {
+            if (fabs(mat[i][k]) >= tmp) {   // Avoid using other functions inside abs()?
                 tmp = fabs(mat[i][k]);
                 pivrow = i;
             }
         }
 
         // check for singular matrix
-        if (mat[pivrow][k] == 0.0f)
-        {
+        if (mat[pivrow][k] == 0.0f) {
             //Inversion failed due to singular matrix
             return 0;
         }
 
         // Execute pivot (row swap) if needed
-        if (pivrow != k)
-        {
+        if (pivrow != k) {
             // swap row k with pivrow
-            for (j = 0; j < n; j++)
-            {
+            for (j = 0; j < n; j++) {
                 tmp = mat[k][j];
                 mat[k][j] = mat[pivrow][j];
                 mat[pivrow][j] = tmp;
@@ -147,20 +125,16 @@ int mInverse(int n, float mat[3][3]) {
         mat[k][k] = 1.0f;   // This element of input matrix becomes result matrix
 
         // Perform row reduction (divide every element by pivot)
-        for (j = 0; j < n; j++)
-        {
+        for (j = 0; j < n; j++) {
             mat[k][j] = mat[k][j]*tmp;
         }
 
         // Now eliminate all other entries in this column
-        for (i = 0; i < n; i++)
-        {
-            if (i != k)
-            {
+        for (i = 0; i < n; i++) {
+            if (i != k) {
                 tmp = mat[i][k];
                 mat[i][k] = 0.0f;   // The other place where in matrix becomes result mat
-                for (j = 0; j < n; j++)
-                {
+                for (j = 0; j < n; j++) {
                     mat[i][j] = mat[i][j] - mat[k][j]*tmp;
                 }
             }
@@ -168,12 +142,9 @@ int mInverse(int n, float mat[3][3]) {
     }
 
     // Done, now need to undo pivot row swaps by doing column swaps in reverse order
-    for (k = n-1; k >= 0; k--)
-    {
-        if (pivrows[k] != k)
-        {
-            for (i = 0; i < n; i++)
-            {
+    for (k = n-1; k >= 0; k--) {
+        if (pivrows[k] != k) {
+            for (i = 0; i < n; i++) {
                 tmp = mat[i][k];
                 mat[i][k] = mat[i][pivrows[k]];
                 mat[i][pivrows[k]] = tmp;

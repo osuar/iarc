@@ -5,7 +5,7 @@
 #include "avr_compiler.h"
 #include <math.h>
 
-#define STEPS 30 //number of steps in a full sweep of the servo
+#define STEPS 10 //number of steps in a full sweep of the servo
 #define NUM_SERVOS 1 //number of servos in use
 #define INCREMENT 1//change in the duty cycle needed to ellicit a one increment step
 #define LENGTH 25 // number of block of data that can be held
@@ -17,18 +17,6 @@ struct array_3
 	int array[LENGTH][STEPS][NUM_SERVOS];
 };
 
-int alt(int num)
-{
-	if (num % 2 == 0)
-	{
-		return(1);
-	}
-
-	else
-	{
-		return(-1);
-	}
-}
 
 void setup_servo(int num) // Sets up pwm output for a "num" number of servos(max of 2)
 {
@@ -38,14 +26,16 @@ void setup_servo(int num) // Sets up pwm output for a "num" number of servos(max
 			DDRD |= 0b01000000;     // Set PD6(OC0A) Output
 			TCCR0A = 0b10000011;    // Fast PWM mode, Non-inverting mode  
 			TCCR0B = 0b00000011;    // clk/256
-			OCR0A = 6;            // Set Output Compare Register
+
+			OCR0A = 5;            // Set Output Compare Register
 			break;
 		case 2:
 			DDRD |= 0b01100000;     // Set PD6(OC0A) Output Set PD5(OC0B) Output
 			TCCR0A = 0b11000011;    // Fast PWM mode, Non-inverting mode  
 			TCCR0B = 0b00000010;    // clk/8
-			OCR0A = 6;            // Set Output Compare Register
-			OCR0B = 6;
+
+			OCR0A = 16;            // Set Output Compare Register
+			OCR0B = 16;
 			break;
 	}
 }
@@ -89,8 +79,7 @@ void sweep(struct array_3 * data) // takes a pointer to structure containg 3 dim
 			for(k = 0; k < NUM_SERVOS; k++)
 			{
 				(*data).array[i][j][k] = readadc(k+=1);
-				move_servo(k++, alt(i)); 
-				_delay_ms(10);
+				move_servo(k+=1, pow(-1, i));
 			}
 		}
 	}
@@ -131,12 +120,15 @@ void sendstring(char *string)
 
 int main(void)
 {
-	setup_adc();
+	
 	setup_servo(1);
 	_delay_ms(1000); // delay for 1 seconds
-	struct array_3 array;
-	sweep(&array);
 	
+	while(1)
+	{
+		move_servo(1,1);
+		_delay_ms(5000);
+	}	
 }
 				
 	
