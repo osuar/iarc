@@ -119,7 +119,7 @@ LOAD /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a
 .rela.plt
  *(.rela.plt)
 
-.text           0x00000000      0x2f8
+.text           0x00000000      0x322
  *(.vectors)
  .vectors       0x00000000       0x68 /usr/lib/gcc/avr/4.3.4/../../../avr/lib/avr5/crtm328p.o
                 0x00000000                __vectors
@@ -201,31 +201,31 @@ LOAD /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a
                 0x000000a2                __vector_16
                 0x000000a2                __vector_18
                 0x000000a2                __vector_20
- .text          0x000000a6      0x23c tester.o
+ .text          0x000000a6      0x266 tester.o
                 0x000000a6                alt
                 0x000000b8                setup_servo
                 0x000000ea                move_servo
                 0x00000124                sweep
-                0x00000218                readadc
-                0x00000252                setup_adc
-                0x00000260                sendchar
-                0x00000270                sendstring
-                0x0000028a                main
- .text          0x000002e2       0x12 util.o
-                0x000002e2                maskedCopy
- .text          0x000002f4        0x0 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_exit.o)
- .text          0x000002f4        0x0 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_copy_data.o)
- .text          0x000002f4        0x0 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_clear_bss.o)
-                0x000002f4                . = ALIGN (0x2)
+                0x00000216                readadc
+                0x00000250                setup_adc
+                0x0000025e                sendchar
+                0x0000026e                sendstring
+                0x00000288                main
+ .text          0x0000030c       0x12 util.o
+                0x0000030c                maskedCopy
+ .text          0x0000031e        0x0 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_exit.o)
+ .text          0x0000031e        0x0 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_copy_data.o)
+ .text          0x0000031e        0x0 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_clear_bss.o)
+                0x0000031e                . = ALIGN (0x2)
  *(.text.*)
- .text.libgcc   0x000002f4        0x0 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_exit.o)
- .text.libgcc   0x000002f4        0x0 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_copy_data.o)
- .text.libgcc   0x000002f4        0x0 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_clear_bss.o)
-                0x000002f4                . = ALIGN (0x2)
+ .text.libgcc   0x0000031e        0x0 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_exit.o)
+ .text.libgcc   0x0000031e        0x0 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_copy_data.o)
+ .text.libgcc   0x0000031e        0x0 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_clear_bss.o)
+                0x0000031e                . = ALIGN (0x2)
  *(.fini9)
- .fini9         0x000002f4        0x0 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_exit.o)
-                0x000002f4                exit
-                0x000002f4                _exit
+ .fini9         0x0000031e        0x0 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_exit.o)
+                0x0000031e                exit
+                0x0000031e                _exit
  *(.fini9)
  *(.fini8)
  *(.fini8)
@@ -244,11 +244,11 @@ LOAD /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a
  *(.fini1)
  *(.fini1)
  *(.fini0)
- .fini0         0x000002f4        0x4 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_exit.o)
+ .fini0         0x0000031e        0x4 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_exit.o)
  *(.fini0)
-                0x000002f8                _etext = .
+                0x00000322                _etext = .
 
-.data           0x00800100        0x0 load address 0x000002f8
+.data           0x00800100        0x0 load address 0x00000322
                 0x00800100                PROVIDE (__data_start, .)
  *(.data)
  .data          0x00800100        0x0 /usr/lib/gcc/avr/4.3.4/../../../avr/lib/avr5/crtm328p.o
@@ -277,8 +277,8 @@ LOAD /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a
  *(.bss*)
  *(COMMON)
                 0x00800100                PROVIDE (__bss_end, .)
-                0x000002f8                __data_load_start = LOADADDR (.data)
-                0x000002f8                __data_load_end = (__data_load_start + SIZEOF (.data))
+                0x00000322                __data_load_start = LOADADDR (.data)
+                0x00000322                __data_load_end = (__data_load_start + SIZEOF (.data))
 
 .noinit         0x00800100        0x0
                 0x00800100                PROVIDE (__noinit_start, .)
@@ -353,21 +353,21 @@ LOAD /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a
  .debug_pubnames
                 0x00000082       0x21 util.o
 
-.debug_info     0x00000000      0x46d
+.debug_info     0x00000000      0x4ba
  *(.debug_info)
- .debug_info    0x00000000      0x3b7 tester.o
- .debug_info    0x000003b7       0xb6 util.o
+ .debug_info    0x00000000      0x404 tester.o
+ .debug_info    0x00000404       0xb6 util.o
  *(.gnu.linkonce.wi.*)
 
-.debug_abbrev   0x00000000      0x28b
+.debug_abbrev   0x00000000      0x2a5
  *(.debug_abbrev)
- .debug_abbrev  0x00000000      0x221 tester.o
- .debug_abbrev  0x00000221       0x6a util.o
+ .debug_abbrev  0x00000000      0x23b tester.o
+ .debug_abbrev  0x0000023b       0x6a util.o
 
-.debug_line     0x00000000      0x38c
+.debug_line     0x00000000      0x3cc
  *(.debug_line)
- .debug_line    0x00000000      0x321 tester.o
- .debug_line    0x00000321       0x6b util.o
+ .debug_line    0x00000000      0x361 tester.o
+ .debug_line    0x00000361       0x6b util.o
 
 .debug_frame    0x00000000       0xc0
  *(.debug_frame)
@@ -381,10 +381,10 @@ LOAD /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a
  .debug_str     0x00000135       0x23 util.o
                                  0xcb (size before relaxing)
 
-.debug_loc      0x00000000      0x1b4
+.debug_loc      0x00000000      0x1cc
  *(.debug_loc)
- .debug_loc     0x00000000      0x196 tester.o
- .debug_loc     0x00000196       0x1e util.o
+ .debug_loc     0x00000000      0x1ae tester.o
+ .debug_loc     0x000001ae       0x1e util.o
 
 .debug_macinfo
  *(.debug_macinfo)

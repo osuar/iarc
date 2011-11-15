@@ -7,9 +7,10 @@
 
 #define STEPS 30 //number of steps in a full sweep of the servo
 #define NUM_SERVOS 1 //number of servos in use
-#define INCREMENT 1//change in the duty cycle needed to ellicit a one increment step
-#define LENGTH 25 // number of block of data that can be held
-
+#define INCREMENT 1 //change in the duty cycle needed to ellicit a one increment step
+#define LENGTH 5 // number of block of data that can be held
+#define SERVO_SPEED 50 // this determines the ammount of delay between the movement of the servo
+		     // needed because the servo cannot keep up with the instructions given
 // AREF pin needs external capacitor for opertation of ADC
 
 struct array_3
@@ -81,16 +82,16 @@ void sweep(struct array_3 * data) // takes a pointer to structure containg 3 dim
 
 {                         // moving servo first up, then down, and reading for each value
 			  // reads a "LENGHT" number of sweeps before returning
-	int i, j, k;
+	int i, j, k = 0;
 	for(i = 0; i < LENGTH; i++)
 	{
 		for(j = 0; j < STEPS; j++)
 		{
 			for(k = 0; k < NUM_SERVOS; k++)
 			{
-				(*data).array[i][j][k] = readadc(k+=1);
-				move_servo(k++, alt(i)); 
-				_delay_ms(10);
+				(*data).array[i][j][k] = readadc(k);
+				move_servo(k+1, alt(i)); 
+				_delay_ms(50);
 			}
 		}
 	}
@@ -119,6 +120,7 @@ void sendchar(char input)
 	while(!(UCSR0A & 0x20));
 	UDR0 = input;
 }
+
 void sendstring(char *string)
 {
 	int i;
@@ -136,7 +138,13 @@ int main(void)
 	_delay_ms(1000); // delay for 1 seconds
 	struct array_3 array;
 	sweep(&array);
-	
+
+	//led is turned on, wait for 1 second, turned off
+	DDRB |= 0x04;
+	if(array.array[0][0][0] > array.array[10][0][0])
+	{
+		PORTB |=  0x04;
+		_delay_ms(1000);
+	}
+	PORTB = 0x00;
 }
-				
-	
