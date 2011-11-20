@@ -256,10 +256,11 @@ int main(void){
 
 
 				for(i = 1; i < 10; i ++){
-					xbeebuffer[i] = currentMatrix[i];
+					xbeebuffer[i] = currentMatrix[i] + 62;
 				}
-				xbeebuffer[0] = 0xFF;
-				xbeebuffer[10] = 0;
+				xbeebuffer[0] = 0xFB;
+				xbeebuffer[11] = 0xFF;
+				xbeebuffer[12] = 0;
 				sendstring(&xbee, xbeebuffer);
 				//sprintf(xbeebuffer, "%d %d %d\n\r", currentMatrix[0], currentMatrix[1], currentMatrix[2]);	
 				//sprintf(xbeebuffer, "%d %d %d\n\r", negFlag[0], negFlag[1], negFlag[2]);
