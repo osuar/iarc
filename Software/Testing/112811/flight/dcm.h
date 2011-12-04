@@ -1,8 +1,18 @@
-#define OMEGA 2
-#define CURRENTWEIGHT 2
+#define OMEGA 4 / 10
+#define AVEC 1/3
+#define AWEIGHT 3
+#define CURRENTWEIGHT 4/3
+#define AXISONZ 10
+#define ROTONZ 3
+#define ROTJOYSENS 1
+#define ZJOYSENS 2
+#define TILTJOYSENS 1
+#define MOTORREG 2000
+
 int abs(int i);
 
-/* Code taken from Craig McQueen*/
+/* Code inspired from Craig McQueen's similar functions*/
+void motorSpeed(int * dcmMatrix,int * gyroint, int * joystick, int * motorSpeeds);
 uint32_t mySqrt(uint32_t input);
 void normalize(int * input,int * output, char * negFlag);
 void mNormalize(int * output, int * input);

@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include "dcm.h"
 
-#define ONE 62
+#define ONE 128
 int abs(int i){
 	if(i < 0) {
 		i *= -1;
@@ -137,11 +137,11 @@ void mMultiply(int * outputMatrix, int * inputMatrix1, int * inputMatrix2){
 
 	for(j = 0; j < 3; j ++){
 		for(i = 0; i < 3; i ++){
-			bufferMatrix[i + (j * 3)] = dot(&rotateMatrix[i], &inputMatrix2[j * 3]);
+			bufferMatrix[i + (j * 3)] = dot(&rotateMatrix[i * 3], &inputMatrix2[j * 3]);
 		}
 	}
 	for(i = 0; i < 9; i ++){
-		outputMatrix[i] = bufferMatrix[i] / OMEGA;
+		outputMatrix[i] = bufferMatrix[i] * OMEGA;
 	}
 }
 
@@ -190,4 +190,30 @@ void orthoNormalize(int * matrix){
 	mNormalize(&matrix[i * 3], &matrix[i * 3]);
 }
 
-
+void motorSpeed(int * dcmMatrix,int * gyroint, int * joystick, int * motorSpeeds){
+	int i;
+	for(i = 0; i < 4; i ++){
+		motorSpeeds[i] = MOTORREG;
+		//Joystick Throttle
+		motorSpeeds[i] -= joystick[2] * ZJOYSENS;
+	}
+	//For x axis rotating on Z
+	motorSpeeds[0] += (dcmMatrix[2] * AXISONZ) + (gyroint[1] * ROTONZ);
+	motorSpeeds[2] -= (dcmMatrix[2] * AXISONZ) + (gyroint[1] * ROTONZ);
+	//Joystick X axis tilt
+	motorSpeeds[0] += joystick[0] * TILTJOYSENS;
+	motorSpeeds[2] -= joystick[0] * TILTJOYSENS;
+	//Joystick Z axis rotate (slow down speed up both motors)
+	motorSpeeds[0] += joystick[3] * ROTJOYSENS;
+	motorSpeeds[2] += joystick[3] * ROTJOYSENS;
+	
+	//For y axis rotating on Z
+	motorSpeeds[1] += (dcmMatrix[5] * AXISONZ) + (gyroint[0] * ROTONZ);
+	motorSpeeds[3] -= (dcmMatrix[5] * AXISONZ) + (gyroint[0] * ROTONZ);
+	//Joystick Y axis tilt
+	motorSpeeds[1] -= joystick[1] * TILTJOYSENS;
+	motorSpeeds[3] += joystick[1] * TILTJOYSENS;
+	//Joystick Z axis rotate (slow down speed up both motors)
+	motorSpeeds[1] -= joystick[3] * ROTJOYSENS;
+	motorSpeeds[3] -= joystick[3] * ROTJOYSENS;
+}

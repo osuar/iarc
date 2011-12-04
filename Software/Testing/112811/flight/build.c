@@ -26,8 +26,8 @@ int main(void){
 
 	int updateMatrix[9];
 	int currentMatrix[9];
+	int aVec[3];
 	dcmInit(currentMatrix);
-	char negFlag;
 	
 	/*counting var, for for loops*/
 	int i;
@@ -38,12 +38,13 @@ int main(void){
 	uint8_t gyrostartbyte = 0x1A;
 
 	/*Joystick Axis buffer
-	  [0] -
-	  [1] -
-	  [2] -
-	  [3] -
+	  [0] - X axis tilt
+	  [1] - Y axis tilt
+	  [2] - Throttle
+	  [3] - Rotation about Z axis
 	 */
 	char joyaxis[] = {0,0,0,0};
+	int motorSpeeds[4];
 
 	/*Var to allow increase in motor speed nonrelative to the throttle
 	  during flight*/
@@ -224,7 +225,7 @@ int main(void){
 				}
 
 				for(i = 0; i < 3; i ++){
-					gyroint[i] = ((10 * gyroint[i]) + (10 * gyrocache[i]))/20;
+					gyroint[i] = ((0* gyroint[i]) + (20 * gyrocache[i]))/20;
 				}
 
 				/*Get accel data
@@ -233,35 +234,50 @@ int main(void){
 				 */
 				getaccel(accelcache, &imu, &accelstartbyte);
 				for(i = 0; i < 3; i ++){
-					accelcache[i] -= accelnorm[i];
+					//accelcache[i] -= accelnorm[i];
 				}
 
 				for(i = 0; i < 3; i ++){
-					accelint[i] = ((16 * accelint[i]) + (4 * accelcache[i]))/20;
+					accelint[i] = ((10 * accelint[i]) + (10 * accelcache[i]))/20;
 				}
 
 				/*dcm  matrix test stuff*/
+				
+				cross(accelint, &currentMatrix[6], aVec);	
+				for(i = 0; i < 3; i++){
+					aVec[i] = (gyroint[i] - (aVec[i] * AWEIGHT)) * AVEC;
+				}
+
 				updateMatrix[0] = 0;
-				updateMatrix[1] = gyroint[2];
-				updateMatrix[2] = -gyroint[1];
-				updateMatrix[3] = -gyroint[2];
+				updateMatrix[1] = aVec[2];
+				updateMatrix[2] = -aVec[1];
+				updateMatrix[3] = -aVec[2];
 				updateMatrix[4] = 0;
-				updateMatrix[5] = gyroint[0];
-				updateMatrix[6] = gyroint[1];
-				updateMatrix[7] = -gyroint[0];
+				updateMatrix[5] = aVec[0];
+				updateMatrix[6] = aVec[1];
+				updateMatrix[7] = -aVec[0];
 				updateMatrix[8] = 0;
+
 
 				mMultiply(updateMatrix, updateMatrix, currentMatrix);
 
 				for(i = 0; i < 3; i ++){
 					vectorScale(&currentMatrix[i * 3], CURRENTWEIGHT, &currentMatrix[i * 3]); 
 				}
+
+
 				
 				mAdd(currentMatrix, currentMatrix, updateMatrix);
-				
 
 				mNormalize(currentMatrix, currentMatrix);
-				orthoNormalize(currentMatrix);
+				//orthoNormalize(currentMatrix);
+				motorSpeed(currentMatrix, gyroint, joyaxis, motorSpeeds);
+/*
+				TCD0.CCA = motorSpeeds[0] + motorup;
+				TCD0.CCC = motorSpeeds[2] + motorup;
+				TCD0.CCB = motorSpeeds[1] + motorup;
+				TCD0.CCD = motorSpeeds[3] + motorup;
+*/
 
 /*
 				for(i = 1; i < 10; i ++){
@@ -271,16 +287,19 @@ int main(void){
 				xbeebuffer[10] = 0xFF;
 				xbeebuffer[11] = 0;
 */
+
 				sprintf(xbeebuffer, "(%3d %3d %3d) (%3d %3d %3d) (%3d %3d %3d)\n\r", 
 					currentMatrix[0], currentMatrix[1], 
 					currentMatrix[2], currentMatrix[3], 
 					currentMatrix[4], currentMatrix[5], 
 					currentMatrix[6], currentMatrix[7], 
 					currentMatrix[8]);
+
 				
 				//sprintf(xbeebuffer, "%d %d %d\n\r", currentMatrix[0], currentMatrix[1], currentMatrix[2]);	
 				//sprintf(xbeebuffer, "%d %d %d\n\r", negFlag[0], negFlag[1], negFlag[2]);
 				//sprintf(xbeebuffer, "%3d %3d %3d\n\r", gyroint[0], gyroint[1], gyroint[2]);
+				//sprintf(xbeebuffer, "%4d %4d %4d %4d\n\r", motorSpeeds[0], motorSpeeds[1], motorSpeeds[2], motorSpeeds[3]);
 				sendstring(&xbee, xbeebuffer);
 
 				/*reset cache values to 0, should be made unnecessary by modding gyro and
