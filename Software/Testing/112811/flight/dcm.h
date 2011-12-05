@@ -1,3 +1,6 @@
+#ifndef DCM_H
+#define DCM_H
+
 #define OMEGA 4 / 10
 #define AVEC 1/3
 #define AWEIGHT 3
@@ -23,3 +26,5 @@ void vectorScale(int * input, int scale, int * output);
 void orthoNormalize(int * matrix);
 void mAdd(int * outputMatrix, int * inputMatrix1, int * inputMatrix2);
 void mMultiply(int * outputmatrix, int * inputMatrix1, int * inputMatrix2);
+
+#endif // DCM_H
