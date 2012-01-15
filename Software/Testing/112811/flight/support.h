@@ -1,3 +1,5 @@
+#ifndef SUPPORT_H
+#define SUPPORT_H
 
 /**
 @author Daniel Sidlauskas Miller with advice from Gary Miller
@@ -130,3 +132,5 @@ char updateoffset(TWI_Master_t * imu,
 void updateDCM();
 
 int absval(int value);
+
+#endif // SUPPORT_H

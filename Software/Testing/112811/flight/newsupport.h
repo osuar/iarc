@@ -1,3 +1,6 @@
+#ifndef NEWSUPPORT_H
+#define NEWSUPPORT_H
+
 #define MOTORONEINIT 2500
 #define MOTORTWOINIT 2500
 #define MOTORTHREEINIT 2500
@@ -36,3 +39,5 @@ void orthoNormalize(int * matrix);
 void updateMatrix(int * accel, int * gyro, int* matrix);
 
 void updateMotor(int * dcmMatrix, int * targetMatrix, int * rollint, int * motorSpeed);
+
+#endif // NEWSUPPORT_H
