@@ -1,0 +1,26 @@
+\documentclass[12pt,letterpaper]{article}
+\usepackage{graphicx}
+
+\setcounter{secnumdepth}{-1}
+
+\begin{document}
+\section{Testing ESC Response}
+\subsection{Overview}
+The three phase motor controllers (esc's) are typically designed for hobby
+applications other than quad rotors (like RC cars). These other applications
+involve motors being geared down, so the firmware gradually ramps up motor
+speeds to avoid stripping the gears. This spin up time is detrimental to
+quad rotor function.\\
+Some of the ESCs we have may already be configured for quad rotor use, test
+the different ESC's using the arm setup to confirm which ESCs work best
+(correct fastest ).
+\subsection{Electrical}
+The inertial measurement unit will need to be secured tightly to the arm facing
+towards the motor. Each ESC will need to be soldered to the 11.1V connection.
+Other components can be more flexibly mounted with 5V and Ground connections.
+\subsection{Software}
+Software for these tests is completed and ready in the esctest folder under
+testing in the the software folder, the y and h keys can be used to change
+the numerator of the gyro correction and u and j for the denominator. Do not
+divide by zero.
+\end{document}
