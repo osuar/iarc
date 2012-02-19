@@ -79,7 +79,7 @@ int main(void){
 
 	/*Initialize PORTD to output on pins 0-3 from Timer counter pwm at
 	  50Hz*/
-	PORTD.DIR = 0x01;
+	PORTD.DIR = 0x09;
 	TCD0.CTRLA = TC_CLKSEL_DIV1_gc;
 	TCD0.CTRLB = TC_WGMODE_SS_gc |  TC0_CCAEN_bm;
 	TCD0.PER = 40000;
@@ -110,9 +110,8 @@ int main(void){
 
 
 	/*Set Xbee Uart transmit pin 3 to output*/
-	PORTE.DIR = 0x08;
-	/*Initialize USARTE0 as the module used by the Xbee*/
-	uartInitiate(&xbee, &USARTE0);
+	/*Initialize USARTD0 as the module used by the Xbee*/
+	uartInitiate(&xbee, &USARTD0);
 
 	PORTF.OUT = 0;
 	/*Initialize imu to use Two wire interface on portC*/
@@ -362,7 +361,7 @@ int main(void){
 
 
 	/*Xbee read interrupt*/
-ISR(USARTE0_RXC_vect){
+ISR(USARTD0_RXC_vect){
 	USART_RXComplete(&xbee);
 	input[xbeecounter] = USART_RXBuffer_GetByte(&xbee);
 
@@ -404,7 +403,7 @@ ISR(USARTE0_RXC_vect){
 }
 
 /*Usart module interrupt to inform data has been properly sent*/
-ISR(USARTE0_DRE_vect){
+ISR(USARTD0_DRE_vect){
 	USART_DataRegEmpty(&xbee);
 }
 

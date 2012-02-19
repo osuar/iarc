@@ -22,7 +22,7 @@
 #define ROTJOYSENS 1
 #define ZJOYSENS 2
 #define TILTJOYSENS 2
-#define MOTORREG 3075
+#define MOTORREG 2785
 
 int abs(int i);
 
