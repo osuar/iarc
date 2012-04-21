@@ -142,7 +142,7 @@ void sprintBinary(char * buffer, int * value){
 /* get gyro data, should do test to figure out degree/sec magnitude*/ 
 void getgyro(int *gyrocache, TWI_Master_t *imu, uint8_t *gyrostartbyte){
 	int i;
-	char buffer[6];
+	uint8_t buffer[6];
 	do{
 		while(imu->status != TWIM_STATUS_READY);
 		TWI_MasterWriteRead(imu, GYRO, gyrostartbyte, 1, 10);
@@ -152,10 +152,10 @@ void getgyro(int *gyrocache, TWI_Master_t *imu, uint8_t *gyrostartbyte){
 		buffer[i] = imu->readData[i + 3];
 	}
 	for(i = 0; i < 5; i += 2){
-	//	gyrocache[i/2] = (buffer[i] << 8) | buffer[i + 1];
+		gyrocache[i/2] = ((buffer[i] << 8) | buffer[i + 1])>>5;
 //		gyrocache[i/2] = buffer[i] << 8;
 //		gyrocache[i/2] |= (buffer[i + 1] & 0x7F);
-		gyrocache[i/2] = buffer[i];
+		//gyrocache[i/2] = buffer[i];
 	}
 }
 
@@ -278,7 +278,7 @@ char getoffset(int *acchisx,int * acchisy,int * acchisz,char * rolhisx,char * ro
 
 /*TWI Master Initiate*/
 void twiInitiate(TWI_Master_t *title,TWI_t *interface){
-	uint8_t accelsetupbuffer1[3] = {0x2C, 0b00001001, 0x08};
+	uint8_t accelsetupbuffer1[3] = {0x2C, 0b00001010, 0x08};
 	uint8_t accelsetupbuffer2[3] = {0x31, 0x00};
 	uint8_t gyrosetupbuffer1[4] = {0x15, (1000/RATE) - 1, 0b00011000, 0x11};
 	uint8_t gyrosetupbuffer2[] = {0x3E, 0b00000001};
@@ -296,7 +296,7 @@ void twiInitiate(TWI_Master_t *title,TWI_t *interface){
 	TWI_MasterWriteRead(title, ACCEL, accelsetupbuffer2, 2, 0);
 	while(title->status != TWIM_STATUS_READY);
 
-	interface->MASTER.CTRLB |= 0x0C;
+	interface->MASTER.CTRLB |= 0x04;
 }
 
 

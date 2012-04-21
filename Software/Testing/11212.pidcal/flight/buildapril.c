@@ -29,6 +29,9 @@ int main(void){
 	char motordif24 = -15;	
 	char motordif13 = 10;
 
+	uint8_t testchar = 0;
+	uint8_t testchar2 = 0;
+
 	int pry[] = {0,0,0};
 	int aVec[] = {0,0,0};
 
@@ -37,8 +40,8 @@ int main(void){
 
 	int tilt = 0;
 
-	int pidValues[3] = {2,0,8};
-	int pidValuesDen[3] = {16,1,1};
+	int pidValues[3] = {0,0,0};
+	int pidValuesDen[3] = {1,1,1};
 
 	/*counting var, for for loops*/
 	int i;
@@ -73,7 +76,7 @@ int main(void){
 
 	/*Standard values for accel and gyro (when level), set during offset*/
 	int accelnorm[3] = {0,0,0};
-	char gyronorm[3] = {-3,0,3};
+	char gyronorm[3] = {2,5,-1};
 
 	/*Buffer for sending data through the xbee*/
 	char xbeebuffer[100];
@@ -289,9 +292,11 @@ int main(void){
 				getgyro(gyrocache, &imu, &gyrostartbyte);
 				for(i = 0; i < 3; i ++){
 					gyrocache[i] -= gyronorm[i];
+
 					if((gyrocache[i] <= 1) && (gyrocache[i] >= -1)){
 						gyrocache[i] = 0;
 					}
+
 					gyrocounter[i] += gyrocache[i];
 				}
 
@@ -301,7 +306,7 @@ int main(void){
 				paceCounter = 0;
 
 					getaccel(accelcache, &imu, &accelstartbyte);
-/*
+
 					for(i = 0; i < 3; i ++){
 						accelcache[i] -= accelnorm[i];
 					}
@@ -314,16 +319,17 @@ int main(void){
 					pry[0] = (-(AWEIGHT * accelint[1]) + (GWEIGHT * pry[0])) / (AWEIGHT + GWEIGHT);
 
 					pry[1] = ((AWEIGHT * accelint[0]) + (GWEIGHT * pry[1])) / (AWEIGHT + GWEIGHT);
-*/
 
+				sprintf(xbeebuffer, "%4d %4d %4d\n\r", gyrocache[0], gyrocache[1], gyrocache[2]);
 				//sprintf(xbeebuffer, "%d %d %d\n\r", pry[0], pry[1], pry[2]);
 				//sprintf(xbeebuffer, "%d %d %d\n\r", accelint[0], accelint[1], accelint[2]);
 				//sprintf(xbeebuffer, "%d %d %d\n\r", currentMatrix[0], currentMatrix[1], currentMatrix[2]);	
 				//sprintf(xbeebuffer, "%3d %3d %3d\n\r", gyroint[0], gyroint[1], gyroint[2]);
 				//sprintf(xbeebuffer, "%4d %4d %4d %4d\n\r", motorSpeeds[0], motorSpeeds[1], motorSpeeds[2], motorSpeeds[3]);
 				//sprintf(xbeebuffer, "%d\n\r", gyrocache[1]);
+				
 				//sprintBinary(xbeebuffer, &gyrocache[0]);
-				//sendstring(&xbee, xbeebuffer);
+				sendstring(&xbee, xbeebuffer);
 
 				/*reset cache values to 0, should be made unnecessary by modding gyro and
 				  accel read functions*/
@@ -360,11 +366,12 @@ int main(void){
 				motorSpeed(pry, integration ,gyroint, joyaxis, motorSpeeds, pidValues, pidValuesDen);
 
 /*
-				TCD0.CCA = motorSpeeds[0] + motorup - motordif13;
-				TCD0.CCC = motorSpeeds[2] + motorup +  motordif13;
-				TCD0.CCB = motorSpeeds[1] + motorup + motordif24;
-				TCD0.CCD = motorSpeeds[3] + motorup - motordif24;
+				TCD0.CCA = motorSpeeds[0] + motorup;// - motordif13;
+				TCD0.CCC = motorSpeeds[2] + motorup;// +  motordif13;
+				TCD0.CCB = motorSpeeds[1] + motorup;// + motordif24;
+				TCD0.CCD = motorSpeeds[3] + motorup;// - motordif24;
 */
+
 				PORTD.OUT ^= 0b00100000;
 
 
