@@ -37,7 +37,7 @@ HEX_EEPROM_FLAGS += --change-section-lma .eeprom=0
 ## Include Directories
 INCLUDES = -I /usr/lib/avr/include/
 
-SOURCES = build.c dcm.c support.c ../../drivers/twi_master_driver.c ../../drivers/usart_driver.c 
+SOURCES = buildapril.c dcm.c support.c ../../drivers/twi_master_driver.c ../../drivers/usart_driver.c 
 ## Objects that must be built in order to link
 OBJECTS = $(SOURCES:.c=.o)
 

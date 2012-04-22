@@ -9,11 +9,11 @@ Source for functions prototyped here found in aux.c
 #define CPU_SPEED 2000000
 
 //Rate which gyro will be read at
-#define RATE 50
+#define RATE 200
 
 //imu constants
 #define ACCEL (0xA6 >> 1)
-#define BAUDRATE 100000
+#define BAUDRATE 200000
 #define TWI_BAUDSETTING TWI_BAUD(CPU_SPEED, BAUDRATE)
 #define GYRO (0xD0 >> 1)
 

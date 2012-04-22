@@ -91,9 +91,6 @@ void normalize(int * input,int * output, char * negFlag){
 	// Scale output by ONE/magnitude.
 	for(i = 0; i < 3; i ++){
 		buffer[i] = ((abs(input[i]) * ONE) / magnitude);
-		if(buffer[i] == 0){
-			PORTF.OUT = 1;
-		}
 		
 		output[i] = buffer[i];
 		
@@ -202,9 +199,14 @@ void motorSpeed(int * pry,
 		//Joystick Throttle
 		motorSpeeds[i] -= joystick[2] * ZJOYSENS;
 	}
+	for(i =0; i < 2; i ++){
+		if(abs(pry[i]) < 10){
+			pry[i] = 0;
+		}
+	}
 	//For x axis rotating on Z
-	motorSpeeds[0] += (-pry[1] * pidValues[0]/pidValuesDen[0]) + (integration[0] * pidValues[1]) + (gyroint[1] * pidValues[2]/pidValuesDen[2]);
-	motorSpeeds[2] -= (-pry[1] * pidValues[0]/pidValuesDen[0]) + (integration[0] * pidValues[1]) + (gyroint[1] * pidValues[2]/pidValuesDen[2]);
+	motorSpeeds[0] -= (-pry[1] * pidValues[0]/pidValuesDen[0]) + (integration[0] * pidValues[1]) + (gyroint[1] * pidValues[2]/pidValuesDen[2]);
+	motorSpeeds[2] += (-pry[1] * pidValues[0]/pidValuesDen[0]) + (integration[0] * pidValues[1]) + (gyroint[1] * pidValues[2]/pidValuesDen[2]);
 	//Joystick X axis tilt
 	motorSpeeds[0] += joystick[0] * TILTJOYSENS;
 	motorSpeeds[2] -= joystick[0] * TILTJOYSENS;
@@ -213,8 +215,8 @@ void motorSpeed(int * pry,
 	motorSpeeds[2] += joystick[3] * ROTJOYSENS;
 	
 	//For y axis rotating on Z
-	motorSpeeds[1] += (pry[0] * pidValues[0]/pidValuesDen[0]) + (integration[1] * pidValues[1]) - (gyroint[0] * pidValues[2]/pidValuesDen[2]);
-	motorSpeeds[3] -= (pry[0] * pidValues[0]/pidValuesDen[0]) + (integration[1] * pidValues[1]) - (gyroint[0] * pidValues[2]/pidValuesDen[2]);
+	motorSpeeds[1] -= (pry[0] * pidValues[0]/pidValuesDen[0]) + (integration[1] * pidValues[1]) - (gyroint[0] * pidValues[2]/pidValuesDen[2]);
+	motorSpeeds[3] += (pry[0] * pidValues[0]/pidValuesDen[0]) + (integration[1] * pidValues[1]) - (gyroint[0] * pidValues[2]/pidValuesDen[2]);
 	//Joystick Y axis tilt
 	motorSpeeds[1] -= joystick[1] * TILTJOYSENS;
 	motorSpeeds[3] += joystick[1] * TILTJOYSENS;

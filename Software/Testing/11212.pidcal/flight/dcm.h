@@ -1,4 +1,4 @@
-#define DEGREE 10
+#define DEGREE 320
 
 //Scales incoming gyro values to arbitrary DCM matrix size, subject to change
 #define OMEGA 10 / 10
@@ -8,7 +8,8 @@
 #define AVEC 3/2
 
 //Weight of accelerometer values in creation of acceleration vector
-#define AWEIGHT 0
+#define AWEIGHT 1
+#define GWEIGHT 9
 
 #define ACCSCALE 3/2
 
@@ -22,7 +23,7 @@
 #define ROTJOYSENS 1
 #define ZJOYSENS 2
 #define TILTJOYSENS 2
-#define MOTORREG 3075
+#define MOTORREG 2970
 
 int abs(int i);
 

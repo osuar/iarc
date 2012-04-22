@@ -320,8 +320,8 @@ int main(void){
 
 					pry[1] = ((AWEIGHT * accelint[0]) + (GWEIGHT * pry[1])) / (AWEIGHT + GWEIGHT);
 
-				sprintf(xbeebuffer, "%4d %4d %4d\n\r", gyrocache[0], gyrocache[1], gyrocache[2]);
-				//sprintf(xbeebuffer, "%d %d %d\n\r", pry[0], pry[1], pry[2]);
+				//sprintf(xbeebuffer, "%4d %4d %4d\n\r", gyrocache[0], gyrocache[1], gyrocache[2]);
+				sprintf(xbeebuffer, "%d %d %d\n\r", pry[0], pry[1], pry[2]);
 				//sprintf(xbeebuffer, "%d %d %d\n\r", accelint[0], accelint[1], accelint[2]);
 				//sprintf(xbeebuffer, "%d %d %d\n\r", currentMatrix[0], currentMatrix[1], currentMatrix[2]);	
 				//sprintf(xbeebuffer, "%3d %3d %3d\n\r", gyroint[0], gyroint[1], gyroint[2]);

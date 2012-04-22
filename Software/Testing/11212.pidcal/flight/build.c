@@ -26,7 +26,8 @@ int main(void){
 
 	int integration[3] = {0,0,0};
 
-	char motordif = 5;	
+	char motordif24 = -15;	
+	char motordif13 = 10;
 
 	int pry[] = {0,0,0};
 	int aVec[] = {0,0,0};
@@ -36,8 +37,8 @@ int main(void){
 
 	int tilt = 0;
 
-	int pidValues[3] = {6,0,11};
-	int pidValuesDen[3] = {8,1,1};
+	int pidValues[3] = {2,0,8};
+	int pidValuesDen[3] = {16,1,1};
 
 	/*counting var, for for loops*/
 	int i;
@@ -82,7 +83,7 @@ int main(void){
 	PORTD.DIR = 0x0F;
 	TCD0.CTRLA = TC_CLKSEL_DIV1_gc;
 	TCD0.CTRLB = TC_WGMODE_SS_gc | TC0_CCCEN_bm |  TC0_CCAEN_bm |TC0_CCBEN_bm | TC0_CCDEN_bm;
-	TCD0.PER = 40000;
+	TCD0.PER = 4000;
 
 	/*Initialize Timer counter C0 for pacing,RATE Hz*/
 	TCC0.CTRLA = TC_CLKSEL_DIV1_gc;
@@ -194,11 +195,27 @@ int main(void){
 			}
 
 			else if(input[0] == 't'){
-				motordif += 5;
+				motordif24 += 5;
 			}
 			else if(input[0] == 'g'){
-				motordif -= 5;
+				motordif24 -= 5;
 			}
+			else if(input[0] == 'a'){
+				motordif13 += 5;
+			}
+			else if(input[0] == 'z'){
+				motordif13 -= 5;
+			}
+			else if(input[0] == '0'){
+				cli();
+				while(1){
+					TCD0.CCA = 2000;
+					TCD0.CCB = 2000;
+					TCD0.CCC = 2000;
+					TCD0.CCD = 2000;
+				}
+			}
+
 
 
 
@@ -217,8 +234,7 @@ int main(void){
 			}
 			else if(input[7] == 4){
 			state = running;
-			sprintf(xbeebuffer, "running %d\n", input[7]);
-			sendstring(&xbee, xbeebuffer);
+			sprintf(xbeebuffer, "running %d\n", input[7]);		sendstring(&xbee, xbeebuffer);
 			}
 			else if(input[7] == 5){
 			state = offset;
@@ -313,19 +329,21 @@ int main(void){
 						accelint[i] = ((ACCELINT * accelint[i]) + ((20 - ACCELINT) * accelcache[i]))/20;
 					}
 
-					pry[0] = (-accelint[1] + pry[0]) / 2;
 
-					pry[1] = (accelint[0] + pry[1]) / 2;
+					pry[0] = (-(AWEIGHT * accelint[1]) + (GWEIGHT * pry[0])) / (AWEIGHT + GWEIGHT);
 
+					pry[1] = ((AWEIGHT * accelint[0]) + (GWEIGHT * pry[1])) / (AWEIGHT + GWEIGHT);
+
+	
 					
 
 					motorSpeed(pry, integration ,gyroint, joyaxis, motorSpeeds, pidValues, pidValuesDen);
 
 
-					TCD0.CCA = motorSpeeds[0] + motorup - motordif;
-					TCD0.CCC = motorSpeeds[2] + motorup +  motordif;
-					TCD0.CCB = motorSpeeds[1] + motorup + motordif;
-					TCD0.CCD = motorSpeeds[3] + motorup - motordif;
+					TCD0.CCA = motorSpeeds[0] + motorup - motordif13;
+					TCD0.CCC = motorSpeeds[2] + motorup +  motordif13;
+					TCD0.CCB = motorSpeeds[1] + motorup + motordif24;
+					TCD0.CCD = motorSpeeds[3] + motorup - motordif24;
 
 
 /*
