@@ -33,8 +33,8 @@ int main(void){
 
 	int tilt = 0;
 
-	int pidValues[3] = {6,0,11};
-	int pidValuesDen[3] = {8,1,1};
+	int pidValues[3] = {2,0,10};
+	int pidValuesDen[3] = {7,1,1};
 
 	/*counting var, for for loops*/
 	int i;
@@ -199,7 +199,7 @@ int main(void){
 
 			/*For Joystick packet reads*/
 			  for(i = 0; i < 4; i ++){
-			  joyaxis[i] = input[3 + i] - 126;
+			  joyaxis[i] = -input[3 + i] + 126;
 			  }
 			//Input 7 is the button buffer
 			if(input[7] == 3){
@@ -321,10 +321,10 @@ int main(void){
 */
 
 
-					TCD0.CCA = motorSpeeds[0] + 15;
-					TCD0.CCC = motorSpeeds[2] - 15;
-					TCD0.CCB = motorSpeeds[1] + tilt;
-					TCD0.CCD = motorSpeeds[3] - tilt;
+					TCD0.CCA = motorSpeeds[0];
+					TCD0.CCC = motorSpeeds[2];
+					TCD0.CCB = motorSpeeds[1];
+					TCD0.CCD = motorSpeeds[3];
 
 
 /*

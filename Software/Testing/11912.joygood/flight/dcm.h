@@ -21,8 +21,8 @@
 #define INTCONST 15/16
 #define ROTJOYSENS 1
 #define ZJOYSENS 1
-#define TILTJOYSENS 3/7
-#define MOTORREG 3275
+#define TILTJOYSENS 9/14
+#define MOTORREG 3055
 
 int abs(int i);
 

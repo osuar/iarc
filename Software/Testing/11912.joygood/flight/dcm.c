@@ -200,19 +200,19 @@ void motorSpeed(int * pry,
 	for(i = 0; i < 4; i ++){
 		motorSpeeds[i] = MOTORREG;
 		//Joystick Throttle
-		motorSpeeds[i] -= joystick[2] * ZJOYSENS;
+		motorSpeeds[i] += joystick[2] * ZJOYSENS;
 	}
 	//For x axis rotating on Z
-	motorSpeeds[0] += (-(pry[1] - (joystick[0] * TILTJOYSENS)) * pidValues[0]/pidValuesDen[0]) + (integration[0] * pidValues[1]) + (gyroint[1] * pidValues[2]/pidValuesDen[2]);
-	motorSpeeds[2] -= (-(pry[1] - (joystick[0] * TILTJOYSENS)) * pidValues[0]/pidValuesDen[0]) + (integration[0] * pidValues[1]) + (gyroint[1] * pidValues[2]/pidValuesDen[2]);
+	motorSpeeds[0] -= (-(pry[1] - (joystick[0] * TILTJOYSENS)) * pidValues[0]/pidValuesDen[0]) + (integration[0] * pidValues[1]) + (gyroint[1] * pidValues[2]/pidValuesDen[2]);
+	motorSpeeds[2] += (-(pry[1] - (joystick[0] * TILTJOYSENS)) * pidValues[0]/pidValuesDen[0]) + (integration[0] * pidValues[1]) + (gyroint[1] * pidValues[2]/pidValuesDen[2]);
 	//Joystick Z axis rotate (slow down speed up both motors)
-	motorSpeeds[0] -= joystick[3] * ROTJOYSENS;
-	motorSpeeds[2] -= joystick[3] * ROTJOYSENS;
+	motorSpeeds[0] += joystick[3] * ROTJOYSENS;
+	motorSpeeds[2] += joystick[3] * ROTJOYSENS;
 	
 	//For y axis rotating on Z
-	motorSpeeds[1] += ((pry[0] - (joystick[1] * TILTJOYSENS)) * pidValues[0]/pidValuesDen[0]) + (integration[1] * pidValues[1]) - (gyroint[0] * pidValues[2]/pidValuesDen[2]);
-	motorSpeeds[3] -= ((pry[0] - (joystick[1] * TILTJOYSENS)) * pidValues[0]/pidValuesDen[0]) + (integration[1] * pidValues[1]) - (gyroint[0] * pidValues[2]/pidValuesDen[2]);
+	motorSpeeds[1] -= ((pry[0] - (joystick[1] * TILTJOYSENS)) * pidValues[0]/pidValuesDen[0]) + (integration[1] * pidValues[1]) - (gyroint[0] * pidValues[2]/pidValuesDen[2]);
+	motorSpeeds[3] += ((pry[0] - (joystick[1] * TILTJOYSENS)) * pidValues[0]/pidValuesDen[0]) + (integration[1] * pidValues[1]) - (gyroint[0] * pidValues[2]/pidValuesDen[2]);
 	//Joystick Z axis rotate (slow down speed up both motors)
-	motorSpeeds[1] += joystick[3] * ROTJOYSENS;
-	motorSpeeds[3] += joystick[3] * ROTJOYSENS;
+	motorSpeeds[1] -= joystick[3] * ROTJOYSENS;
+	motorSpeeds[3] -= joystick[3] * ROTJOYSENS;
 }

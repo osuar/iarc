@@ -300,6 +300,22 @@ int main(void){
 					gyrocounter[i] += gyrocache[i];
 				}
 
+				for(i = 0; i < 3; i ++){
+
+					//	gyroint[i] = ((GYROINT)* gyroint[i]);
+					//	gyroint[i] += (20 - GYROINT) * gyrocounter[i]/DEGREE;
+					gyroint[i] = gyrocounter[i]/DEGREE;
+					gyrocounter[i] %= DEGREE;
+
+					//gyroint[i] /= 20;
+
+
+					pry[i] += gyroint[i];
+
+				}
+
+
+
 				paceCounter ++;
 				//Slower Operations at 50Hz
 				if(paceCounter == (RATE / 50)){
@@ -339,21 +355,6 @@ int main(void){
 
 				}
 
-
-
-				for(i = 0; i < 3; i ++){
-
-					//	gyroint[i] = ((GYROINT)* gyroint[i]);
-					//	gyroint[i] += (20 - GYROINT) * gyrocounter[i]/DEGREE;
-					gyroint[i] = gyrocounter[i]/DEGREE;
-					gyrocounter[i] %= DEGREE;
-
-					//gyroint[i] /= 20;
-
-
-					pry[i] += gyroint[i];
-
-				}
 
 
 				/*Get accel data
