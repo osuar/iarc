@@ -99,19 +99,27 @@ void motorSpeed(int * pry,
 	for(i=0;i<3;i++){
 		prybuffer[i] = pry[i];
 	}
+	for(i=0;i<2;i++){
+		if(prybuffer[i] > 200){
+			prybuffer[i] = 200;
+			}
+		else if(prybuffer[i] < -200){
+			prybuffer[i] = -200;
+		}
+	}
 	for(i = 0; i < 4; i ++){
 		motorSpeeds[i] = MOTORREG;
 		//Joystick Throttle
-		motorSpeeds[i] -= joystick[2] * ZJOYSENS;
+		motorSpeeds[i] += joystick[2] * ZJOYSENS + joystick[4] * THROTTLEMAIN;
 	}
 	//For x axis rotating on Z
-	motorSpeeds[0] += (-prybuffer[1] * pidValues[0]/pidValuesDen[0]) + (integration[0] * pidValues[1]) - (gyroint[1] * pidValues[2]/pidValuesDen[2]);
-	motorSpeeds[2] -= (-prybuffer[1] * pidValues[0]/pidValuesDen[0]) + (integration[0] * pidValues[1]) - (gyroint[1] * pidValues[2]/pidValuesDen[2]);
+	motorSpeeds[0] += (prybuffer[1] * pidValues[0]/pidValuesDen[0]) + (gyroint[1] * pidValues[2]/pidValuesDen[2]);
+	motorSpeeds[2] -= (prybuffer[1] * pidValues[0]/pidValuesDen[0]) + (gyroint[1] * pidValues[2]/pidValuesDen[2]);
 	//Joystick X axis tilt
 	motorSpeeds[0] -= joystick[1] * TILTJOYSENS;
 	motorSpeeds[2] += joystick[1] * TILTJOYSENS;
 	//Joystick Z axis rotate (slow down speed up both motors)
-	if(joystick[3] < 0){
+	if(joystick[3] > 0){
 		motorSpeeds[0] += joystick[3] * ROTJOYSENSDOWN;
 		motorSpeeds[2] += joystick[3] * ROTJOYSENSDOWN;
 	}
@@ -121,13 +129,13 @@ void motorSpeed(int * pry,
 	}
 	
 	//For y axis rotating on Z
-	motorSpeeds[1] += (prybuffer[0] * pidValues[0]/pidValuesDen[0]) + (integration[1] * pidValues[1]) + (gyroint[0] * pidValues[2]/pidValuesDen[2]);
-	motorSpeeds[3] -= (prybuffer[0] * pidValues[0]/pidValuesDen[0]) + (integration[1] * pidValues[1]) + (gyroint[0] * pidValues[2]/pidValuesDen[2]);
+	motorSpeeds[1] += (prybuffer[0] * pidValues[0]/pidValuesDen[0]) + (gyroint[0] * pidValues[2]/pidValuesDen[2]);
+	motorSpeeds[3] -= (prybuffer[0] * pidValues[0]/pidValuesDen[0]) + (gyroint[0] * pidValues[2]/pidValuesDen[2]);
 	//Joystick Y axis tilt
 	motorSpeeds[1] -= joystick[0] * TILTJOYSENS;
 	motorSpeeds[3] += joystick[0] * TILTJOYSENS;
 	//Joystick Z axis rotate (slow down speed up both motors)
-	if(joystick[3] > 0){
+	if(joystick[3] < 0){
 		motorSpeeds[1] -= joystick[3] * ROTJOYSENSDOWN;
 		motorSpeeds[3] -= joystick[3] * ROTJOYSENSDOWN;
 	}
@@ -136,9 +144,5 @@ void motorSpeed(int * pry,
 		motorSpeeds[3] -= joystick[3] * ROTJOYSENSUP;
 	}
 
-	motorSpeeds[1] += gyroint[2] * pidValues[1]/pidValuesDen[1];
-	motorSpeeds[3] += gyroint[2] * pidValues[1]/pidValuesDen[1];
-	
-	motorSpeeds[0] -= gyroint[2] * pidValues[1]/pidValuesDen[1];
-	motorSpeeds[2] -= gyroint[2] * pidValues[1]/pidValuesDen[1];
+
 }

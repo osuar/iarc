@@ -9,16 +9,17 @@
 
 #define DEGREE 40
 
-#define AWEIGHT 1
-#define GWEIGHT 9
+#define AWEIGHT 2
+#define GWEIGHT 8
 
 #define ROTJOYSENSDOWN 2
-#define ROTJOYSENSUP 2
-#define ZJOYSENS -2
+#define ROTJOYSENSUP 1
+#define ZJOYSENS 1
+#define THROTTLEMAIN 4
 #define TILTJOYSENS 2
-#define THROTTLEJOYDIF 6
+#define THROTTLEJOYDIF 5
 #define YAWJOYDIF 3
-#define MOTORREG 2950
+#define MOTORREG 2900
 
 //Rate which gyro will be read at
 #define RATE 200

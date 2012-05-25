@@ -5,7 +5,7 @@
 
 
 void adxl345Init(TWI_Master_t *title){
-	uint8_t accelsetupbuffer1[3] = {0x2C, 0b00001010, 0x08};
+	uint8_t accelsetupbuffer1[3] = {0x2C, 0b00001000, 0x08};
 	uint8_t accelsetupbuffer2[3] = {0x31, 0x00};
 
 	while(title->status != TWIM_STATUS_READY);
