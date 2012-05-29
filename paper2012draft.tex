@@ -1,5 +1,10 @@
 \documentclass[12pt,letterpaper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{palatino}
+\usepackage{microtype}
 \usepackage{graphicx}
+\usepackage[hang,bf,small]{caption}
 
 \begin{document}
 
@@ -7,25 +12,29 @@
     \vspace*{4cm}
     \begin{center}
     {\huge
-        OSURC Aerial team\\[1cm]
+        OSURC Autonomous Aerial Robotics Team\\[1cm]
     }
     {\large
-	IARC 2012 Paper\\
+	IARC 2012\\
     }
 
     \end{center}
     \vfill
 \end{titlepage}
+
+
 \section{Abstract}
-The Oregon State University Aerial Robotics Team has the goal to develop
-an indoor autonomous flight platform to compete in the International Aerial
-Robotics Competition. Our team is comprised of undergraduate students in the
-Mechanical, Industrial, and Manufacturing Engineering and Electrical Engineering
-and Computer Science departments. Over the past year we have developed a quad
-rotor flight platform along with a Robot Operating System (ROS) base station
-interface in order to navigate indoor environments. A robotic hand is also
-being developed in order to handle manipulating the environment (picking up the
-flash drive).
+
+The Oregon State University Autonomous Aerial Robotics Team has developed an
+indoor autonomous quadrotor with custom hardware and software to compete in the
+International Aerial Robotics Competition (IARC). Onboard, an ATXmega128a3
+microcontroller runs a 200 Hz PD angular position controller to maintain stable
+flight. The quadrotor is capable of sending live video, LIDAR scans, and
+altitude measurements to an offboard Robot Operating System (ROS) navigation
+system that processes the sensory information and passes navigational commands
+back to the quadrotor. The quadrotor possesses a passively compliant robotic
+hand capable of grasping objects of varying shapes and sizes.
+
 
 \section{Introduction}
 	The Oregon State University strategy for indoor automous flight involves
