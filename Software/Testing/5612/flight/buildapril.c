@@ -10,6 +10,7 @@
 
 /*Xbee Wireless Communication Module, initialized later*/
 USART_data_t xbee;
+USART_data_t atmega328;
 
 /*Two wire interface module for Inertial Measurement Unit*/
 TWI_Master_t imu;
@@ -40,6 +41,7 @@ int main(void){
 	int pidValues[3] = {14,0,28};
 	int pidValuesDen[3] = {16,1,1};
 
+	char *IRdata;
 	/*counting var, for for loops*/
 	int i;
 
@@ -115,7 +117,8 @@ int main(void){
 	/*Set Xbee Uart transmit pin 3 to output*/
 	PORTE.DIR = 0x08;
 	/*Initialize USARTE0 as the module used by the Xbee*/
-	uartInitiate(&xbee, &USARTE0);
+	uartInitiate(&xbee, &USARTE0, xbeeBAUD);
+	uartInitiate(&atmega328, &USARTE1, atmega328BAUD);	
 
 	/*Initialize imu to use Two wire interface on portC*/
 	twiInitiate(&imu, &TWIC);
@@ -247,7 +250,11 @@ int main(void){
 					lostsignalcnt ++;
 
 					getaccel(accelcache, &imu, &accelstartbyte);
-
+					
+					sendchar(&atmega328, 'r');	//requrdt IR data
+					if(getchar(&atmega328 == 'a'))
+						IRdata = getstring(&atmega328);										
+	
 					for(i = 0; i < 3; i ++){
 						accelcache[i] -= accelnorm[i];
 					}

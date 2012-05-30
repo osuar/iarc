@@ -22,6 +22,8 @@
 
 #define BAUDRATE 200000
 #define TWI_BAUDSETTING TWI_BAUD(CPU_SPEED, BAUDRATE)
+#define xbeeBAUD 38400
+#define atmega328BAUD 9600
 
 #define GYROINT 0
 #define ACCELINT 0
@@ -42,11 +44,13 @@ void sendchar( USART_data_t * uart, char buffer);
 
 void sendstring( USART_data_t * uart, char *buffer);
 
+char getchar(USART_data_t * uart);
+
 void CCPWrite( volatile uint8_t * address, uint8_t value );
 
 void twiInitiate(TWI_Master_t * title,TWI_t * interface);
 
-void uartInitiate(USART_data_t * title,USART_t * interface);
+void uartInitiate(USART_data_t * title,USART_t * interface, int BAUD);
 
 void motorSpeed(int * pry,
 		int * integration, 

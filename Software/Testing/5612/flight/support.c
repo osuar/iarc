@@ -26,7 +26,23 @@ void sendstring(USART_data_t * uart, char *buffer){
 	}
 }
 
+char getchar(USART_data_t * uart)
+{
+	while(!USART_RXBufferData_Available(uart));
+	return (USART_RXBuffer_GetByte(uart));
+}
 
+*char getstring(USART_data_t * uart)
+{
+	char string [50];
+	int idx = 0;
+	do{
+		string[idx] = getchar(uart);
+		idx++;
+	}while(!character);
+
+	return string; 
+}
 
 void CCPWrite( volatile uint8_t * address, uint8_t value )
 {
@@ -76,11 +92,13 @@ void twiInitiate(TWI_Master_t *title,TWI_t *interface){
 
 
 /*USART Initiate*/
-void uartInitiate(USART_data_t * title,USART_t * interface){
+void uartInitiate(USART_data_t * title,USART_t * interface, BUAD){
 	USART_InterruptDriver_Initialize(title, interface, USART_DREINTLVL_LO_gc);
 	USART_Format_Set(title->usart, USART_CHSIZE_8BIT_gc, USART_PMODE_DISABLED_gc, false);
 	USART_RxdInterruptLevel_Set(title->usart, USART_RXCINTLVL_LO_gc);
-	USART_Baudrate_Set(interface, 22 , -2);
+	if(BAUD == 38400)	USART_Baudrate_Set(interface, 22, -2);
+	else if(BUAD == 9600)	USART_Baudrate_Set(interface, 12, 0);
+	else USART_Baudrate_Set(interface, 12, 0);
 	title->usart->CTRLB |= 0x04;
 	USART_Rx_Enable(title->usart);
 	USART_Tx_Enable(title->usart);
