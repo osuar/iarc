@@ -1,0 +1,184 @@
+\documentclass[12pt,letterpaper]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage{palatino}
+\usepackage{microtype}
+\usepackage{graphicx}
+\usepackage[hang,bf,small]{caption}
+
+\begin{document}
+
+\begin{titlepage}
+    \vspace*{4cm}
+    \begin{center}
+    {\huge
+        OSURC Autonomous Aerial Robotics Team\\[1cm]
+    }
+    {\large
+	IARC 2012\\
+    }
+
+    \end{center}
+    \vfill
+\end{titlepage}
+
+
+\section{Abstract}
+
+The Oregon State University Autonomous Aerial Robotics Team has developed an
+indoor autonomous quadrotor with custom hardware and software to compete in the
+International Aerial Robotics Competition (IARC). Onboard, an ATXmega128a3
+microcontroller runs a 200 Hz PD angular position controller to maintain stable
+flight. The quadrotor is capable of sending live video, LIDAR scans, and
+altitude measurements to an offboard Robot Operating System (ROS) navigation
+system that processes the sensory information and passes navigational commands
+back to the quadrotor. The quadrotor possesses a passively compliant robotic
+hand capable of grasping objects of varying shapes and sizes.
+
+
+\section{Introduction}
+	The Oregon State University strategy for indoor automous flight involves
+specific functional goals for each part of the system. Flight stability is
+handled by the flight platform, however, all navigational data gathered from
+distance sensors and cameras mounted on the flight platform is transmitted to
+the base station for processing. The base station then transmits navigational
+commands to the flight platform.
+	Stabilization sensory is handled using a three axis gyroscope, 
+accellerometer and magnetometer. Navigational data comes from a number of
+distance sensors mounted on servos. This solution was chosen because of the
+low electrical and computing power required to process distance sensor data.
+A seperate wireless camera is also implemented to provide object recognition
+through the OpenCV libraries.
+
+\section{Electrical}
+The electrical setup for our quad rotor runs primarily off of a 3 cell
+lithium polymer battery. The ~12V from they battery is used to power the motors
+and motor controllers on the flight platform. This supply is also regulated down
+to 5V to power an Atmel Xmega microcontroller used as the central intelligence
+on the flight platform, an xbee radio for wireless communication, and 
+addionally to power the various distance and inertial sensors. A wireless camera
+is powered by a seperate 9V source.
+
+% \section{Flight Control}
+% The on board flight control system was developed to provide basic
+% stability for the flight platform. It does not have contingencies to prevent
+% drift. Integration of gyroscope samples is used to create an estimate of the
+% orientation of the flight platform. This combined with the raw data from the
+% gyroscopes is as input to a position differential (PD) controller. To prevent
+% the gyroscope positional estimates from drifting they are averaged with 
+% magnetometer and accelerometer samples.
+
+\section{Aerial stabilization and flight control}
+
+\subsection{Orientation kinematics}
+
+An accurate measurement of the aerial vehicle's orientation is key to
+autonomous stabilization. The orientation can be represented with a direction
+cosine matrix (DCM), which is a 3x3 matrix containing the cosines between each
+of the 9 possible pairs of axes of two separate Cartesian coordinate systems.
+
+In the context of inertial measurement units in robotics applications, a 3D
+vector could be represented in either the global (earth) or the body (local)
+frames of reference. For example, the location of an end effector may be
+represented as $<1, 0, 0>$ in the body frame but have different and changing
+$x$, $y$, and $z$ components in the global frame, and vice versa.
+
+If the controller loop frequency is high enough (on the order of 100 Hz), an
+axis of the DCM, its rotational vector, and its linear velocity are
+approximately orthogonal to each other. Thus, the magnitude of the angular
+velocity of a unit vector approximately equals its linear velocity, which means
+that the DCM can be calculated by integrating the gyroscope readings.
+
+Unfortunately, since the gyroscope only measures changes in the orientation,
+the DCM will drift over time. A 3-axis accelerometer can be used to correct the
+roll and pitch drift, which will keep the vehicle upright.
+
+In order to achieve this, we wish to keep the global Z vector codirectional
+with the negative gravity vector. That is, the cross product of the two vectors
+should equal zero, and we can use whatever the cross product actually is as our
+correctional rotation vector. It is important to keep in mind, however, that
+since the accelerometer reports acceleration in the body frame of reference, we
+must express Z in the same frame of reference as the acceleration vector.
+
+This body frame Z vector is simply found by taking the third row of the
+transpose of the DCM. We cross multiply Z with the gravity vector, add the
+resulting correction vector to the angular displacement vector, and take a
+weighted average.
+
+Small imperfections in the mounting of the accelerometer can be offset by a
+rotation matrix.
+
+
+\subsection{PID control}
+
+Some systems can be controlled with a simple P controller, where a given offset
+is translated directly to some actuator output. Other systems, like the flight
+orientation control of micro aerial vehicles (MAVs), may require a damping term
+on the position to prevent a divergent oscillation of the vehicle's angular
+position.
+
+
+\subsection{Cascading PID controllers}
+
+The D controller in a simple angular position PD controller can hinder the
+responsiveness of the MAV, which is crucial to stability. A better alternative
+is an angular position P controller that feeds a desired velocity to an angular
+velocity PD controller.
+
+At first thought, it might seem that a position P/velocity PD controller is no
+different than a position PD controller, since both the position D and the
+velocity P are based on velocity measurements. However, the two controllers do
+different things with the velocity measurements.
+
+The position D controller has a damping effect on motion in that it always
+resists a change in position. This means that if the MAV experiences a
+perturbation away from some desired position, the D controller will help resist
+the motion, as desired. However, as the MAV tries to recover from this error
+state, the D controller blindly hinders the movement back towards the desired
+position, which is not at all optimal.
+
+The velocity P controller, on the other hand, pushes the velocity to whatever
+it should be, whether that means slowing it down or speeding it up. The
+velocity D controller ensures that the velocity change does not happen too
+abruptly, helping reduce the chance of overshoot. The controller is able to do
+this by keeping track of a desired velocity in addition to the current
+velocity, which provides a context upon which the controller can ``decide''
+whether it should help a positional movement or hinder it, instead of blindly
+hindering all movement as is the case with a position D controller.
+
+This means that the P/PD controller as a whole can take a desired position
+input and accelerate the body towards and maintain a target angular velocity
+until the current position nears the target position. Only then will the
+controller actively slow down the movement. This makes for a controller that
+can respond much more quickly while maintaining stability.
+
+
+\section{Flash Drive Pickup}
+The IARC competition requires the use of a grasping mechanism for one of the 
+primary objectives.  The chosen design for the grasping mechanism will make use 
+of an under-actuated, passively compliant four-fingered hand.  Each of the four 
+fingers will contain two flexure joints, rather than rotational bearing joints. 
+A fully actuated hand would require eight actuators; this under-actuated design 
+will require only one.  A single actuator will control all joints through the 
+use of a pulley system, allowing each finger link to actuate until it comes into
+ contact with an object.  All tendon cables will see the same force from the 
+actuator.  Not only does this design greatly reduce cost, but it saves 
+weight--an essential benefit for an aerial vehicle.  In addition, the design all
+ows the hand to automatically adapt to the shape of any object, without the need
+ for special positioning and calculated movements.  
+
+\section{Chassis}
+The new chassis design will make use of lighter weight carbon fiber tubing.  The
+ current design consists of 4 motors mounted on arms that mount to a central 
+chassis.  The new design will consist of only two solid arms that mount to one 
+another, each connecting a pair of motors.  This will remove bending moments 
+resulting from motor forces from the central chassis, allowing for material 
+reduction and weight savings.  The current chassis also has a tendency to snag 
+the ground when the aerial vehicle lands with significant lateral speed.  This 
+causes the vehicle to tip over, sending its propellers into the ground and 
+causing damage.  The new chassis will have less skid resistance, while allowing 
+for vertical impact absorption.  Blade guards will also be added around the 
+perimeter of the propellers, to reduce the risk of propeller damage from 
+incidental contact with the environment.
+
+\end{document}
