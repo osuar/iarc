@@ -41,11 +41,14 @@ int main(void){
 	int pidValues24[3] = {6,20,24};
 	int pidValuesDen24[3] = {16,1,1};
 
+	char pidRotUp[3] = {0,0,15};
+	char pidRotDenUp[3] = {1,1,1};
+	
+	char pidRotDown[3] = {0,0,20};
+	char pidRotDenDown[3] = {1,1,1};
+
 	int throttledif = 0;
 	int throttleavr = 0;
-
-	int yawdif = 0;
-	int yawavr = 0;
 
 	/*counting var, for for loops*/
 	int i;
@@ -64,7 +67,7 @@ int main(void){
 	 */
 	int joyaxis[] = {0,0,0,0,0};
 	char joyin[] = {0,0,0,0,0};
-	int joytrim[] = {0,0,0,-43,0};
+	int joytrim[] = {0,0,0,-30,0};
 	int joydif[] = {0,0};
 	int joyavr[] = {0,0};
 	int motorSpeeds[4];
@@ -77,6 +80,10 @@ int main(void){
 	  imu*/
 	int gyrocache[3] = {0,0,0};
 	int accelcache[3] = {0,0,0};
+	int magcache[3] = {0,0,0};
+	int magfacing = 0;
+	int roterr = 0;
+	int target[] = {0,0,0};
 	int accelint[] = {0, 0, 0};
 	int gyroint[] = {0, 0, 0};
 	int gyrocounter[] = {0,0,0};
@@ -134,6 +141,7 @@ int main(void){
 	twiInitiate(&imu, &TWIC);
 	itg3200Init(&imu, RATE);
 	adxl345Init(&imu);
+	lsm303dlhInit(&imu);
 
 	/*Send string to indicate startup, python doesn't like return carriage
 	  (/r) character*/
@@ -222,11 +230,19 @@ int main(void){
 				sendstring(&xbee, xbeebuffer);
 			}
 			else if(input[8] == 8){
-				pidValues13[0] --;
-				sprintf(xbeebuffer, "P down %d\n", pidValues13[0]);
-				pidValues24[0] --;
+				
+				   pidValues13[0] --;
+				   sprintf(xbeebuffer, "P down %d\n", pidValues13[0]);
+				   pidValues24[0] --;
 				//sprintf(xbeebuffer, "P down %d\n", pidValues24[0]);
 				sendstring(&xbee, xbeebuffer);
+				 
+/*
+				getmag(magcache, &imu);
+				sprintf(xbeebuffer, "%4d %4d %4d\n", magcache[0], magcache[1], magcache[2]);
+				sendstring(&xbee, xbeebuffer);
+*/
+
 			}
 			else if(input[8] == 2){
 				sprintf(xbeebuffer, "descending\n");
@@ -238,10 +254,12 @@ int main(void){
 			if(state == running){
 				//sprintf(xbeebuffer, "%d %d\n", joyaxis[2], throttledif);
 				//sprintf(xbeebuffer, "%d %d %d \n", joyaxis[0], joyaxis[1], joyaxis[3]);
-				//sprintf(xbeebuffer, "%3d %3d\n", pry[0], pry[1]);
+				//sprintf(xbeebuffer, "%4d %4d %4d\n", pry[0], pry[1], pry[2]);
 				//sprintf(xbeebuffer, "%3d %3d\n", gyroint[2], joyaxis[3]);
 				//sprintf(xbeebuffer, "%4d %4d %4d %4d\n", motorSpeeds[0], motorSpeeds[1], motorSpeeds[2], motorSpeeds[3]);
 				//sprintf(xbeebuffer, "%4d %4d %4d\n", accelint[0], accelint[1], accelint[2]);
+				//sprintf(xbeebuffer, "%4d %4d %4d\n", magcache[0], magcache[1], magcache[2]);
+				//sprintf(xbeebuffer, "%4d\n", roterr);
 				//sendstring(&xbee, xbeebuffer);
 			}
 
@@ -260,6 +278,9 @@ int main(void){
 			case offset:
 					getgyro(gyrocache, &imu, &gyrostartbyte);
 					getaccel(accelcache, &imu, &accelstartbyte);
+					getmag(magcache, &imu);
+					target[2] = arctan2(magcache[0], magcache[1]);
+
 				for(i = 0; i < 3; i ++){
 					gyronorm[i] = gyrocache[i];
 					//accelnorm[i] = accelcache[i];
@@ -302,6 +323,12 @@ int main(void){
 					gyrocounter[i] %= DEGREE;
 
 					pry[i] += gyroint[i];
+					if(pry[i] > PI){
+						pry[i] = -PI + (pry[i] - PI);
+					}
+					else if(pry[i] < -PI){
+						pry[i] = PI + (pry[i] + PI);
+					}
 
 				}
 				
@@ -319,6 +346,22 @@ int main(void){
 					lostsignalcnt ++;
 
 					getaccel(accelcache, &imu, &accelstartbyte);
+					getmag(magcache, &imu);
+					magfacing = arctan2(magcache[0], magcache[1]);
+					pry[2] = ((9 * pry[2]) + (magfacing))/10;
+
+					if((4900 - abs(pry[2]) - abs(target[2])) < abs(pry[2] - target[2])){
+						if(target > 0){
+							roterr = 4900 - abs(target[2]) - abs(pry[2]);
+						}
+						else{
+							roterr = -(4900 - abs(target[2]) - abs(pry[2]));
+						}
+					}
+					else{
+						roterr = target[2] - pry[2];
+					}
+					
 
 					for(i = 0; i < 3; i ++){
 						accelcache[i] -= accelnorm[i];
@@ -385,6 +428,8 @@ int main(void){
 
 
 				motorSpeed(pry, integration ,gyroint, joyaxis, motorSpeeds, pidValues13, pidValues24, pidValuesDen13, pidValuesDen24);
+				yawCorrect(motorSpeeds, gyroint, &roterr,pidRotUp,pidRotDenUp,pidRotDown,pidRotDenDown);
+
 
 				if(lostsignalcnt > 10){
 					for(i = 0; i < 4; i ++){
@@ -407,7 +452,6 @@ int main(void){
 				PORTD.OUT ^= 0b00100000;	
 
 
-				pry[2] = 0;
 		}
 
 	}

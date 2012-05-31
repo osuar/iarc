@@ -11,6 +11,217 @@ Source code for flight control support functions
 #include "support.h"
 #include <stdio.h>
 
+//136 is 10 degrees, 4900 is full circle
+int arctan2(int opp, int adj){
+
+	//Catch divide by 0 just in case
+
+	if(adj == 0){
+		if(opp > 0){
+			return 1225;
+		}
+		else{
+			return -1225;
+		}
+	}
+
+	int ratio = (32 * opp)/adj;
+
+	if(abs(ratio) < 3){
+		if(adj > 0){
+			return 0;
+		}
+		else{
+			return 2450;
+		}
+	}
+
+	else if(abs(ratio) < 9){
+		if(adj > 0){
+			if(opp > 0){
+				return 137;
+			}
+			else{
+				return -137;
+			}
+		}
+		else{
+			if(opp > 0){
+				return 2313;
+			}
+			else{
+				return -2313;
+			}
+		}
+	}
+
+	else if(abs(ratio) < 15){
+		if(adj > 0){
+			if(opp > 0){
+				return 274;
+			}
+			else{
+				return -274;
+			}
+		}
+		else{
+			if(opp > 0){
+				return 2176;
+			}
+			else{
+				return -2176;
+			}
+		}
+	}
+
+	else if(abs(ratio) < 22){
+		if(adj > 0){
+			if(opp > 0){
+				return 411;
+			}
+			else{
+				return -411;
+			}
+		}
+		else{
+			if(opp > 0){
+				return 2039;
+			}
+			else{
+				return -2039;
+			}
+		}
+	}
+
+	else if(abs(ratio) < 32){
+		if(adj > 0){
+			if(opp > 0){
+				return 548;
+			}
+			else{
+				return -548;
+			}
+		}
+		else{
+			if(opp > 0){
+				return 1902;
+			}
+			else{
+				return -1902;
+			}
+		}
+	}
+
+
+	else if(abs(ratio) < 45){
+		if(adj > 0){
+			if(opp > 0){
+				return 685;
+			}
+			else{
+				return -685;
+			}
+		}
+		else{
+			if(opp > 0){
+				return 1765;
+			}
+			else{
+				return -1765;
+			}
+		}
+	}
+
+
+	else if(abs(ratio) < 69){
+		if(adj > 0){
+			if(opp > 0){
+				return 822;
+			}
+			else{
+				return -822;
+			}
+		}
+		else{
+			if(opp > 0){
+				return 1628;
+			}
+			else{
+				return -1628;
+			}
+		}
+	}
+
+
+	else if(abs(ratio) < 120){
+		if(adj > 0){
+			if(opp > 0){
+				return 959;
+			}
+			else{
+				return -959;
+			}
+		}
+		else{
+			if(opp > 0){
+				return 1493;
+			}
+			else{
+				return -1493;
+			}
+		}
+	}
+
+
+	else if(abs(ratio) < 365){
+		if(adj > 0){
+			if(opp > 0){
+				return 1096;
+			}
+			else{
+				return -1096;
+			}
+		}
+		else{
+			if(opp > 0){
+				return 1356;
+			}
+			else{
+				return -1356;
+			}
+		}
+	}
+
+	else{
+		if(adj > 0){
+			if(opp > 0){
+				return 1225;
+			}
+			else{
+				return -1225;
+			}
+		}
+		else{
+			if(opp > 0){
+				return 1225;
+			}
+			else{
+				return -1225;
+			}
+		}
+	}
+}
+
+
+
+
+
+
+
+
+
+			
+
 
 void sendchar(USART_data_t * uart, char buffer){
 	char bytetobuffer;
@@ -146,14 +357,57 @@ void motorSpeed(int * pry,
 		motorSpeeds[3] -= joystick[3] * ROTJOYSENSUP;
 	}
 
-
-	motorSpeeds[0] -= gyroint[2] * pidValues13[1]/pidValuesDen13[1];
-	motorSpeeds[2] -= gyroint[2] * pidValues13[1]/pidValuesDen13[1];
-	motorSpeeds[1] += gyroint[2] * pidValues24[1]/pidValuesDen24[1];
-	motorSpeeds[3] += gyroint[2] * pidValues24[1]/pidValuesDen24[1];
-
-
-
+	
 
 
 }
+
+void yawCorrect(int * motorSpeeds, int * gyroint, int * roterr, char * pidRotUp, char * pidRotDenUp, char * pidRotDown, char * pidRotDenDown){
+	int diferrup = gyroint[2] * pidRotUp[2]/pidRotDenUp[2];
+	int diferrdown = gyroint[2] * pidRotDown[2]/pidRotDown[2];
+
+	if(diferrup > 0){
+		motorSpeeds[0] -= diferrdown;
+		motorSpeeds[2] -= diferrdown;
+		motorSpeeds[1] += diferrup;
+		motorSpeeds[3] += diferrup;
+	}
+	else{
+		motorSpeeds[0] -= diferrup;
+		motorSpeeds[2] -= diferrup;
+		motorSpeeds[1] += diferrdown;
+		motorSpeeds[3] += diferrdown;
+	}
+
+
+	if(*roterr > 411){
+		*roterr = 411;
+	}
+	else if(*roterr < -411){
+		*roterr = -411;
+	}
+
+	int roterrup = *roterr * pidRotUp[0]/pidRotDenUp[0];	
+	int roterrdown = *roterr * pidRotDown[0]/pidRotDenDown[0];	
+
+	if(roterrup > 0){
+		motorSpeeds[0] += roterrup;
+		motorSpeeds[2] += roterrup;
+		motorSpeeds[1] -= roterrdown;
+		motorSpeeds[3] -= roterrdown;
+	}
+	else{
+		motorSpeeds[0] += roterrdown;
+		motorSpeeds[2] += roterrdown;
+		motorSpeeds[1] -= roterrup;
+		motorSpeeds[3] -= roterrup;
+	}
+}
+
+
+
+	
+
+
+
+

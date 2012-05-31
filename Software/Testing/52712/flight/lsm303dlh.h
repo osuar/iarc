@@ -2,4 +2,4 @@
 
 void lsm303dlhInit(TWI_Master_t *title);
 
-void getmag(TWI_Master_t *title, int * magcache);
+void getmag(int * magcache, TWI_Master_t *title);

@@ -8,6 +8,7 @@
 #define CPU_SPEED 2000000
 
 #define DEGREE 40
+#define PI 2450
 
 #define AWEIGHT 2
 #define GWEIGHT 8
@@ -43,6 +44,8 @@
 #define LITTLE_ENDIAN   1
 
 
+int arctan2(int opp, int adj);
+
 void sprintBinary(char * buffer, int * value);
 
 void sendchar( USART_data_t * uart, char buffer);
@@ -64,3 +67,6 @@ void motorSpeed(int * pry,
 		int * pidValues24,
 		int * pidValuesDen13,
 		int * pidValuesDen24);
+
+void yawCorrect(int * motorSpeeds, int * gyroint, int * roterr, char * pidRotUp, char * pidRotDenUp, char * pidRotDown, char * pidRotDenDown);
+
