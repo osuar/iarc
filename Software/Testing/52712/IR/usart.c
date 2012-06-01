@@ -14,7 +14,7 @@ void setup_usart(void)
 void sendchar(char input)
 {
         while(!(UCSR0A & 0x20));
-        UDR0 = input;
+	UDR0 = input;
 }
 
 void sendstring(char* string)
@@ -24,5 +24,13 @@ void sendstring(char* string)
         {
                 sendchar(string[i]);
         }
+}
+
+char mygetchar(void)
+{
+	if((UCSR0A & 0x80)){
+		return UDR0;
+	}
+	return 0;
 }
 

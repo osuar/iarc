@@ -8,6 +8,7 @@ MCU = atmega328p
 TARGET = $(PROJECT).elf
 CC = avr-gcc
 
+
 ## Options common to compile, link and assembly rules
 COMMON = -mmcu=$(MCU)
 
@@ -37,7 +38,7 @@ HEX_EEPROM_FLAGS += --change-section-lma .eeprom=0
 ## Include Directories
 INCLUDES = -I /usr/lib/avr/include/
 
-SOURCES = ir.c usart.c adc.c servo.c filter.c trig.c
+SOURCES = usart.c adc.c servo.c main.c
 ## Objects that must be built in order to link
 OBJECTS = $(SOURCES:.c=.o)
 
@@ -68,7 +69,7 @@ $(TARGET): $(OBJECTS)
 
 ## Program
 program: all
-	avrdude -c avrispv2 -p m328p -P usb -e -U flash:w:$(PROJECT).hex 
+	avrdude -F -c avrispv2 -p m328p -P usb -e -U flash:w:$(PROJECT).hex 
 	#avrdude -p m328p -c buspirate -P /dev/ttyUSB0 -e -U flash:w:$(PROJECT).hex	
 ## Clean target
 .PHONY: clean

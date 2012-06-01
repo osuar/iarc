@@ -1,7 +1,6 @@
 #include <avr/io.h>
 #include "avr_compiler.h"
 #include "adc.h"
-
 void setup_adc(void)
 
 {
