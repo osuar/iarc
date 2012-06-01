@@ -1,76 +1,138 @@
 \documentclass[12pt,letterpaper]{article}
 \usepackage[margin=1in]{geometry}
+\usepackage{fancyhdr}
 \usepackage[utf8]{inputenc}
 \usepackage{palatino}
 \usepackage{microtype}
 \usepackage{graphicx}
-\usepackage[hang,bf,small]{caption}
+\usepackage{lastpage}
+\usepackage[hang,small]{caption}
+
+\renewcommand{\headrulewidth}{0pt}
+\fancyfoot{}
+\fancyfoot[C]{\sffamily Page \thepage\ of \pageref{LastPage}}
+\pagestyle{fancy}
+
+\usepackage{titlesec}
+\titleformat{\section}{\Large\bfseries\MakeUppercase}{\thesection}{}{}
+\titleformat{\subsection}{\large\bfseries}{\thesubsection}{}{}
+\titleformat{\subsubsection}{\bfseries\itshape}{\thesubsubsection}{}{}
+
+\setlength{\parindent}{0cm}
+\setlength{\parskip}{1em}
+
+
 
 \begin{document}
 
-\begin{titlepage}
-    \vspace*{4cm}
-    \begin{center}
-    {\huge
-        OSURC Autonomous Aerial Robotics Team\\[1cm]
-    }
-    {\large
-	IARC 2012\\
-    }
+\begin{center}
+{\huge
+    OSURC Autonomous Aerial \\ Robotics Team\\[1cm]
+    % TODO: need a more on-topic title.
+}
+{
+Kyle Dillon \\
+Daniel Miller \\
+Tim Niedermeyer \\
+Ryan Skeele \\
+Michael Williamson \\
+Soo-Hyun Yoo \\ \vspace{0.5em}
 
-    \end{center}
-    \vfill
-\end{titlepage}
+\emph{Oregon State University}
+}
+
+\end{center}
+
+\section*{Abstract}
+
+The Oregon State University Autonomous Aerial Robotics Team has developed
+an indoor autonomous quadrotor with custom hardware and software to compete
+in the International Aerial Robotics Competition (IARC). Onboard, an
+ATXmega128a3 microcontroller runs a 200 Hz PD angular position controller
+to maintain stable flight. The quadrotor is capable of sending live video,
+LIDAR scans, and altitude measurements to an offboard Robot Operating
+System (ROS) navigation system that processes the sensory information and
+passes navigational commands back to the quadrotor. The quadrotor possesses
+a passively compliant robotic hand capable of grasping objects of varying
+shapes and sizes.
 
 
-\section{Abstract}
+\section*{Introduction}
 
-The Oregon State University Autonomous Aerial Robotics Team has developed an
-indoor autonomous quadrotor with custom hardware and software to compete in the
-International Aerial Robotics Competition (IARC). Onboard, an ATXmega128a3
-microcontroller runs a 200 Hz PD angular position controller to maintain stable
-flight. The quadrotor is capable of sending live video, LIDAR scans, and
-altitude measurements to an offboard Robot Operating System (ROS) navigation
-system that processes the sensory information and passes navigational commands
-back to the quadrotor. The quadrotor possesses a passively compliant robotic
-hand capable of grasping objects of varying shapes and sizes.
-
-
-\section{Introduction}
-	The Oregon State University strategy for indoor automous flight involves
+The Oregon State University strategy for indoor automous flight involves
 specific functional goals for each part of the system. Flight stability is
 handled by the flight platform, however, all navigational data gathered from
 distance sensors and cameras mounted on the flight platform is transmitted to
 the base station for processing. The base station then transmits navigational
 commands to the flight platform.
-	Stabilization sensory is handled using a three axis gyroscope, 
+
+Stabilization sensory is handled using a three axis gyroscope, 
 accellerometer and magnetometer. Navigational data comes from a number of
 distance sensors mounted on servos. This solution was chosen because of the
 low electrical and computing power required to process distance sensor data.
 A seperate wireless camera is also implemented to provide object recognition
 through the OpenCV libraries.
 
-\section{Electrical}
+
+\section*{Hardware}
+
+\subsection*{Chassis}
+
+The new chassis design will make use of lighter weight carbon fiber tubing.  The
+ current design consists of 4 motors mounted on arms that mount to a central
+chassis.  The new design will consist of only two solid arms that mount to one
+another, each connecting a pair of motors.  This will remove bending moments
+resulting from motor forces from the central chassis, allowing for material
+reduction and weight savings.  The current chassis also has a tendency to snag
+the ground when the aerial vehicle lands with significant lateral speed.  This
+causes the vehicle to tip over, sending its propellers into the ground and
+causing damage.  The new chassis will have less skid resistance, while allowing
+for vertical impact absorption.  Blade guards will also be added around the
+perimeter of the propellers, to reduce the risk of propeller damage from
+incidental contact with the environment.
+
+
+\subsection*{End Effector}
+
+The IARC competition requires the use of a grasping mechanism for one of the
+primary objectives.  The chosen design for the grasping mechanism will make use
+of an under-actuated, passively compliant four-fingered hand.  Each of the four
+fingers will contain two flexure joints, rather than rotational bearing joints.
+A fully actuated hand would require eight actuators; this under-actuated design
+will require only one.  A single actuator will control all joints through the
+use of a pulley system, allowing each finger link to actuate until it comes into
+ contact with an object.  All tendon cables will see the same force from the
+actuator.  Not only does this design greatly reduce cost, but it saves
+weight--an essential benefit for an aerial vehicle.  In addition, the design all
+ows the hand to automatically adapt to the shape of any object, without the need
+ for special positioning and calculated movements.
+
+
+\subsection*{Electronics}
+
 The electrical setup for our quad rotor runs primarily off of a 3 cell
 lithium polymer battery. The ~12V from they battery is used to power the motors
 and motor controllers on the flight platform. This supply is also regulated down
 to 5V to power an Atmel Xmega microcontroller used as the central intelligence
-on the flight platform, an xbee radio for wireless communication, and 
+on the flight platform, an xbee radio for wireless communication, and
 addionally to power the various distance and inertial sensors. A wireless camera
 is powered by a seperate 9V source.
 
-% \section{Flight Control}
+
+\section*{Software}
+
+\subsection*{Aerial stabilization and flight control}
+
+% \section*{Flight Control}
 % The on board flight control system was developed to provide basic
 % stability for the flight platform. It does not have contingencies to prevent
 % drift. Integration of gyroscope samples is used to create an estimate of the
 % orientation of the flight platform. This combined with the raw data from the
 % gyroscopes is as input to a position differential (PD) controller. To prevent
-% the gyroscope positional estimates from drifting they are averaged with 
+% the gyroscope positional estimates from drifting they are averaged with
 % magnetometer and accelerometer samples.
 
-\section{Aerial stabilization and flight control}
-
-\subsection{Orientation kinematics}
+\subsubsection*{Orientation kinematics}
 
 An accurate measurement of the aerial vehicle's orientation is key to
 autonomous stabilization. The orientation can be represented with a direction
@@ -109,7 +171,7 @@ Small imperfections in the mounting of the accelerometer can be offset by a
 rotation matrix.
 
 
-\subsection{PID control}
+\subsubsection*{PID control}
 
 Some systems can be controlled with a simple P controller, where a given offset
 is translated directly to some actuator output. Other systems, like the flight
@@ -118,7 +180,7 @@ on the position to prevent a divergent oscillation of the vehicle's angular
 position.
 
 
-\subsection{Cascading PID controllers}
+\subsubsection*{Cascading PID controllers}
 
 The D controller in a simple angular position PD controller can hinder the
 responsiveness of the MAV, which is crucial to stability. A better alternative
@@ -151,34 +213,5 @@ input and accelerate the body towards and maintain a target angular velocity
 until the current position nears the target position. Only then will the
 controller actively slow down the movement. This makes for a controller that
 can respond much more quickly while maintaining stability.
-
-
-\section{Flash Drive Pickup}
-The IARC competition requires the use of a grasping mechanism for one of the 
-primary objectives.  The chosen design for the grasping mechanism will make use 
-of an under-actuated, passively compliant four-fingered hand.  Each of the four 
-fingers will contain two flexure joints, rather than rotational bearing joints. 
-A fully actuated hand would require eight actuators; this under-actuated design 
-will require only one.  A single actuator will control all joints through the 
-use of a pulley system, allowing each finger link to actuate until it comes into
- contact with an object.  All tendon cables will see the same force from the 
-actuator.  Not only does this design greatly reduce cost, but it saves 
-weight--an essential benefit for an aerial vehicle.  In addition, the design all
-ows the hand to automatically adapt to the shape of any object, without the need
- for special positioning and calculated movements.  
-
-\section{Chassis}
-The new chassis design will make use of lighter weight carbon fiber tubing.  The
- current design consists of 4 motors mounted on arms that mount to a central 
-chassis.  The new design will consist of only two solid arms that mount to one 
-another, each connecting a pair of motors.  This will remove bending moments 
-resulting from motor forces from the central chassis, allowing for material 
-reduction and weight savings.  The current chassis also has a tendency to snag 
-the ground when the aerial vehicle lands with significant lateral speed.  This 
-causes the vehicle to tip over, sending its propellers into the ground and 
-causing damage.  The new chassis will have less skid resistance, while allowing 
-for vertical impact absorption.  Blade guards will also be added around the 
-perimeter of the propellers, to reduce the risk of propeller damage from 
-incidental contact with the environment.
 
 \end{document}
