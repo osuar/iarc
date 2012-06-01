@@ -7,16 +7,16 @@
 \usepackage{graphicx}
 \usepackage{lastpage}
 \usepackage[hang,small]{caption}
+\usepackage{titlesec}
 
 \renewcommand{\headrulewidth}{0pt}
 \fancyfoot{}
 \fancyfoot[C]{\sffamily Page \thepage\ of \pageref{LastPage}}
 \pagestyle{fancy}
 
-\usepackage{titlesec}
-\titleformat{\section}{\bfseries\MakeUppercase}{\thesection}{}{}
-\titleformat{\subsection}{\bfseries}{\thesubsection}{}{}
-\titleformat{\subsubsection}{\itshape}{\thesubsubsection}{}{}
+\titleformat{\section}{\bfseries\MakeUppercase}{\arabic{\thesection}}{1em}{}
+\titleformat{\subsection}{\bfseries}{\arabic{\thesection}.\arabic{\thesubsection}}{1em}{}
+\titleformat{\subsubsection}{\itshape}{\arabic{\thesection}.\arabic{\thesubsection}.\arabic{\thesubsubsection}}{1em}{}
 
 \setlength{\parindent}{0cm}
 \setlength{\parskip}{1em}
@@ -26,19 +26,16 @@
 \begin{document}
 
 \begin{center}
-{\huge
-    OSURC Autonomous Aerial \\ Robotics Team\\[1cm]
+{
+    \bfseries\huge
+    Oregon State University \\
+    Autonomous Aerial Robotics Team \\ [1cm]
     % TODO: need a more on-topic title.
 }
 {
-Kyle Dillon \\
-Daniel Miller \\
-Tim Niedermeyer \\
-Ryan Skeele \\
-Michael Williamson \\
-Soo-Hyun Yoo \\ \vspace{0.5em}
-
-\emph{Oregon State University}
+    \small
+    Kyle Dillon, Daniel Miller, Tim Niedermeyer, Ryan Skeele, Michael Williams, Soo-Hyun Yoo \\ \vspace{0.5em}
+    \emph{Oregon State University, Corvallis, OR 97330}
 }
 
 \end{center}
@@ -148,8 +145,8 @@ of the 9 possible pairs of axes of two separate Cartesian coordinate systems.
 In the context of inertial measurement units in robotics applications, a 3D
 vector could be represented in either the global (earth) or the body (local)
 frames of reference. For example, the location of an end effector may be
-represented as $<1, 0, 0>$ in the body frame but have different and changing
-$x$, $y$, and $z$ components in the global frame, and vice versa.
+represented as $\langle1, 0, 0\rangle$ in the body frame but have different and changing
+X, Y, and Z components in the global frame, and vice versa.
 
 If the controller loop frequency is high enough (on the order of 100 Hz), an
 axis of the DCM, its rotational vector, and its linear velocity are
