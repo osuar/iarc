@@ -12,8 +12,7 @@
 
 \renewcommand{\headrulewidth}{0pt}
 \fancyfoot{}
-\fancyfoot[C]{\sffamily Page \thepage\ of \pageref{LastPage}}
-\pagestyle{fancy}
+\fancyfoot[C]{\sffamily Page \thepage\ of \pageref{LastPage}} \pagestyle{fancy}
 
 \titleformat{\section}{\bfseries\MakeUppercase}{\arabic{\thesection}}{1em}{}
 \titleformat{\subsection}{\bfseries}{\arabic{\thesection}.\arabic{\thesubsection}}{1em}{}
@@ -192,8 +191,9 @@ those two sensors, an accurate DCM can be maintained.
 %rotation matrix.
 
 
-\begin{figure}[h!] \caption{Prototype Flight Platform Operating Outdoors}
-%\includegraphics[width=6in]{platform.png}
+\begin{figure}[h!] 
+\includegraphics[width=6in]{posterbackground_cropped.png}
+\caption{Prototype Flight Platform Operating Outdoors}
 \end{figure}
 
 
@@ -232,5 +232,27 @@ input and accelerate the body towards and maintain a target angular velocity
 until the current position nears the target position. Only then will the
 controller actively slow down the movement. This makes for a controller that
 can respond much more quickly while maintaining stability.
+
+\subsection*{Navigation}
+\subsubsection*{Navigation Hierarchy}
+	Our navigation hierarchy modularizes each part of our system to have a
+specific set of responsibilities with little overlap. The intelligence contained
+on the flight platform is solely responsible for maintaining a stable
+orientation. Additionally the flight platform forwards navigational data from
+distance sensors through xbee radios and images from a wireless camera using the
+camera's own self contained wireless transmission capabilities. Navigation data is processed on the base station, which is responsible
+for completing the mission. It sends commands back to the flight platform based
+on the navigational data it has received.
+
+\subsubsection*{Navigation Strategy}
+	In order to navigate indoor environments we implement an array of simple
+distance sensors, some mounted on pan or tilt mechanisms, to act as an
+improvised LIDAR system. This approach was chosen because of its accesibility,
+low power, and low bandwidth requirements.
+	Distance sensor data gathered on the flight platform is not processed
+there and instead forwarded to the base station. The base station operates
+using Robot Operating System, which processes both distance sensor data and
+images sent from the fligh platform to make navigational decisions. These
+decisions are then relayed back to the flight platform as movement commands.
 
 \end{document}
