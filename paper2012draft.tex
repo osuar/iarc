@@ -48,16 +48,22 @@
 The Oregon State University Autonomous Aerial Robotics Team has developed
 an indoor autonomous quadrotor with custom hardware and software to compete
 in the International Aerial Robotics Competition (IARC). Onboard, an
-ATXmega128a3 microcontroller runs a 200 Hz PD angular position controller
-to maintain stable flight. The quadrotor is capable of sending live video,
-LIDAR scans, and altitude measurements to an offboard Robot Operating
-System (ROS) navigation system that processes the sensory information and
-passes navigational commands back to the quadrotor. The quadrotor possesses
-a passively compliant robotic hand capable of grasping objects of varying
-shapes and sizes.
+ATXmega128a3 microcontroller runs a 200 Hz PD orientation controller
+. The quadrotor is capable of sending live video,
+LIDAR scans, and altitude measurements to the base station
+which passes navigational commands back to the quadrotor. 
+The quadrotor possesses a passively compliant robotic hand that will be used
+to pick up the USB flash drive in competition.
 
 \end{minipage}
 \end{center}
+
+\begin{figure}[h!]
+\caption{Oregon State Aerial Robotics Team 2012}
+%\includegraphics[width=6in]{teampic.png}
+\end{figure}
+
+
 
 
 \section*{Introduction}
@@ -71,16 +77,11 @@ commands to the flight platform.
 
 Stabilization sensory is handled using a three axis gyroscope, 
 accellerometer and magnetometer. Navigational data comes from a number of
-distance sensors mounted on servos. This solution was chosen because of the
+distance sensors mounted on servos that act as an improvised LIDAR. 
+This solution was chosen because of the
 low electrical and computing power required to process distance sensor data.
-A seperate wireless camera is also implemented to provide object recognition
-through the OpenCV libraries.
-
-
-\begin{figure}[h!]
-\caption{Oregon State Aerial Robotics Team 2012}
-%\includegraphics[width=6in]{teampic.png}
-\end{figure}
+A seperate wireless camera is implemented to provide object recognition
+using the OpenCV libraries.
 
 
 \section*{Hardware}
@@ -129,8 +130,8 @@ lithium polymer battery. The ~12V from they battery is used to power the motors
 and motor controllers on the flight platform. This supply is also regulated down
 to 5V to power an Atmel Xmega microcontroller used as the central intelligence
 on the flight platform, an xbee radio for wireless communication, and
-addionally to power the various distance and inertial sensors. A wireless camera
-is powered by a seperate 9V source.
+addionally to power the various distance and inertial sensors. 
+The wireless camera is powered by a seperate 9V source.
 
 
 \section*{Software}
@@ -165,33 +166,26 @@ approximately orthogonal to each other. Thus, the magnitude of the angular
 velocity of a unit vector approximately equals its linear velocity, which means
 that the DCM can be calculated by integrating the gyroscope readings.
 
-Unfortunately, since the gyroscope only measures changes in the orientation,
-the DCM will drift over time. A 3-axis accelerometer can be used to correct the
-roll and pitch drift, which will keep the vehicle upright.
+Unfortunately, since the gyroscope only measures the change in the orientation,
+the DCM will drift over time. A 3-axis accelerometer can be 
+used to correct the roll and pitch drift. A 3-axis magnetometer to correct for 
+yaw drift. Between those two sensors, an accurate DCM can be maintained.
 
-In order to achieve this, we wish to keep the global Z vector codirectional
-with the negative gravity vector. That is, the cross product of the two vectors
-should equal zero, and we can use whatever the cross product actually is as our
-correctional rotation vector. It is important to keep in mind, however, that
-since the accelerometer reports acceleration in the body frame of reference, we
-must express Z in the same frame of reference as the acceleration vector.
+%In order to achieve this, we wish to keep the calculated 
+%global Z vector codirectional
+%with the negative gravity vector. That is, the cross product of the two vectors
+%should equal zero, and we can use whatever the cross product actually is as our
+%correctional rotation vector. It is important to keep in mind, however, that
+%since the accelerometer reports acceleration in the body frame of reference, we
+%must express Z in the same frame of reference as the acceleration vector.
 
-This body frame Z vector is simply found by taking the third row of the
-transpose of the DCM. We cross multiply Z with the gravity vector, add the
-resulting correction vector to the angular displacement vector, and take a
-weighted average.
+%This body frame Z vector is simply found by taking the third row of the
+%transpose of the DCM. We cross multiply Z with the gravity vector, add the
+%resulting correction vector to the angular displacement vector, and take a
+%weighted average.
 
-Small imperfections in the mounting of the accelerometer can be offset by a
-rotation matrix.
-
-
-\subsubsection*{PID control}
-
-Some systems can be controlled with a simple P controller, where a given offset
-is translated directly to some actuator output. Other systems, like the flight
-orientation control of micro aerial vehicles (MAVs), may require a damping term
-on the position to prevent a divergent oscillation of the vehicle's angular
-position.
+%Small imperfections in the mounting of the accelerometer can be offset by a
+%rotation matrix.
 
 
 \begin{figure}[h!]
