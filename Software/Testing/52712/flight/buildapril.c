@@ -12,6 +12,9 @@
 /*Xbee Wireless Communication Module, initialized later*/
 USART_data_t xbee;
 
+/*atmega328p */
+USART_data_t atmega328p;
+
 /*Two wire interface module for Inertial Measurement Unit*/
 TWI_Master_t imu;
 
@@ -20,8 +23,16 @@ enum states{running, stopped, offset} state = stopped;
 
 /*Flag for complete Xbee packet receival*/
 volatile char readdata = 0;
+
+/*Flag for the complete IR data packet receival*/
+volatile char IRDataAvailable = 0;
+
 /*Packet buffer for incoming data from Xbee*/
 volatile char input[11] = {0,0,0,0,0,0,0,0,0,0,0};
+
+/*Packet buffer for incoming IR data from atmeg328p {startByte, highData1, lowData1, endByte} */
+volatile char irdata[4] = {0,0,0,0}
+
 /*Counter for packet position*/
 volatile char xbeecounter = 0;
 
@@ -129,6 +140,9 @@ int main(void){
 	PORTE.DIR = 0x08;
 	/*Initialize USARTE0 as the module used by the Xbee*/
 	uartInitiate(&xbee, &USARTE0);
+	
+	/*Initialize USARTE1 as the module used by atmega328p */
+	uartInitiate(&atmega328p, &USARTE1);
 
 	/*Initialize imu to use Two wire interface on portC*/
 	twiInitiate(&imu, &TWIC);
@@ -245,6 +259,12 @@ int main(void){
 				//sendstring(&xbee, xbeebuffer);
 			}
 
+		}
+
+		if(IRDataAvailable)
+		{
+			IRDataAvailable = 0;
+			
 		}
 
 		switch(state){
@@ -413,7 +433,12 @@ int main(void){
 	}
 }
 
+/*IR sensor read interrupt*/
+ISR(USARTE1_RXC_vect){
+USART_RXComplete(&atmega328p);
+irdata[irdatacounter] = USART_RXBuffer_GetByte(&atmega328p);
 
+}
 
 	/*Xbee read interrupt*/
 ISR(USARTE0_RXC_vect){
