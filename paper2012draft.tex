@@ -65,13 +65,6 @@ pick up the USB flash drive in competition.
 \end{center}
 
 
-% TODO: Move to the end of the paper?
-\begin{figure}[h!]
-    % \includegraphics[width=6in]{teampic.png}
-    \caption{Oregon State Aerial Robotics Team 2012}
-\end{figure}
-
-
 \section*{Introduction}
 
 Our strategy for indoor automous flight involves specific functional goals for
@@ -93,7 +86,8 @@ recognition using the OpenCV libraries.
 
 \subsection*{Chassis}
 
-Ultimately, we aim to construct a chassis that is lightweight, durable, modular, and safe.
+Ultimately, we aim to construct a chassis that is lightweight, durable,
+modular, and safe.
 
 For initial tests, however, a simple ``X'' configuration quadrotor was
 assembled from laser-cut plywood. The symmetric construction of the ``X''
@@ -123,19 +117,21 @@ without the need for a separate control system.
 
 \subsection*{Electronics}
 
-\begin{figure}[h!]
-    \includegraphics[width=6in]{controlhardware.png}
-    \caption{Control Hardware Block Diagram}
-    \label{fig:el_blockdia}
-\end{figure}
-
 A single 3-cell lithium polymer battery powers the motors and motor controllers
 on the quadrotor. The battery is also regulated down to 5 volts to power an
 Atmel Xmega microcontroller, a 2.4 GHz XBee radio, and various distance
 and inertial sensors. The wireless camera is powered by a seperate 9 volt
 source.
 
-The organization of the electrical system is illustrated in Figure~\ref{fig:el_blockdia}.
+The organization of the electrical system is illustrated in
+Figure~\ref{fig:el_blockdia}.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=6in]{controlhardware.png}
+    \caption{Control Hardware Block Diagram}
+    \label{fig:el_blockdia}
+\end{figure}
 
 
 \section*{Software}
@@ -193,12 +189,6 @@ for yaw drift. With these corrections, an accurate DCM can be maintained.
 
 \subsubsection*{Cascading PID Controllers}
 
-\begin{figure}[h!]
-\includegraphics[width=6in]{posterbackground_cropped.png}
-\caption{Prototype Flight Platform Operating Outdoors}
-\label{fig:flight}
-\end{figure}
-
 The D controller in a simple angular position PD controller can hinder the
 responsiveness of the quadrotor, which is crucial to stability. A better
 alternative is an angular position P controller that feeds a desired velocity
@@ -230,7 +220,15 @@ This means that the P/PD controller as a whole can take a desired position
 input and accelerate the body towards and maintain a target angular velocity
 until the current position nears the target position. Only then will the
 controller actively slow down the movement. This makes for a controller that
-can respond much more quickly while maintaining stability.
+can respond much more quickly while maintaining stability, making flight
+possible (Figure~\ref{fig:flight}).
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=6in]{posterbackground_cropped.png}
+    \caption{Prototype Flight Platform Operating Outdoors}
+    \label{fig:flight}
+\end{figure}
 
 
 \subsection*{Navigation}
