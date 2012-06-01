@@ -372,12 +372,13 @@ int main(void){
 				if(paceCounter == (RATE / 20)){
 					paceCounter = 0;
 					lostsignalcnt ++;
+				
+					sendbyte(&atmega328p, 'r');	//ask for IR data					
 
 					getaccel(accelcache, &imu, &accelstartbyte);
 					getmag(magcache, &imu);
 					magfacing = arctan2(magcache[0], magcache[1]);
-					pry[2] = ((9 * pry[2]) + (magfacing))/10;
-
+					
 					if((4900 - abs(pry[2]) - abs(target[2])) < abs(pry[2] - target[2])){
 						if(target > 0){
 							roterr = 4900 - abs(target[2]) - abs(pry[2]);

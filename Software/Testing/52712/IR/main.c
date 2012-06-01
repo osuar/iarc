@@ -35,15 +35,16 @@ int main(void)
 			sendchar('a');
 			sendchar((char) (adcData >> 8));
 			sendchar((char) adcData);
+			sendchar('z');
 		}
 
 		if(TIFR2 & 0x01)	//if timer has elapsed
 		{
 			TIFR2 &= 0b1111110;
 			
-			adcDataPrev = adcData;
+//			adcDataPrev = adcData;
 			adcData = readadc(ADCCHANNEL);
-			adcDataDeriv = adcData - adcDataPrev;
+//			adcDataDeriv = adcData - adcDataPrev;
 //			sprintf(buffer, "ADC Data: %d", adcData);
 //			sendstring(buffer);	
 //			sendchar('\r');
