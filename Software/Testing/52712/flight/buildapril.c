@@ -33,6 +33,9 @@ volatile char input[11] = {0,0,0,0,0,0,0,0,0,0,0};
 /*Packet buffer for incoming IR data from atmeg328p {startByte, highData1, lowData1, endByte} */
 volatile char irdata[4] = {0,0,0,0}
 
+/*Counter for atmega counter position.*/
+volatile char irdatacounter = 0;
+
 /*Counter for packet position*/
 volatile char xbeecounter = 0;
 
@@ -163,7 +166,16 @@ int main(void){
 	sendstring(&xbee, xbeebuffer);
 
 	/*Start of flight control state machine loop*/
-	while(1){
+	while(1){	
+		
+		/*Check for new packet from atmega328p*/
+		if(IRDataAvailable)
+		{
+			sprintf(xbeebuffer, "Altitude: %d\n", (irdata[1]*256) + irdata[2]);
+			sendstring(&xbee, xbeebuffer);
+
+		}
+
 		/*Check for new packet from xbee each time*/
 		if(readdata){
 			readdata = 0;
@@ -279,11 +291,7 @@ int main(void){
 
 		}
 
-		if(IRDataAvailable)
-		{
-			IRDataAvailable = 0;
-			
-		}
+		
 
 		switch(state){
 
@@ -482,7 +490,17 @@ ISR(USARTE1_RXC_vect){
 USART_RXComplete(&atmega328p);
 irdata[irdatacounter] = USART_RXBuffer_GetByte(&atmega328p);
 
-}
+	if((irdata[0] == 'a') && (irdatacounter == 0))
+	{
+		irdatacounter++;
+	}
+	else if((irdatacounter == 1) || (irdatacounter== 2))
+	{
+		irdatacounter++;
+	}
+	else if((irdata[3] == 'z') && (irdatacounter = 3){
+		IRDataAvailable = 1;
+	}
 
 	/*Xbee read interrupt*/
 ISR(USARTE0_RXC_vect){
@@ -530,6 +548,11 @@ ISR(USARTE0_RXC_vect){
 /*Usart module interrupt to inform data has been properly sent*/
 ISR(USARTE0_DRE_vect){
 	USART_DataRegEmpty(&xbee);
+}
+
+/*Usart module interrupt to inform data has been properly sent */
+ISR(USARTE1_DRE_vect){
+	USART_DataRegEmpty(&atmeg328p);
 }
 
 /*Inertial measurement unit interrupt support routine, could be implemented by polling*/
