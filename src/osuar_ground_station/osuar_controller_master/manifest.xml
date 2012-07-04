@@ -1,0 +1,16 @@
+<package>
+  <description brief="osuar_controller_master">
+
+     osuar_controller_master
+
+  </description>
+  <author>yoos</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/osuar_controller_master</url>
+
+  <depend stack="osuar_controllers"/>
+
+</package>
+
+
