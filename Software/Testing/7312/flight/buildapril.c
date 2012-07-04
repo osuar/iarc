@@ -36,7 +36,7 @@ int main(void){
 
 	char lostsignalcnt = 0;
 
-	int pry[] = {0,0,0};
+	int pry[] = {-5,0,0};
 
 	int paceCounter = 0;
 
@@ -106,6 +106,9 @@ int main(void){
 	/*Buffer for sending data through the xbee*/
 	char xbeebuffer[100];
 
+	/*Byte for status update sent in data packet*/
+	char stat;
+
 
 	CLK.CTRL = 0b00000011;
 	CLK.PSCTRL = 0b00010100;
@@ -159,6 +162,8 @@ int main(void){
 	sprintf(xbeebuffer, "starting\n");
 	sendstring(&xbee, xbeebuffer);
 
+	stat = 1;
+
 	/*Start of flight control state machine loop*/
 	while(1){
 		/*Check for new packet from xbee each time*/
@@ -199,8 +204,10 @@ int main(void){
 			if(input[8] == 4){
 				state = stopped;
 				//sprintf(xbeebuffer, "stopped %d\n", input[7]);
-				sprintf(xbeebuffer, "%4d %4d %4d %4d\n", joyaxis[0], joyaxis[1], joyaxis[2], joyaxis[3]);
-				sendstring(&xbee, xbeebuffer);
+				//sprintf(xbeebuffer, "%4d %4d %4d %4d\n", joyaxis[0], joyaxis[1], joyaxis[2], joyaxis[3]);
+				//sendstring(&xbee, xbeebuffer);
+				stat = 2;
+				PORTF.OUT ^= 1;
 			}
 			else if(input[8] == 0){
 				joytrim[0] += joyin[0];
@@ -209,11 +216,13 @@ int main(void){
 			}
 			else if(input[8] == 1){
 				state = running;
-				sprintf(xbeebuffer, "running %d\n", input[7]);
-				sendstring(&xbee, xbeebuffer);
+				//sprintf(xbeebuffer, "running %d\n", input[7]);
+				//sendstring(&xbee, xbeebuffer);
+				stat = 3;
 			}
 			else if(input[8] == 10){
 				state = offset;
+				stat = 4;
 			}
 			else if(input[8] == 5){
 				//motorup += 5;
@@ -221,9 +230,9 @@ int main(void){
 				//sprintf(xbeebuffer, "D up %d\n", pidRot[2]);
 				pidValues13[2] ++;
 				pidValues24[2] ++;
-				sprintf(xbeebuffer, "D up %d\n", pidValues24[2]);
+				//sprintf(xbeebuffer, "D up %d\n", pidValues24[2]);
 
-				sendstring(&xbee, xbeebuffer);
+				//sendstring(&xbee, xbeebuffer);
 
 			}
 			else if(input[8] == 6){
@@ -231,8 +240,8 @@ int main(void){
 				//sprintf(xbeebuffer, "D down %d\n", pidRot[2]);
 				pidValues13[2] --;
 				pidValues24[2] --;
-				sprintf(xbeebuffer, "D down %d\n", pidValues24[2]);
-				sendstring(&xbee, xbeebuffer);
+				//sprintf(xbeebuffer, "D down %d\n", pidValues24[2]);
+				//sendstring(&xbee, xbeebuffer);
 				//motorup -= 5;
 			}
 			else if(input[8] == 7){
@@ -240,8 +249,8 @@ int main(void){
 				//sprintf(xbeebuffer, "P up %d\n", pidRot[0]);
 				pidValues13[0] ++;
 				pidValues24[0] ++;
-				sprintf(xbeebuffer, "P up %d\n", pidValues24[0]);
-				sendstring(&xbee, xbeebuffer);
+				//sprintf(xbeebuffer, "P up %d\n", pidValues24[0]);
+				//sendstring(&xbee, xbeebuffer);
 			}
 			else if(input[8] == 8){
 				
@@ -249,8 +258,8 @@ int main(void){
 				   //sprintf(xbeebuffer, "P down %d\n", pidRot[0]);
 					pidValues13[0] --;
 				   pidValues24[0] --;
-				sprintf(xbeebuffer, "P down %d\n", pidValues24[0]);
-				sendstring(&xbee, xbeebuffer);
+				//sprintf(xbeebuffer, "P down %d\n", pidValues24[0]);
+				//sendstring(&xbee, xbeebuffer);
 				 
 /*
 				getmag(magcache, &imu);
@@ -259,11 +268,6 @@ int main(void){
 */
 
 			}
-			else if(input[8] == 2){
-				sprintf(xbeebuffer, "descending\n");
-				sendstring(&xbee, xbeebuffer);
-				motorup = -50;
-			}
 			xbeecounter = 0;
 
 			for(i=0;i<3;i++){
@@ -271,7 +275,7 @@ int main(void){
 				pidRotDown[i] = pidRot[i] * 1;
 			}
 
-			if(state == running){
+			//if(state == running){
 				//sprintf(xbeebuffer, "%d %d\n", joyaxis[2], throttledif);
 				//sprintf(xbeebuffer, "%d %d %d \n", joyaxis[0], joyaxis[1], joyaxis[3]);
 				//sprintf(xbeebuffer, "%4d %4d %4d\n", pry[0], pry[1], pry[2]);
@@ -288,16 +292,17 @@ int main(void){
 				xbeebuffer[0] = 'v';
 				xbeebuffer[1] = 'e';
 				xbeebuffer[2] = 'x';
-				xbeebuffer[3] = irdata[0] + 1;
-				xbeebuffer[4] = irdata[1] + 1;
-				xbeebuffer[5] = 1;
-				xbeebuffer[6] = 1;
-				xbeebuffer[7] = 1;
-				xbeebuffer[8] = 1;
-				xbeebuffer[9] = 'u';
-				xbeebuffer[10] = 0;
-				sendstring(&xbee, xbeebuffer);
-			}
+				xbeebuffer[3] = irdata[0];
+				xbeebuffer[4] = irdata[1];
+				xbeebuffer[5] = pry[0] >> 8;
+				xbeebuffer[6] = pry[0] & 0xff;
+				xbeebuffer[7] = pry[1] >> 8;;
+				xbeebuffer[8] = pry[1] & 0xff;
+				xbeebuffer[9] = stat;
+				xbeebuffer[10] = 'u';
+				sendpacket(&xbee, xbeebuffer);
+				stat = 20;
+			//}
 
 			//If IR data ready
 			if(readdatair == 1){
@@ -333,8 +338,8 @@ int main(void){
 					accelcache[i] = 0;
 					gyrocache[i] = 0;
 				}
-				   sprintf(xbeebuffer, "offset %d %d %d %d %d %d\n", gyronorm[0], gyronorm[1], gyronorm[2], accelnorm[0], accelnorm[1], accelnorm[2]);
-				   sendstring(&xbee, xbeebuffer);
+				   //sprintf(xbeebuffer, "offset %d %d %d %d %d %d\n", gyronorm[0], gyronorm[1], gyronorm[2], accelnorm[0], accelnorm[1], accelnorm[2]);
+				   //sendstring(&xbee, xbeebuffer);
 
 
 				state = stopped;

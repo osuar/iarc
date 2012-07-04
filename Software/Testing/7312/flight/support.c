@@ -236,6 +236,12 @@ void sendstring(USART_data_t * uart, char *buffer){
 		sendchar(uart, buffer[i]);
 	}
 }
+void sendpacket(USART_data_t * uart, char *buffer){
+	int i;
+	for(i=0;i<11;i++){
+		sendchar(uart, buffer[i]);
+	}
+}
 
 
 
