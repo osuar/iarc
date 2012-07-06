@@ -59,6 +59,7 @@ int main(void){
 
 	/*counting var, for for loops*/
 	int i;
+	int j;
 
 
 	/*Start memory location for Accel and Gyro reads, should be moved
@@ -97,6 +98,11 @@ int main(void){
 	int gyrocounter[] = {0,0,0};
 
 	char irdata[2] = {0,0};
+
+	//For offsets
+	int acceloffsetcache[3];
+	int gyrooffsetcache[3];
+	int magoffsetcache;
 
 
 	/*Standard values for accel and gyro (when level), set during offset*/
@@ -203,9 +209,6 @@ int main(void){
 			//Input 7 is the button buffer
 			if(input[8] == 4){
 				state = stopped;
-				//sprintf(xbeebuffer, "stopped %d\n", input[7]);
-				//sprintf(xbeebuffer, "%4d %4d %4d %4d\n", joyaxis[0], joyaxis[1], joyaxis[2], joyaxis[3]);
-				//sendstring(&xbee, xbeebuffer);
 				stat = 2;
 				PORTF.OUT ^= 1;
 			}
@@ -216,8 +219,6 @@ int main(void){
 			}
 			else if(input[8] == 1){
 				state = running;
-				//sprintf(xbeebuffer, "running %d\n", input[7]);
-				//sendstring(&xbee, xbeebuffer);
 				stat = 3;
 			}
 			else if(input[8] == 10){
@@ -225,48 +226,27 @@ int main(void){
 				stat = 4;
 			}
 			else if(input[8] == 5){
-				//motorup += 5;
 				//pidRot[2] ++;
-				//sprintf(xbeebuffer, "D up %d\n", pidRot[2]);
 				pidValues13[2] ++;
 				pidValues24[2] ++;
-				//sprintf(xbeebuffer, "D up %d\n", pidValues24[2]);
 
-				//sendstring(&xbee, xbeebuffer);
 
 			}
 			else if(input[8] == 6){
 				//pidRot[2] --;
-				//sprintf(xbeebuffer, "D down %d\n", pidRot[2]);
 				pidValues13[2] --;
 				pidValues24[2] --;
-				//sprintf(xbeebuffer, "D down %d\n", pidValues24[2]);
-				//sendstring(&xbee, xbeebuffer);
-				//motorup -= 5;
 			}
 			else if(input[8] == 7){
 				//pidRot[0] ++;
-				//sprintf(xbeebuffer, "P up %d\n", pidRot[0]);
 				pidValues13[0] ++;
 				pidValues24[0] ++;
-				//sprintf(xbeebuffer, "P up %d\n", pidValues24[0]);
-				//sendstring(&xbee, xbeebuffer);
 			}
 			else if(input[8] == 8){
 				
 				  // pidRot[0] --;
-				   //sprintf(xbeebuffer, "P down %d\n", pidRot[0]);
 					pidValues13[0] --;
 				   pidValues24[0] --;
-				//sprintf(xbeebuffer, "P down %d\n", pidValues24[0]);
-				//sendstring(&xbee, xbeebuffer);
-				 
-/*
-				getmag(magcache, &imu);
-				sprintf(xbeebuffer, "%4d %4d %4d\n", magcache[0], magcache[1], magcache[2]);
-				sendstring(&xbee, xbeebuffer);
-*/
-
 			}
 			xbeecounter = 0;
 
@@ -275,34 +255,36 @@ int main(void){
 				pidRotDown[i] = pidRot[i] * 1;
 			}
 
-			//if(state == running){
-				//sprintf(xbeebuffer, "%d %d\n", joyaxis[2], throttledif);
-				//sprintf(xbeebuffer, "%d %d %d \n", joyaxis[0], joyaxis[1], joyaxis[3]);
-				//sprintf(xbeebuffer, "%4d %4d %4d\n", pry[0], pry[1], pry[2]);
-				//sprintf(xbeebuffer, "%3d %3d\n", gyroint[2], joyaxis[3]);
-				//sprintf(xbeebuffer, "%4d %4d %4d %4d\n", motorSpeeds[0], motorSpeeds[1], motorSpeeds[2], motorSpeeds[3]);
-				//sprintf(xbeebuffer, "%4d %4d %4d\n", accelint[0], accelint[1], accelint[2]);
-				//sprintf(xbeebuffer, "%4d %4d %4d\n", magcache[0], magcache[1], magcache[2]);
-//				sprintf(xbeebuffer, "%4d %4d %4d\n", magfiltered[0], magfiltered[1], magfiltered[2]);
-				//sprintf(xbeebuffer, "%4d\n", roterr);
-				//sprintf(xbeebuffer, "%4d\n", irdata);
-				//sprintf(xbeebuffer, "%i\n", input[8]);
-				//sprintf(xbeebuffer, "%i\n", irdata);
-			
+				//packet to send back		
 				xbeebuffer[0] = 'v';
 				xbeebuffer[1] = 'e';
 				xbeebuffer[2] = 'x';
 				xbeebuffer[3] = irdata[0];
 				xbeebuffer[4] = irdata[1];
+/*	FOR General Use
+*/
 				xbeebuffer[5] = pry[0] >> 8;
 				xbeebuffer[6] = pry[0] & 0xff;
 				xbeebuffer[7] = pry[1] >> 8;;
 				xbeebuffer[8] = pry[1] & 0xff;
-				xbeebuffer[9] = stat;
-				xbeebuffer[10] = 'u';
+				xbeebuffer[9] = pry[2] >> 8;
+				xbeebuffer[10] = pry[2] & 0xff;
+
+
+/*	For Checking Offsets
+
+				xbeebuffer[5] = accelnorm[0] >> 8;
+				xbeebuffer[6] = accelnorm[0] & 0xff;
+				xbeebuffer[7] = accelnorm[1] >> 8;
+				xbeebuffer[8] = accelnorm[1] & 0xff;
+				xbeebuffer[9] = target[2] >> 8;
+				xbeebuffer[10] = target[2] & 0xff;
+*/
+
+				xbeebuffer[11] = stat;
+				xbeebuffer[12] = 'u';
 				sendpacket(&xbee, xbeebuffer);
 				stat = 20;
-			//}
 
 			//If IR data ready
 			if(readdatair == 1){
@@ -327,19 +309,33 @@ int main(void){
 				break;
 				/*Offset gets standard value for gyro's and accel's*/
 			case offset:
+				for(i=0;i<3;i++){
+					acceloffsetcache[i] = 0;
+					gyrooffsetcache[i] = 0;
+				}
+
+				magoffsetcache = 0;
+				for(i =0; i<8;i++){
 					getgyro(gyrocache, &imu, &gyrostartbyte);
 					getaccel(accelcache, &imu, &accelstartbyte);
 					getmag(magcache, &imu);
-					target[2] = arctan2(magcache[0], magcache[1]);
+					for(j=0;j<3;j++){
+						acceloffsetcache[j] += accelcache[j];
+						gyrooffsetcache[j] += gyrocache[j];
+					}
+					magoffsetcache += arctan2(magcache[0], magcache[1]);
+					_delay_ms(100);
+				}
+				for(i=0;i<3;i++){
+					accelcache[i] = acceloffsetcache[i]/8;
+					gyrocache[i] = gyrooffsetcache[i]/8;
+				}
+				target[2] = magoffsetcache/8;
 
 				for(i = 0; i < 3; i ++){
 					gyronorm[i] = gyrocache[i];
 					accelnorm[i] = accelcache[i];
-					accelcache[i] = 0;
-					gyrocache[i] = 0;
 				}
-				   //sprintf(xbeebuffer, "offset %d %d %d %d %d %d\n", gyronorm[0], gyronorm[1], gyronorm[2], accelnorm[0], accelnorm[1], accelnorm[2]);
-				   //sendstring(&xbee, xbeebuffer);
 
 
 				state = stopped;
@@ -354,7 +350,7 @@ int main(void){
 				TCC0.INTFLAGS = 0x01;
 
 				/*Get gyro data
-				  substract stationary offset
+				  subtract stationary offset
 				  filter for stability
 				 */
 				getgyro(gyrocache, &imu, &gyrostartbyte);
@@ -402,10 +398,22 @@ int main(void){
 						magfiltered[i] = ((4 * magfiltered[i]) + (magcache[i]))/5;
 					}
 					magfacing = arctan2(magcache[0], magcache[1]);
-					pry[2] = ((9 * pry[2]) + (magfacing))/10;
+					//pry[2] = ((11 * pry[2]) + (magfacing))/12;
+					if((4900 - abs(pry[2]) - abs(magfacing)) < abs(pry[2] - magfacing)){
+						if(magfacing > 0){
+							pry[2] += (4900 - abs(magfacing) - abs(pry[2]))/12;
+						}
+						else{
+							pry[2] += -(4900 - abs(magfacing) - abs(pry[2]))/12;
+						}
+					}
+					else{
+						pry[2] += (magfacing - pry[2])/12;
+					}
+
 
 					if((4900 - abs(pry[2]) - abs(target[2])) < abs(pry[2] - target[2])){
-						if(target > 0){
+						if(target[2] > 0){
 							roterr = 4900 - abs(target[2]) - abs(pry[2]);
 						}
 						else{
@@ -415,19 +423,19 @@ int main(void){
 					else{
 						roterr = target[2] - pry[2];
 					}
-					
+
 
 					for(i = 0; i < 3; i ++){
 						accelcache[i] -= accelnorm[i];
-/*
-						if(accelcache[i] > (accelint[i] + 40)){
-							accelcache[i] = accelint[i] + 40;
-						}
-						else if(accelcache[i] < (accelint[i] - 40)){
-							accelcache[i] = accelint[i] - 40;
+						/*
+						   if(accelcache[i] > (accelint[i] + 40)){
+						   accelcache[i] = accelint[i] + 40;
+						   }
+						   else if(accelcache[i] < (accelint[i] - 40)){
+						   accelcache[i] = accelint[i] - 40;
 
-						}
-*/
+						   }
+						 */
 					}
 
 
@@ -496,13 +504,13 @@ int main(void){
 
 
 				while(!((TCD0.CNT > 5000) || (TCD0.CNT < 2500)));
-
+/*
 				TCD0.CCA = motorSpeeds[0] + motorup;// - motordif13;
 
 				TCD0.CCC = motorSpeeds[2] + motorup;// +  motordif13;
 				TCD0.CCB = motorSpeeds[1] + motorup;// + motordif24;
 				TCD0.CCD = motorSpeeds[3] + motorup;// - motordif24;
-
+*/
 
 
 
@@ -594,6 +602,7 @@ ISR(USARTE1_RXC_vect){
 	else if((inputir[3] == 'z') && (megacounter == 3)){
 		readdatair = 1;
 		megacounter ++;
+		PORTF.OUT ^= 1;
 
 	}
 

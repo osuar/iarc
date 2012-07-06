@@ -24,17 +24,27 @@ void getaccel(int *accelcache, TWI_Master_t *imu, uint8_t *accelstartbyte){
 	}while(!(imu->readData[0] & 0x80));
 
 	for(i = 0; i < 5; i += 2){
+/*
 		if(imu->readData[i + 3] & 0x80){
-			accelcache[i/2] -= 256 * (~imu->readData[i + 3] + 1);
+			accelcache[i/2] = -(256 * (~imu->readData[i + 3] + 1));
 			accelcache[i/2] -= (~imu->readData[i + 2] + 1);
 		}
 		else{
-			accelcache[i/2] += 256 * imu->readData[i + 3];
+			accelcache[i/2] = 256 * imu->readData[i + 3];
 			accelcache[i/2] += (imu->readData[i + 2]);
 		}
+*/
+			accelcache[i/2] = (imu->readData[i+3] << 8) | (imu->readData[i+2] & 0xff);
 	}
 	for(i = 0; i < 3; i ++){
-			accelcache[i] = (accelcache[i] * 2);
+		accelcache[i] = (accelcache[i] * 2);
+		if(accelcache[i] > 750){
+			accelcache[i] = 0;
+		}
+		else if(accelcache[i] < -750){
+			accelcache[i] = 0;
+		}
+	
 	}
 }
 

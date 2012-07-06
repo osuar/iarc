@@ -15,7 +15,6 @@ Source code for flight control support functions
 int arctan2(int opp, int adj){
 
 	//Catch divide by 0 just in case
-	int ratio;
 
 	if(adj == 0){
 		if(opp > 0){
@@ -25,7 +24,10 @@ int arctan2(int opp, int adj){
 			return -1225;
 		}
 	}
-	else if(opp == 0){
+
+	int ratio = (32 * opp)/adj;
+
+	if(abs(ratio) < 3){
 		if(adj > 0){
 			return 0;
 		}
@@ -34,410 +36,177 @@ int arctan2(int opp, int adj){
 		}
 	}
 
-	if(abs(adj)>abs(opp)){
-
-	ratio = (32 * adj)/opp;
-		//45..
-		if(abs(ratio) < 35){
-			if(adj > 0){
-				if(opp > 0){
-					return 617;
-				}
-				else{
-					return -617;
-				}
+	else if(abs(ratio) < 9){
+		if(adj > 0){
+			if(opp > 0){
+				return 137;
 			}
 			else{
-				if(opp > 0){
-					return 1831;
-				}
-				else{
-					return -1831;
-				}
+				return -137;
 			}
 		}
-
-
-		//40..
-		else if(abs(ratio) < 42){
-			if(adj > 0){
-				if(opp > 0){
-					return 548;
-				}
-				else{
-					return -548;
-				}
-			}
-			else{
-				if(opp > 0){
-					return 1902;
-				}
-				else{
-					return -1902;
-				}
-			}
-		}
-
-
-		//35..
-		else if(abs(ratio) < 51){
-			if(adj > 0){
-				if(opp > 0){
-					return 480;
-				}
-				else{
-					return -480;
-				}
-			}
-			else{
-				if(opp > 0){
-					return 1970;
-				}
-				else{
-					return -1970;
-				}
-			}
-		}
-
-
-		//30..
-		else if(abs(ratio) < 62){
-			if(adj > 0){
-				if(opp > 0){
-					return 411;
-				}
-				else{
-					return -411;
-				}
-			}
-			else{
-				if(opp > 0){
-					return 2039;
-				}
-				else{
-					return -2039;
-				}
-			}
-		}
-
-		//25..
-		else if(abs(ratio) < 78){
-			if(adj > 0){
-				if(opp > 0){
-					return 340;
-				}
-				else{
-					return -340;
-				}
-			}
-			else{
-				if(opp > 0){
-					return 2110;
-				}
-				else{
-					return -2110;
-				}
-			}
-		}
-
-
-		//20..
-		else if(abs(ratio) < 102){
-			if(adj > 0){
-				if(opp > 0){
-					return 274;
-				}
-				else{
-					return -274;
-				}
-			}
-			else{
-				if(opp > 0){
-					return 2176;
-				}
-				else{
-					return -2176;
-				}
-			}
-		}
-
-
-		//15..
-		else if(abs(ratio) < 145){
-			if(adj > 0){
-				if(opp > 0){
-					return 205;
-				}
-				else{
-					return -205;
-				}
-			}
-			else{
-				if(opp > 0){
-					return 2244;
-				}
-				else{
-					return -2244;
-				}
-			}
-		}
-
-
-		//10 OR -10 ..
-		else if(abs(ratio) < 244){
-			if(adj > 0){
-				if(opp > 0){
-					return 137;
-				}
-				else{
-					return -137;
-				}
-			}
-			else{
-				if(opp > 0){
-					return 2313;
-				}
-				else{
-					return -2313;
-				}
-			}
-		}
-
-
-		//5 OR -5 OR 175 OR -175
-		else if(abs(ratio) < 733){
-			if(adj > 0){
-				if(opp > 0){
-					return 69;
-				}
-				else{
-					return -69;
-				}
-			}
-			else{
-				if(opp > 0){
-					return 2381;
-				}
-				else{
-					return -2381;
-				}
-			}
-		}
-
-	//0 OR 180
 		else{
-			if(adj > 0){
-				return 0;
+			if(opp > 0){
+				return 2313;
 			}
 			else{
-				return 2450;
+				return -2313;
 			}
 		}
+	}
+
+	else if(abs(ratio) < 15){
+		if(adj > 0){
+			if(opp > 0){
+				return 274;
+			}
+			else{
+				return -274;
+			}
+		}
+		else{
+			if(opp > 0){
+				return 2176;
+			}
+			else{
+				return -2176;
+			}
+		}
+	}
+
+	else if(abs(ratio) < 22){
+		if(adj > 0){
+			if(opp > 0){
+				return 411;
+			}
+			else{
+				return -411;
+			}
+		}
+		else{
+			if(opp > 0){
+				return 2039;
+			}
+			else{
+				return -2039;
+			}
+		}
+	}
+
+	else if(abs(ratio) < 32){
+		if(adj > 0){
+			if(opp > 0){
+				return 548;
+			}
+			else{
+				return -548;
+			}
+		}
+		else{
+			if(opp > 0){
+				return 1902;
+			}
+			else{
+				return -1902;
+			}
+		}
+	}
 
 
+	else if(abs(ratio) < 45){
+		if(adj > 0){
+			if(opp > 0){
+				return 685;
+			}
+			else{
+				return -685;
+			}
+		}
+		else{
+			if(opp > 0){
+				return 1765;
+			}
+			else{
+				return -1765;
+			}
+		}
+	}
 
+
+	else if(abs(ratio) < 69){
+		if(adj > 0){
+			if(opp > 0){
+				return 822;
+			}
+			else{
+				return -822;
+			}
+		}
+		else{
+			if(opp > 0){
+				return 1628;
+			}
+			else{
+				return -1628;
+			}
+		}
+	}
+
+
+	else if(abs(ratio) < 120){
+		if(adj > 0){
+			if(opp > 0){
+				return 959;
+			}
+			else{
+				return -959;
+			}
+		}
+		else{
+			if(opp > 0){
+				return 1493;
+			}
+			else{
+				return -1493;
+			}
+		}
+	}
+
+
+	else if(abs(ratio) < 365){
+		if(adj > 0){
+			if(opp > 0){
+				return 1096;
+			}
+			else{
+				return -1096;
+			}
+		}
+		else{
+			if(opp > 0){
+				return 1356;
+			}
+			else{
+				return -1356;
+			}
+		}
 	}
 
 	else{
-		ratio = (32 * opp)/adj;
-		//45..
-		if(abs(ratio) < 35){
-			if(adj > 0){
-				if(opp > 0){
-					return 617;
-				}
-				else{
-					return -617;
-				}
+		if(adj > 0){
+			if(opp > 0){
+				return 1225;
 			}
 			else{
-				if(opp > 0){
-					return 1833;
-				}
-				else{
-					return -1833;
-				}
+				return -1225;
 			}
 		}
-
-		//50..
-		else if(abs(ratio) < 42){
-			if(adj > 0){
-				if(opp > 0){
-					return 685;
-				}
-				else{
-					return -685;
-				}
-			}
-			else{
-				if(opp > 0){
-					return 1765;
-				}
-				else{
-					return -1765;
-				}
-			}
-		}
-
-		//55..
-		else if(abs(ratio) < 51){
-			if(adj > 0){
-				if(opp > 0){
-					return 754;
-				}
-				else{
-					return -754;
-				}
-			}
-			else{
-				if(opp > 0){
-					return 1696;
-				}
-				else{
-					return -1696;
-				}
-			}
-		}
-
-		//60..
-		else if(abs(ratio) < 62){
-			if(adj > 0){
-				if(opp > 0){
-					return 822;
-				}
-				else{
-					return -822;
-				}
-			}
-			else{
-				if(opp > 0){
-					return 1628;
-				}
-				else{
-					return -1628;
-				}
-			}
-		}
-
-		//65..
-		else if(abs(ratio) < 78){
-			if(adj > 0){
-				if(opp > 0){
-					return 889;
-				}
-				else{
-					return -889;
-				}
-			}
-			else{
-				if(opp > 0){
-					return 1559;
-				}
-				else{
-					return -1559;
-				}
-			}
-		}
-
-
-		//70..
-		else if(abs(ratio) < 102){
-			if(adj > 0){
-				if(opp > 0){
-					return 959;
-				}
-				else{
-					return -959;
-				}
-			}
-			else{
-				if(opp > 0){
-					return 1493;
-				}
-				else{
-					return -1493;
-				}
-			}
-		}
-
-		//75..
-		else if(abs(ratio) < 145){
-			if(adj > 0){
-				if(opp > 0){
-					return 1028;
-				}
-				else{
-					return -1028;
-				}
-			}
-			else{
-				if(opp > 0){
-					return 1424;
-				}
-				else{
-					return -1424;
-				}
-			}
-		}
-
-		//80..
-		else if(abs(ratio) < 244){
-			if(adj > 0){
-				if(opp > 0){
-					return 1096;
-				}
-				else{
-					return -1096;
-				}
-			}
-			else{
-				if(opp > 0){
-					return 1356;
-				}
-				else{
-					return -1356;
-				}
-			}
-		}
-
-		//85..
-		else if(abs(ratio) < 733){
-			if(adj > 0){
-				if(opp > 0){
-					return 1165;
-				}
-				else{
-					return -1165;
-				}
-			}
-			else{
-				if(opp > 0){
-					return 1287;
-				}
-				else{
-					return -1287;
-				}
-			}
-		}
-
-		//90..
 		else{
-			if(adj > 0){
-				if(opp > 0){
-					return 1225;
-				}
-				else{
-					return -1225;
-				}
+			if(opp > 0){
+				return 1225;
 			}
 			else{
-				if(opp > 0){
-					return 1225;
-				}
-				else{
-					return -1225;
-				}
+				return -1225;
 			}
 		}
 	}
@@ -473,8 +242,6 @@ void sendpacket(USART_data_t * uart, char *buffer){
 		sendchar(uart, buffer[i]);
 	}
 }
-
-
 
 void CCPWrite( volatile uint8_t * address, uint8_t value )
 {
@@ -552,8 +319,6 @@ void motorSpeed(int * pry,
 		int * pidValuesDen24){
 	int i;
 	int prybuffer[3];
-	int xMove;
-	int yMove;
 	for(i=0;i<3;i++){
 		prybuffer[i] = pry[i];
 	}
@@ -574,11 +339,8 @@ void motorSpeed(int * pry,
 	motorSpeeds[0] += (prybuffer[1] * pidValues13[0]/pidValuesDen13[0]) + (gyroint[1] * pidValues13[2]/pidValuesDen13[2]);
 	motorSpeeds[2] -= (prybuffer[1] * pidValues13[0]/pidValuesDen13[0]) + (gyroint[1] * pidValues13[2]/pidValuesDen13[2]);
 	//Joystick X axis tilt
-	xMove = joystick[1] * TILTJOYSENS13;
-	motorSpeeds[0] -= xMove;
-	motorSpeeds[1] -= xMove;
-	motorSpeeds[2] += xMove;
-	motorSpeeds[3] += xMove;
+	motorSpeeds[0] -= joystick[1] * TILTJOYSENS13;
+	motorSpeeds[2] += joystick[1] * TILTJOYSENS13;
 	//Joystick Z axis rotate (slow down speed up both motors)
 	if(joystick[3] < 0){
 		motorSpeeds[0] += joystick[3] * ROTJOYSENSDOWN;
@@ -593,11 +355,8 @@ void motorSpeed(int * pry,
 	motorSpeeds[1] += (prybuffer[0] * pidValues24[0]/pidValuesDen24[0]) + (gyroint[0] * pidValues24[2]/pidValuesDen24[2]);
 	motorSpeeds[3] -= (prybuffer[0] * pidValues24[0]/pidValuesDen24[0]) + (gyroint[0] * pidValues24[2]/pidValuesDen24[2]);
 	//Joystick Y axis tilt
-	yMove = joystick[0] * TILTJOYSENS24;
-	motorSpeeds[2] -= yMove;
-	motorSpeeds[1] -= yMove;
-	motorSpeeds[0] += yMove;
-	motorSpeeds[3] += yMove;
+	motorSpeeds[1] -= joystick[0] * TILTJOYSENS24;
+	motorSpeeds[3] += joystick[0] * TILTJOYSENS24;
 	//Joystick Z axis rotate (slow down speed up both motors)
 	if(joystick[3] > 0){
 		motorSpeeds[1] -= joystick[3] * ROTJOYSENSDOWN;
