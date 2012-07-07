@@ -1,0 +1,13 @@
+<launch>
+    <!-- Run the controller manager. -->
+    <node name    = "controller_manager"
+          pkg     = "osuar_controller_manager"
+          type    = "controller_manager"
+          output  = "screen"/>
+
+    <!-- Run the subcontrollers. -->
+    <node name    = "takeoff_landing_controller"
+          pkg     = "osuar_takeoff_landing_controller"
+          type    = "takeoff_landing_controller"/>
+</launch>
+
