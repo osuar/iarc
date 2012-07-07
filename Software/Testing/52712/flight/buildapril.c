@@ -12,6 +12,9 @@
 /*Xbee Wireless Communication Module, initialized later*/
 USART_data_t xbee;
 
+/*atmega328p */
+USART_data_t atmega328p;
+
 /*Two wire interface module for Inertial Measurement Unit*/
 TWI_Master_t imu;
 
@@ -20,8 +23,19 @@ enum states{running, stopped, offset} state = stopped;
 
 /*Flag for complete Xbee packet receival*/
 volatile char readdata = 0;
+
+/*Flag for the complete IR data packet receival*/
+volatile char IRDataAvailable = 0;
+
 /*Packet buffer for incoming data from Xbee*/
 volatile char input[11] = {0,0,0,0,0,0,0,0,0,0,0};
+
+/*Packet buffer for incoming IR data from atmeg328p {startByte, highData1, lowData1, endByte} */
+volatile char irdata[4] = {0,0,0,0}
+
+/*Counter for atmega counter position.*/
+volatile char irdatacounter = 0;
+
 /*Counter for packet position*/
 volatile char xbeecounter = 0;
 
@@ -138,6 +152,9 @@ int main(void){
 	PORTE.DIR = 0x08;
 	/*Initialize USARTE0 as the module used by the Xbee*/
 	uartInitiate(&xbee, &USARTE0);
+	
+	/*Initialize USARTE1 as the module used by atmega328p */
+	uartInitiate(&atmega328p, &USARTE1);
 
 	/*Initialize imu to use Two wire interface on portC*/
 	twiInitiate(&imu, &TWIC);
@@ -151,7 +168,16 @@ int main(void){
 	sendstring(&xbee, xbeebuffer);
 
 	/*Start of flight control state machine loop*/
-	while(1){
+	while(1){	
+		
+		/*Check for new packet from atmega328p*/
+		if(IRDataAvailable)
+		{
+			sprintf(xbeebuffer, "Altitude: %d\n", (irdata[1]*256) + irdata[2]);
+			sendstring(&xbee, xbeebuffer);
+
+		}
+
 		/*Check for new packet from xbee each time*/
 		if(readdata){
 			readdata = 0;
@@ -272,6 +298,8 @@ int main(void){
 
 		}
 
+		
+
 		switch(state){
 
 			/*Stopped state keeps motors stopped but not beeping*/
@@ -351,12 +379,13 @@ int main(void){
 				if(paceCounter == (RATE / 20)){
 					paceCounter = 0;
 					lostsignalcnt ++;
+				
+					sendbyte(&atmega328p, 'r');	//ask for IR data					
 
 					getaccel(accelcache, &imu, &accelstartbyte);
 					getmag(magcache, &imu);
 					magfacing = arctan2(magcache[0], magcache[1]);
-					pry[2] = ((9 * pry[2]) + (magfacing))/10;
-
+					
 					if((4900 - abs(pry[2]) - abs(target[2])) < abs(pry[2] - target[2])){
 						if(target > 0){
 							roterr = 4900 - abs(target[2]) - abs(pry[2]);
@@ -464,7 +493,22 @@ int main(void){
 	}
 }
 
+/*IR sensor read interrupt*/
+ISR(USARTE1_RXC_vect){
+USART_RXComplete(&atmega328p);
+irdata[irdatacounter] = USART_RXBuffer_GetByte(&atmega328p);
 
+	if((irdata[0] == 'a') && (irdatacounter == 0))
+	{
+		irdatacounter++;
+	}
+	else if((irdatacounter == 1) || (irdatacounter== 2))
+	{
+		irdatacounter++;
+	}
+	else if((irdata[3] == 'z') && (irdatacounter = 3){
+		IRDataAvailable = 1;
+	}
 
 	/*Xbee read interrupt*/
 ISR(USARTE0_RXC_vect){
@@ -512,6 +556,11 @@ ISR(USARTE0_RXC_vect){
 /*Usart module interrupt to inform data has been properly sent*/
 ISR(USARTE0_DRE_vect){
 	USART_DataRegEmpty(&xbee);
+}
+
+/*Usart module interrupt to inform data has been properly sent */
+ISR(USARTE1_DRE_vect){
+	USART_DataRegEmpty(&atmeg328p);
 }
 
 /*Inertial measurement unit interrupt support routine, could be implemented by polling*/
