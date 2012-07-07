@@ -1,0 +1,14 @@
+<package>
+  <description brief="osuar_core">
+
+     osuar_core contains the launch scripts and global configuration files for the OSUAR flight system.
+
+  </description>
+  <author>yoos</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/osuar_core</url>
+
+</package>
+
+

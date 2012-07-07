@@ -1,0 +1,15 @@
+<package>
+  <description brief="rxtx_server">
+
+     rxtx_server
+
+  </description>
+  <author>root</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/rxtx_server</url>
+  <depend package="roscpp"/>
+
+</package>
+
+

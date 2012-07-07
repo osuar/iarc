@@ -5,4 +5,8 @@
 *.hex
 *.map
 dep
-a.out
+*.out
+bin
+msg_gen
+build
+
