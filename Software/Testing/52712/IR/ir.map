@@ -125,7 +125,7 @@ LOAD /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a
 .rela.plt
  *(.rela.plt)
 
-.text           0x00000000      0x256
+.text           0x00000000      0x336
  *(.vectors)
  .vectors       0x00000000       0x68 /usr/lib/gcc/avr/4.3.4/../../../avr/lib/avr5/crtm328p.o
                 0x00000000                __vectors
@@ -215,31 +215,31 @@ LOAD /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a
  .text          0x000000fe       0x6c adc.o
                 0x000000fe                setup_adc
                 0x0000010c                readadc
- .text          0x0000016a       0x3e servo.o
+ .text          0x0000016a       0x4e servo.o
                 0x0000016a                setup_servo
                 0x0000019c                move_servo
- .text          0x000001a8       0x5c main.o
-                0x000001a8                main
- .text          0x00000204        0x0 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_divmodhi4.o)
- .text          0x00000204        0x0 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_exit.o)
- .text          0x00000204        0x0 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_copy_data.o)
- .text          0x00000204        0x0 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_clear_bss.o)
- .text          0x00000204        0x0 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_udivmodhi4.o)
-                0x00000204                . = ALIGN (0x2)
+ .text          0x000001b8      0x12c main.o
+                0x000001b8                main
+ .text          0x000002e4        0x0 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_divmodhi4.o)
+ .text          0x000002e4        0x0 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_exit.o)
+ .text          0x000002e4        0x0 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_copy_data.o)
+ .text          0x000002e4        0x0 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_clear_bss.o)
+ .text          0x000002e4        0x0 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_udivmodhi4.o)
+                0x000002e4                . = ALIGN (0x2)
  *(.text.*)
- .text.libgcc   0x00000204       0x26 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_divmodhi4.o)
-                0x00000204                __divmodhi4
-                0x00000204                _div
- .text.libgcc   0x0000022a        0x0 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_exit.o)
- .text.libgcc   0x0000022a        0x0 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_copy_data.o)
- .text.libgcc   0x0000022a        0x0 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_clear_bss.o)
- .text.libgcc   0x0000022a       0x28 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_udivmodhi4.o)
-                0x0000022a                __udivmodhi4
-                0x00000252                . = ALIGN (0x2)
+ .text.libgcc   0x000002e4       0x26 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_divmodhi4.o)
+                0x000002e4                __divmodhi4
+                0x000002e4                _div
+ .text.libgcc   0x0000030a        0x0 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_exit.o)
+ .text.libgcc   0x0000030a        0x0 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_copy_data.o)
+ .text.libgcc   0x0000030a        0x0 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_clear_bss.o)
+ .text.libgcc   0x0000030a       0x28 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_udivmodhi4.o)
+                0x0000030a                __udivmodhi4
+                0x00000332                . = ALIGN (0x2)
  *(.fini9)
- .fini9         0x00000252        0x0 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_exit.o)
-                0x00000252                exit
-                0x00000252                _exit
+ .fini9         0x00000332        0x0 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_exit.o)
+                0x00000332                exit
+                0x00000332                _exit
  *(.fini9)
  *(.fini8)
  *(.fini8)
@@ -258,11 +258,11 @@ LOAD /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a
  *(.fini1)
  *(.fini1)
  *(.fini0)
- .fini0         0x00000252        0x4 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_exit.o)
+ .fini0         0x00000332        0x4 /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a(_exit.o)
  *(.fini0)
-                0x00000256                _etext = .
+                0x00000336                _etext = .
 
-.data           0x00800100        0x0 load address 0x00000256
+.data           0x00800100        0x0 load address 0x00000336
                 0x00800100                PROVIDE (__data_start, .)
  *(.data)
  .data          0x00800100        0x0 /usr/lib/gcc/avr/4.3.4/../../../avr/lib/avr5/crtm328p.o
@@ -299,8 +299,8 @@ LOAD /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a
  *(.bss*)
  *(COMMON)
                 0x00800100                PROVIDE (__bss_end, .)
-                0x00000256                __data_load_start = LOADADDR (.data)
-                0x00000256                __data_load_end = (__data_load_start + SIZEOF (.data))
+                0x00000336                __data_load_start = LOADADDR (.data)
+                0x00000336                __data_load_end = (__data_load_start + SIZEOF (.data))
 
 .noinit         0x00800100        0x0
                 0x00800100                PROVIDE (__noinit_start, .)
@@ -383,27 +383,27 @@ LOAD /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a
  .debug_pubnames
                 0x000000a9       0x1b main.o
 
-.debug_info     0x00000000      0x36c
+.debug_info     0x00000000      0x37e
  *(.debug_info)
  .debug_info    0x00000000      0x11b usart.o
  .debug_info    0x0000011b       0xbf adc.o
- .debug_info    0x000001da       0xb0 servo.o
- .debug_info    0x0000028a       0xe2 main.o
+ .debug_info    0x000001da       0xc2 servo.o
+ .debug_info    0x0000029c       0xe2 main.o
  *(.gnu.linkonce.wi.*)
 
-.debug_abbrev   0x00000000      0x26a
+.debug_abbrev   0x00000000      0x269
  *(.debug_abbrev)
  .debug_abbrev  0x00000000       0xe9 usart.o
  .debug_abbrev  0x000000e9       0x8c adc.o
- .debug_abbrev  0x00000175       0x6e servo.o
- .debug_abbrev  0x000001e3       0x87 main.o
+ .debug_abbrev  0x00000175       0x7d servo.o
+ .debug_abbrev  0x000001f2       0x77 main.o
 
-.debug_line     0x00000000      0x325
+.debug_line     0x00000000      0x3d7
  *(.debug_line)
  .debug_line    0x00000000       0xf4 usart.o
  .debug_line    0x000000f4       0xb2 adc.o
  .debug_line    0x000001a6       0xc4 servo.o
- .debug_line    0x0000026a       0xbb main.o
+ .debug_line    0x0000026a      0x16d main.o
 
 .debug_frame    0x00000000       0xd0
  *(.debug_frame)
@@ -412,22 +412,23 @@ LOAD /usr/lib/gcc/avr/4.3.4/avr5/libgcc.a
  .debug_frame   0x00000080       0x30 servo.o
  .debug_frame   0x000000b0       0x20 main.o
 
-.debug_str      0x00000000      0x12b
+.debug_str      0x00000000      0x12c
  *(.debug_str)
  .debug_str     0x00000000       0xa8 usart.o
                                  0xe8 (size before relaxing)
  .debug_str     0x000000a8       0x27 adc.o
                                  0xcb (size before relaxing)
  .debug_str     0x000000cf       0x1f servo.o
-                                 0xc3 (size before relaxing)
- .debug_str     0x000000ee       0x3d main.o
-                                 0xe6 (size before relaxing)
+                                 0xc9 (size before relaxing)
+ .debug_str     0x000000ee       0x3e main.o
+                                 0xe7 (size before relaxing)
 
-.debug_loc      0x00000000       0xb6
+.debug_loc      0x00000000      0x1c6
  *(.debug_loc)
  .debug_loc     0x00000000       0x36 usart.o
  .debug_loc     0x00000036       0x30 adc.o
  .debug_loc     0x00000066       0x50 servo.o
+ .debug_loc     0x000000b6      0x110 main.o
 
 .debug_macinfo
  *(.debug_macinfo)
@@ -494,6 +495,7 @@ exit                                              /usr/lib/gcc/avr/4.3.4/avr5/li
 main                                              main.o
                                                   /usr/lib/gcc/avr/4.3.4/../../../avr/lib/avr5/crtm328p.o
 move_servo                                        servo.o
+                                                  main.o
 mygetchar                                         usart.o
                                                   main.o
 readadc                                           adc.o
@@ -504,5 +506,6 @@ sendstring                                        usart.o
 setup_adc                                         adc.o
                                                   main.o
 setup_servo                                       servo.o
+                                                  main.o
 setup_usart                                       usart.o
                                                   main.o

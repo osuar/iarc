@@ -4,6 +4,6 @@
 
 
 void setup_servo(int num);
-void move_servo(int num);
+void move_servo(int pos, int servo);
 
 #endif
