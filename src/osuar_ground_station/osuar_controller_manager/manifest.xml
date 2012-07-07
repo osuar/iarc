@@ -1,13 +1,13 @@
 <package>
-  <description brief="osuar_controller_master">
+  <description brief="osuar_controller_manager">
 
-     osuar_controller_master
+     osuar_controller_manager
 
   </description>
   <author>yoos</author>
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
-  <url>http://ros.org/wiki/osuar_controller_master</url>
+  <url>http://ros.org/wiki/osuar_controller_manager</url>
 
   <depend stack="osuar_controllers"/>
 
