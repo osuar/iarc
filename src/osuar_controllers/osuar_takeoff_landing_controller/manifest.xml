@@ -1,0 +1,14 @@
+<package>
+  <description brief="osuar_takeoff_landing_controller">
+
+     osuar_takeoff_landing_controller
+
+  </description>
+  <author>yoos</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/osuar_takeoff_landing_controller</url>
+
+</package>
+
+
