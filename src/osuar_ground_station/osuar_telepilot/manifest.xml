@@ -8,6 +8,8 @@
   <license>BSD</license>
   <review status="unreviewed" notes=""/>
   <url>http://ros.org/wiki/osuar_telepilot</url>
+  <depend package="roscpp"/>
+  <depend package="rxtx_server"/>
 
 </package>
 
