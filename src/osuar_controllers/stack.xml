@@ -1,0 +1,9 @@
+<stack>
+    <description brief="osuar_controllers">OSU Aerial Robotics controllers</description>
+    <author>Daniel Miller</author>
+    <author>Soo-Hyun Yoo</author>
+    <license>BSD</license>
+    <review status="unreviewed" notes=""/>
+    <url>http://ros.org/wiki/osuar_controllers</url>
+    <depend stack="ros" />
+</stack>

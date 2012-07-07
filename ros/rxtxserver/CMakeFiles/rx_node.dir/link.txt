@@ -1,0 +1,1 @@
+/usr/bin/c++   -O2 -g     -pthread CMakeFiles/rx_node.dir/src/rxnode.o  -o bin/rx_node -rdynamic -L/opt/ros/fuerte/lib -lroscpp -lrostime -lrosconsole -lroscpp_serialization -lxmlrpcpp -lncurses -Wl,-rpath,/opt/ros/fuerte/lib 

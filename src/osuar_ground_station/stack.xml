@@ -1,0 +1,9 @@
+<stack>
+    <description brief="osuar_ground_station">OSU Aerial Robotics ground station</description>
+    <author>Daniel Miller</author>
+    <author>Soo-Hyun Yoo</author>
+    <license>BSD</license>
+    <review status="unreviewed" notes=""/>
+    <url>http://ros.org/wiki/osuar_ground_station</url>
+    <depend stack="ros" />
+</stack>
