@@ -1,0 +1,14 @@
+<package>
+  <description brief="osuar_telepilot">
+
+     osuar_telepilot
+
+  </description>
+  <author>root</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/osuar_telepilot</url>
+
+</package>
+
+
