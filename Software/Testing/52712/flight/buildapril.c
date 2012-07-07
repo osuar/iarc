@@ -41,11 +41,13 @@ int main(void){
 	int pidValues24[3] = {6,20,24};
 	int pidValuesDen24[3] = {16,1,1};
 
-	char pidRotUp[3] = {0,0,15};
-	char pidRotDenUp[3] = {1,1,1};
+	char pidRotUp[3] = {0,0,20};
+	char pidRotDenUp[3] = {42,1,1};
 	
-	char pidRotDown[3] = {0,0,20};
-	char pidRotDenDown[3] = {1,1,1};
+	char pidRotDown[3] = {9,0,20};
+	char pidRotDenDown[3] = {42,1,1};
+
+	char pidRot[] = {5,0,20};
 
 	int throttledif = 0;
 	int throttleavr = 0;
@@ -67,7 +69,7 @@ int main(void){
 	 */
 	int joyaxis[] = {0,0,0,0,0};
 	char joyin[] = {0,0,0,0,0};
-	int joytrim[] = {0,0,0,-30,0};
+	int joytrim[] = {0,0,0,0,0};
 	int joydif[] = {0,0};
 	int joyavr[] = {0,0};
 	int motorSpeeds[4];
@@ -206,34 +208,34 @@ int main(void){
 			}
 			else if(input[8] == 5){
 				//motorup += 5;
-				pidValues13[2] ++;
-				sprintf(xbeebuffer, "D up %d\n", pidValues13[2]);
-				pidValues24[2] ++;
+				pidRot[2] ++;
+				sprintf(xbeebuffer, "D up %d\n", pidRot[2]);
+				//pidRot[2] ++;
 				//sprintf(xbeebuffer, "D up %d\n", pidValues24[2]);
 
 				sendstring(&xbee, xbeebuffer);
 
 			}
 			else if(input[8] == 6){
-				pidValues13[2] --;
-				sprintf(xbeebuffer, "D down %d\n", pidValues13[2]);
-				pidValues24[2] --;
+				pidRot[2] --;
+				sprintf(xbeebuffer, "D down %d\n", pidRot[2]);
+				//pidRot[2] --;
 				//sprintf(xbeebuffer, "D down %d\n", pidValues24[2]);
 				sendstring(&xbee, xbeebuffer);
 				//motorup -= 5;
 			}
 			else if(input[8] == 7){
-				pidValues13[0] ++;
-				sprintf(xbeebuffer, "P up %d\n", pidValues13[0]);
-				pidValues24[0] ++;
+				pidRot[0] ++;
+				sprintf(xbeebuffer, "P up %d\n", pidRot[0]);
+				//pidRot[0] ++;
 				//sprintf(xbeebuffer, "P up %d\n", pidValues24[0]);
 				sendstring(&xbee, xbeebuffer);
 			}
 			else if(input[8] == 8){
 				
-				   pidValues13[0] --;
-				   sprintf(xbeebuffer, "P down %d\n", pidValues13[0]);
-				   pidValues24[0] --;
+				   pidRot[0] --;
+				   sprintf(xbeebuffer, "P down %d\n", pidRot[0]);
+				   //pidRot[0] --;
 				//sprintf(xbeebuffer, "P down %d\n", pidValues24[0]);
 				sendstring(&xbee, xbeebuffer);
 				 
@@ -251,6 +253,11 @@ int main(void){
 			}
 			xbeecounter = 0;
 
+			for(i=0;i<3;i++){
+				pidRotUp[i] = pidRot[i] * 3/4;
+				pidRotDown[i] = pidRot[i] * 1;
+			}
+
 			if(state == running){
 				//sprintf(xbeebuffer, "%d %d\n", joyaxis[2], throttledif);
 				//sprintf(xbeebuffer, "%d %d %d \n", joyaxis[0], joyaxis[1], joyaxis[3]);
@@ -259,8 +266,8 @@ int main(void){
 				//sprintf(xbeebuffer, "%4d %4d %4d %4d\n", motorSpeeds[0], motorSpeeds[1], motorSpeeds[2], motorSpeeds[3]);
 				//sprintf(xbeebuffer, "%4d %4d %4d\n", accelint[0], accelint[1], accelint[2]);
 				//sprintf(xbeebuffer, "%4d %4d %4d\n", magcache[0], magcache[1], magcache[2]);
-				//sprintf(xbeebuffer, "%4d\n", roterr);
-				//sendstring(&xbee, xbeebuffer);
+				sprintf(xbeebuffer, "%4d\n", roterr);
+				sendstring(&xbee, xbeebuffer);
 			}
 
 		}
