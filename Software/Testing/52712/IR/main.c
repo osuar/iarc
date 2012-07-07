@@ -7,25 +7,27 @@
 #include "adc.h"
 #include <util/delay.h>
 
-#define ADCCHANNEL 0
-#define RUNNINGAVGWEIGHT 0.4	//Higher = faster response, more spikes. Lower = slower response, less spikes.
+#define SONARCHANNEL 0
+#define IRACHANNEL 1
+#define IRBCHANNEL 2
 
 int main(void)
 {
 	//initialize
 	setup_usart();
 	setup_adc();
-	//setup_servo(1);
+	setup_servo(2);
 
 	//initialize TIMER2. if works: modualize into diff file.
 	TCCR2A = 0; //normal mode
 	TCCR2B = 0b00000100; // clk/64 ~= 61Hz	
 
-	int adcDataPrev = 0;
-	int adcData = 0;
-	int adcDataDeriv = 0;
-	int servoPos = 0; 
-	char buffer[50];
+	unsigned int sonarData = 0;
+	unsigned int irAData = 0;
+	unsigned int irBData = 0;
+	unsigned int servoPos = 64;
+	unsigned int servoAngle = 0; 
+	int servoDirection = 0;
 	int i = 0;
 
 	while(1)	//check for data request as fast as possible
@@ -33,8 +35,14 @@ int main(void)
 		if(mygetchar() == 'r')
 		{
 			sendchar('a');
-			sendchar((char) (adcData >> 8));
-			sendchar((char) adcData & 0xFF);
+			sendchar((char) (sonarData >> 8));	//sonar HIGH byte
+			sendchar((char) (sonarData & 0xFF));	//sonar LOW byte
+			sendchar((char) (irAData >> 8));	//irA HIGH byte
+			sendchar((char) (irAData & 0xFF));	//irA LOW byte
+			sendchar((char) (irBData >> 8));	//irB HIGH byte	
+			sendchar((char) (irBData & 0xFF));	//irB LOW byte
+			sendchar((char) (servoAngle >> 8));	//servoPos HIGH byte
+			sendchar((char) (servoAngle & 0xFF));	//servoPos LOW byte
 			sendchar('z');
 //			sendchar(10);
 //			sendchar(13);
@@ -44,14 +52,26 @@ int main(void)
 		if(TIFR2 & 0x01)	//if timer has elapsed
 		{
 			TIFR2 &= 0b1111110; //reset timer
+			sonarData = readadc(SONARCHANNEL);
+			irAData = readadc(IRACHANNEL);
+			irBData = readadc(IRBCHANNEL);
 			
-//			adcDataPrev = adcData;
-			adcData = readadc(ADCCHANNEL);
-//			adcDataDeriv = adcData - adcDataPrev;
-//			sprintf(buffer, "ADC Data: %d", adcData);
-//			sendstring(buffer);	
-//			sendchar('\r');
-//			sendchar('\n');
+			if(i >= 1)
+			{
+				i = 0;
+				
+				if(servoDirection)	servoPos--;
+				else			servoPos++;
+
+				if(servoPos >= 199)	servoDirection = 1;
+				else if(servoPos <= 64)	servoDirection = 0;
+
+				move_servo(servoPos, 1);
+				move_servo(servoPos, 2);
+
+				servoAngle = ((servoPos - 64)*(2/3)); 
+			}
+			i++;
 		}
 
 	}
