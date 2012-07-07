@@ -1,1 +1,0 @@
-/usr/bin/c++   -O2 -g     -pthread CMakeFiles/rxtx.dir/src/threadtest.o  -o ../bin/rxtx -rdynamic -L/opt/ros/fuerte/lib -lroscpp -lrostime -lrosconsole -lroscpp_serialization -lxmlrpcpp -Wl,-rpath,/opt/ros/fuerte/lib 

@@ -1,4 +1,4 @@
-#define DEGREE 320
+#define DEGREE 40
 
 //Scales incoming gyro values to arbitrary DCM matrix size, subject to change
 #define OMEGA 10 / 10
@@ -23,7 +23,7 @@
 #define ROTJOYSENS 1
 #define ZJOYSENS 2
 #define TILTJOYSENS 2
-#define MOTORREG 2970
+#define MOTORREG 2975
 
 int abs(int i);
 

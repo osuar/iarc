@@ -643,7 +643,7 @@ void yawCorrect(int * motorSpeeds, int * gyroint, int * roterr, char * pidRotUp,
 	roterrup = *roterr * pidRotUp[0]/pidRotDenUp[0];	
 	roterrdown = *roterr * pidRotDown[0]/pidRotDenDown[0];	
 
-	if(roterr > 0){
+	if(roterrup > 0){
 		motorSpeeds[0] += roterrup;
 		motorSpeeds[2] += roterrup;
 		motorSpeeds[1] -= roterrdown;

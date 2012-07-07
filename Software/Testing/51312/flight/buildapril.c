@@ -60,7 +60,9 @@ int main(void){
 	 */
 	int joyaxis[] = {0,0,0,0,0};
 	char joyin[] = {0,0,0,0,0};
-	int joytrim[] = {0,0,0,0,0};
+	int joytrim[] = {0,0,0,-50,0};
+	int joydif[] = {0,0};
+	int joyavr[] = {0,0};
 	int motorSpeeds[4];
 
 	/*Var to allow increase in motor speed nonrelative to the throttle
@@ -146,9 +148,17 @@ int main(void){
 				joyaxis[i] = joyin[i];
 				joyaxis[i] += joytrim[i];
 			}
+
 			throttleavr = ((throttleavr) + (joyaxis[2]))/2;
 			throttledif = joyaxis[2] - throttleavr;
 			joyaxis[2] += throttledif * THROTTLEJOYDIF;
+
+			for(i = 0; i < 2; i++){
+				joyavr[i] = (joyavr[i] + joyaxis[i])/2;
+				joydif[i] = joyaxis[i] - joyavr[i];
+				joyaxis[i] += joydif[i] * PRJOYDIF;
+			}
+			
 
 /*
 			yawavr = ((yawavr) + joyaxis[3])/2;
@@ -159,8 +169,8 @@ int main(void){
 			if(input[8] == 4){
 				state = stopped;
 				//sprintf(xbeebuffer, "stopped %d\n", input[7]);
-				//sprintf(xbeebuffer, "%4d %4d %4d %4d\n", joyaxis[0], joyaxis[1], joyaxis[2], joyaxis[3]);
-				//sendstring(&xbee, xbeebuffer);
+				sprintf(xbeebuffer, "%4d %4d %4d %4d\n", joyaxis[0], joyaxis[1], joyaxis[2], joyaxis[3]);
+				sendstring(&xbee, xbeebuffer);
 			}
 			else if(input[8] == 0){
 				joytrim[0] += joyin[0];
@@ -310,19 +320,19 @@ int main(void){
 					accelint[1] = ((ACCELINT * accelint[1]) + ((20 - ACCELINT) * accelcache[1]))/20;
 
 
-					if(accelint[1] > (pry[0] + 20)){
-						accelint[1] = pry[0] + 20;
+					if(accelint[1] > (pry[0] + 15)){
+						accelint[1] = pry[0] + 15;
 					}
-					else if(accelint[1] < (pry[0] - 20)){
-						accelint[1] = pry[0] - 20;
+					else if(accelint[1] < (pry[0] - 15)){
+						accelint[1] = pry[0] - 15;
 					}
 
 
-					if(accelint[0] > (pry[1] + 20)){
-						accelint[0] = pry[1] + 20;
+					if(accelint[0] > (pry[1] + 15)){
+						accelint[0] = pry[1] + 15;
 					}
-					else if(accelint[0] < (pry[1] - 20)){
-						accelint[0] = pry[1] - 20;
+					else if(accelint[0] < (pry[1] - 15)){
+						accelint[0] = pry[1] - 15;
 					}
 
 

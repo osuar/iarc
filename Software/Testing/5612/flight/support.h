@@ -12,9 +12,9 @@
 #define AWEIGHT 1
 #define GWEIGHT 9
 
-#define ROTJOYSENS 1
+#define ROTJOYSENS 2
 #define ZJOYSENS -2
-#define TILTJOYSENS 3/4
+#define TILTJOYSENS 5/4
 #define MOTORREG 3000
 
 //Rate which gyro will be read at

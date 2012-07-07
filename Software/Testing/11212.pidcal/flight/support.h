@@ -82,7 +82,7 @@ Source for functions prototyped here found in aux.c
 #define MOTOR1RZ -0
 
 #define GYROINT 0
-#define ACCELINT 10
+#define ACCELINT 0
 
 //TC overflow flag stuff
 #define TC_GetOverflowFlag( _tc ) ( (_tc)->INTFLAGS & TC0_OVFIF_bm )

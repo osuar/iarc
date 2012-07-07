@@ -40,10 +40,10 @@ int main(void){
 
 	int paceCounter = 0;
 
-	int pidValues13[3] = {9,0,18};
+	int pidValues13[3] = {11,0,22};
 	int pidValuesDen13[3] = {16,1,1};
 
-	int pidValues24[3] = {9,0,18};
+	int pidValues24[3] = {11,0,22};
 	int pidValuesDen24[3] = {16,1,1};
 
 	char pidRotUp[3] = {9,0,20};
@@ -52,7 +52,7 @@ int main(void){
 	char pidRotDown[3] = {9,0,20};
 	char pidRotDenDown[3] = {42,1,1};
 
-	char pidRot[] = {9,0,20};
+	char pidRot[] = {22,0,24};
 
 	int throttledif = 0;
 	int throttleavr = 0;
@@ -226,27 +226,35 @@ int main(void){
 				stat = 4;
 			}
 			else if(input[8] == 5){
-				//pidRot[2] ++;
+				pidRot[2] ++;
+				/*
 				pidValues13[2] ++;
 				pidValues24[2] ++;
+				*/
 
 
 			}
 			else if(input[8] == 6){
-				//pidRot[2] --;
+				pidRot[2] --;
+	/*
 				pidValues13[2] --;
 				pidValues24[2] --;
+*/
 			}
 			else if(input[8] == 7){
-				//pidRot[0] ++;
+				pidRot[0] ++;
+/*
 				pidValues13[0] ++;
 				pidValues24[0] ++;
+*/
 			}
 			else if(input[8] == 8){
 				
-				  // pidRot[0] --;
+				   pidRot[0] --;
+/*
 					pidValues13[0] --;
 				   pidValues24[0] --;
+*/
 			}
 			xbeecounter = 0;
 
@@ -261,6 +269,8 @@ int main(void){
 				xbeebuffer[2] = 'x';
 				xbeebuffer[3] = irdata[0];
 				xbeebuffer[4] = irdata[1];
+
+
 /*	FOR General Use
 */
 				xbeebuffer[5] = pry[0] >> 8;
@@ -280,7 +290,23 @@ int main(void){
 				xbeebuffer[9] = target[2] >> 8;
 				xbeebuffer[10] = target[2] & 0xff;
 */
+/*	For PID tuning
 
+				xbeebuffer[5] = 0;
+				xbeebuffer[6] = pidRot[0];
+				xbeebuffer[7] = 0;
+				xbeebuffer[8] = pidRot[2];;
+				xbeebuffer[9] = roterr >> 8;
+				xbeebuffer[10] = roterr & 0xff;
+
+				xbeebuffer[5] = gyroint[2] >> 8;
+				xbeebuffer[6] = gyroint[2] & 0xff;;
+				xbeebuffer[7] = roterr >> 8;
+				xbeebuffer[8] = roterr & 0xff;
+				xbeebuffer[9] = joytrim[3] >> 8;
+				xbeebuffer[10] = joytrim[3] & 0xff;
+	
+*/
 				xbeebuffer[11] = stat;
 				xbeebuffer[12] = 'u';
 				sendpacket(&xbee, xbeebuffer);
@@ -504,13 +530,13 @@ int main(void){
 
 
 				while(!((TCD0.CNT > 5000) || (TCD0.CNT < 2500)));
-/*
+
 				TCD0.CCA = motorSpeeds[0] + motorup;// - motordif13;
 
 				TCD0.CCC = motorSpeeds[2] + motorup;// +  motordif13;
 				TCD0.CCB = motorSpeeds[1] + motorup;// + motordif24;
 				TCD0.CCD = motorSpeeds[3] + motorup;// - motordif24;
-*/
+
 
 
 

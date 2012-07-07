@@ -28,10 +28,7 @@ int main(void){
 
 	int integration[3] = {0,0,0};
 
-	int lostsignalcnt = 0;
-
-	char motordif24 = -15;	
-	char motordif13 = 10;
+	char lostsignalcnt = 0;
 
 	int pry[] = {0,0,0};
 
@@ -132,7 +129,7 @@ int main(void){
 		/*Check for new packet from xbee each time*/
 		if(readdata){
 			readdata = 0;
-			lostsignalcnt = 0;
+				lostsignalcnt = 0;
 
 
 				   /*For Joystick packet reads*/
@@ -194,7 +191,7 @@ int main(void){
 					getaccel(accelcache, &imu, &accelstartbyte);
 				for(i = 0; i < 3; i ++){
 					gyronorm[i] = gyrocache[i];
-					accelnorm[i] = accelcache[i];
+					//accelnorm[i] = accelcache[i];
 					accelcache[i] = 0;
 					gyrocache[i] = 0;
 				}
@@ -289,7 +286,7 @@ int main(void){
 
 				motorSpeed(pry, integration ,gyroint, joyaxis, motorSpeeds, pidValues, pidValuesDen);
 
-				if(lostsignalcnt > 5){
+				if(lostsignalcnt > 10){
 					for(i = 0; i < 4; i ++){
 						motorSpeeds[i] -= 50;
 					}
@@ -304,24 +301,6 @@ int main(void){
 
 
 				pry[2] = 0;
-
-				PORTD.OUT ^= 0b00100000;
-
-
-				/*
-				   if((abs(pry[0]) > 80) || (abs(pry[1]) > 80)){
-				   state = stopped;
-				   }
-				 */
-
-				/*
-				   for(i = 1; i < 10; i ++){
-				   xbeebuffer[i] = currentMatrix[i - 1] + 62;
-				   }
-				   xbeebuffer[0] = 0xFB;
-				   xbeebuffer[10] = 0xFF;
-				   xbeebuffer[11] = 0;
-				 */
 		}
 
 	}

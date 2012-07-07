@@ -23,6 +23,7 @@ volatile char input[9] = {0,0,0,0,0,0,0,0,0};
 volatile char xbeecounter = 0;
 
 int main(void){
+	int testcounter = 0;
 
 	int integration[3] = {0,0,0};
 
@@ -40,8 +41,8 @@ int main(void){
 
 	int tilt = 0;
 
-	int pidValues[3] = {0,0,0};
-	int pidValuesDen[3] = {1,1,1};
+	int pidValues[3] = {14,0,28};
+	int pidValuesDen[3] = {16,1,1};
 
 	/*counting var, for for loops*/
 	int i;
@@ -75,8 +76,8 @@ int main(void){
 
 
 	/*Standard values for accel and gyro (when level), set during offset*/
-	int accelnorm[3] = {0,0,0};
-	char gyronorm[3] = {2,5,-1};
+	int accelnorm[3] = {38,-4,470};
+	int gyronorm[3] = {16,42,0};
 
 	/*Buffer for sending data through the xbee*/
 	char xbeebuffer[100];
@@ -264,15 +265,16 @@ int main(void){
 				break;
 				/*Offset gets standard value for gyro's and accel's*/
 			case offset:
-				for(i = 0; i < (RATE/50); i ++){
 					getgyro(gyrocache, &imu, &gyrostartbyte);
-				}
+					getaccel(accelcache, &imu, &accelstartbyte);
 				for(i = 0; i < 3; i ++){
 					gyronorm[i] = gyrocache[i];
+					accelnorm[i] = accelcache[i];
+					accelcache[i] = 0;
 					gyrocache[i] = 0;
 				}
 
-				sprintf(xbeebuffer, "offset %d %d %d\n\r", gyronorm[0], gyronorm[1], gyronorm[2]);
+				sprintf(xbeebuffer, "offset %d %d %d %d %d %d\n\r", gyronorm[0], gyronorm[1], gyronorm[2], accelnorm[0], accelnorm[1], accelnorm[2]);
 				sendstring(&xbee, xbeebuffer);
 				state = stopped;
 
@@ -318,6 +320,7 @@ int main(void){
 
 				paceCounter ++;
 				//Slower Operations at 50Hz
+
 				if(paceCounter == (RATE / 50)){
 				paceCounter = 0;
 
@@ -327,18 +330,44 @@ int main(void){
 						accelcache[i] -= accelnorm[i];
 					}
 
-					for(i = 0; i < 3; i ++){
-						accelint[i] = ((ACCELINT * accelint[i]) + ((20 - ACCELINT) * accelcache[i]))/20;
+						accelint[0] = -((ACCELINT * accelint[0]) + ((20 - ACCELINT) * accelcache[0]))/20;
+						accelint[1] = ((ACCELINT * accelint[1]) + ((20 - ACCELINT) * accelcache[1]))/20;
+
+
+
+					if(accelint[0] > (pry[1] + 10)){
+						accelint[0] = pry[1] + 10;
+					}
+					else if(accelint[0] < (pry[1] - 10)){
+						accelint[0] = pry[1] - 10;
 					}
 
 
-					pry[0] = (-(AWEIGHT * accelint[1]) + (GWEIGHT * pry[0])) / (AWEIGHT + GWEIGHT);
+
+					if(accelint[1] > (pry[0] + 10)){
+						accelint[1] = pry[0] + 10;
+					}
+					else if(accelint[1] < (pry[0] - 10)){
+						accelint[1] = pry[0] - 10;
+					}
+
+					
+					
+
+
+					pry[0] = ((AWEIGHT * accelint[1]) + (GWEIGHT * pry[0])) / (AWEIGHT + GWEIGHT);
 
 					pry[1] = ((AWEIGHT * accelint[0]) + (GWEIGHT * pry[1])) / (AWEIGHT + GWEIGHT);
 
+/*
+				_delay_ms(500);
+				testcounter ++;
+				sprintf(xbeebuffer, "%d \n \r", testcounter);
+*/
 				//sprintf(xbeebuffer, "%4d %4d %4d\n\r", gyrocache[0], gyrocache[1], gyrocache[2]);
 				sprintf(xbeebuffer, "%d %d %d\n\r", pry[0], pry[1], pry[2]);
 				//sprintf(xbeebuffer, "%d %d %d\n\r", accelint[0], accelint[1], accelint[2]);
+				//sprintf(xbeebuffer, "%d %d %d\n\r", accelcache[0], accelcache[1], accelcache[2]);
 				//sprintf(xbeebuffer, "%d %d %d\n\r", currentMatrix[0], currentMatrix[1], currentMatrix[2]);	
 				//sprintf(xbeebuffer, "%3d %3d %3d\n\r", gyroint[0], gyroint[1], gyroint[2]);
 				//sprintf(xbeebuffer, "%4d %4d %4d %4d\n\r", motorSpeeds[0], motorSpeeds[1], motorSpeeds[2], motorSpeeds[3]);
@@ -366,12 +395,15 @@ int main(void){
 
 				motorSpeed(pry, integration ,gyroint, joyaxis, motorSpeeds, pidValues, pidValuesDen);
 
-/*
+
 				TCD0.CCA = motorSpeeds[0] + motorup;// - motordif13;
 				TCD0.CCC = motorSpeeds[2] + motorup;// +  motordif13;
 				TCD0.CCB = motorSpeeds[1] + motorup;// + motordif24;
 				TCD0.CCD = motorSpeeds[3] + motorup;// - motordif24;
-*/
+
+
+
+				pry[2] = 0;
 
 				PORTD.OUT ^= 0b00100000;
 

@@ -363,6 +363,8 @@ void motorSpeed(int * pry,
 }
 
 void yawCorrect(int * motorSpeeds, int * gyroint, int * roterr, char * pidRotUp, char * pidRotDenUp, char * pidRotDown, char * pidRotDenDown){
+	int roterrup;
+	int roterrdown;
 	int diferrup = gyroint[2] * pidRotUp[2]/pidRotDenUp[2];
 	int diferrdown = gyroint[2] * pidRotDown[2]/pidRotDown[2];
 
@@ -387,10 +389,10 @@ void yawCorrect(int * motorSpeeds, int * gyroint, int * roterr, char * pidRotUp,
 		*roterr = -411;
 	}
 
-	int roterrup = *roterr * pidRotUp[0]/pidRotDenUp[0];	
-	int roterrdown = *roterr * pidRotDown[0]/pidRotDenDown[0];	
+	roterrup = *roterr * pidRotUp[0]/pidRotDenUp[0];	
+	roterrdown = *roterr * pidRotDown[0]/pidRotDenDown[0];	
 
-	if(roterrup > 0){
+	if(roterr > 0){
 		motorSpeeds[0] += roterrup;
 		motorSpeeds[2] += roterrup;
 		motorSpeeds[1] -= roterrdown;

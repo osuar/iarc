@@ -13,9 +13,10 @@
 #define GWEIGHT 8
 
 #define ROTJOYSENSDOWN 2
-#define ROTJOYSENSUP 1
+#define ROTJOYSENSUP 1/2
 #define ZJOYSENS 1
 #define THROTTLEMAIN 4
+#define PRJOYDIF 1
 #define TILTJOYSENS 2
 #define THROTTLEJOYDIF 5
 #define YAWJOYDIF 3

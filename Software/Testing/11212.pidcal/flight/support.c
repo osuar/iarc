@@ -168,6 +168,10 @@ void getaccel(int *accelcache, TWI_Master_t *imu, uint8_t *accelstartbyte){
 		while(imu->result == TWIM_RESULT_UNKNOWN);
 	}while(!(imu->readData[0] & 0x80));
 
+	for(i=0;i<3;i++){
+		accelcache[i] = 0;
+	}
+
 	for(i = 0; i < 5; i += 2){
 		if(imu->readData[i + 3] & 0x80){
 			accelcache[i/2] -= 256 * (~imu->readData[i + 3] + 1);
@@ -179,7 +183,7 @@ void getaccel(int *accelcache, TWI_Master_t *imu, uint8_t *accelstartbyte){
 		}
 	}
 	for(i = 0; i < 3; i ++){
-			accelcache[i] = (accelcache[i] >> 2) * 3;
+			accelcache[i] = (accelcache[i] * 2);
 	}
 }
 

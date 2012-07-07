@@ -194,19 +194,18 @@ void motorSpeed(int * pry,
 		int * pidValues,
 		int * pidValuesDen){
 	int i;
+	int prybuffer[3];
+	for(i=0;i<3;i++){
+		prybuffer[i] = pry[i];
+	}
 	for(i = 0; i < 4; i ++){
 		motorSpeeds[i] = MOTORREG;
 		//Joystick Throttle
 		motorSpeeds[i] -= joystick[2] * ZJOYSENS;
 	}
-	for(i =0; i < 2; i ++){
-		if(abs(pry[i]) < 10){
-			pry[i] = 0;
-		}
-	}
 	//For x axis rotating on Z
-	motorSpeeds[0] -= (-pry[1] * pidValues[0]/pidValuesDen[0]) + (integration[0] * pidValues[1]) + (gyroint[1] * pidValues[2]/pidValuesDen[2]);
-	motorSpeeds[2] += (-pry[1] * pidValues[0]/pidValuesDen[0]) + (integration[0] * pidValues[1]) + (gyroint[1] * pidValues[2]/pidValuesDen[2]);
+	motorSpeeds[0] += (-prybuffer[1] * pidValues[0]/pidValuesDen[0]) + (integration[0] * pidValues[1]) - (gyroint[1] * pidValues[2]/pidValuesDen[2]);
+	motorSpeeds[2] -= (-prybuffer[1] * pidValues[0]/pidValuesDen[0]) + (integration[0] * pidValues[1]) - (gyroint[1] * pidValues[2]/pidValuesDen[2]);
 	//Joystick X axis tilt
 	motorSpeeds[0] += joystick[0] * TILTJOYSENS;
 	motorSpeeds[2] -= joystick[0] * TILTJOYSENS;
@@ -215,8 +214,8 @@ void motorSpeed(int * pry,
 	motorSpeeds[2] += joystick[3] * ROTJOYSENS;
 	
 	//For y axis rotating on Z
-	motorSpeeds[1] -= (pry[0] * pidValues[0]/pidValuesDen[0]) + (integration[1] * pidValues[1]) - (gyroint[0] * pidValues[2]/pidValuesDen[2]);
-	motorSpeeds[3] += (pry[0] * pidValues[0]/pidValuesDen[0]) + (integration[1] * pidValues[1]) - (gyroint[0] * pidValues[2]/pidValuesDen[2]);
+	motorSpeeds[1] += (prybuffer[0] * pidValues[0]/pidValuesDen[0]) + (integration[1] * pidValues[1]) + (gyroint[0] * pidValues[2]/pidValuesDen[2]);
+	motorSpeeds[3] -= (prybuffer[0] * pidValues[0]/pidValuesDen[0]) + (integration[1] * pidValues[1]) + (gyroint[0] * pidValues[2]/pidValuesDen[2]);
 	//Joystick Y axis tilt
 	motorSpeeds[1] -= joystick[1] * TILTJOYSENS;
 	motorSpeeds[3] += joystick[1] * TILTJOYSENS;
