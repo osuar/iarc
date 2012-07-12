@@ -1,0 +1,14 @@
+<package>
+  <description brief="navigation">
+
+     navigation
+
+  </description>
+  <author>Kyle Dillon</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/navigation</url>
+
+</package>
+
+
