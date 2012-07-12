@@ -1,0 +1,14 @@
+<package>
+  <description brief="osuar_vision">
+
+     osuar_vision
+
+  </description>
+  <author>yoos</author>
+  <license>BSD</license>
+  <review status="unreviewed" notes=""/>
+  <url>http://ros.org/wiki/osuar_vision</url>
+
+</package>
+
+
