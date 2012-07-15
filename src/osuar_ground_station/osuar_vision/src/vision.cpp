@@ -1,5 +1,5 @@
 // AppliedRoboticsCV.cpp : Defines the entry point for the console application.
-#include "blob_detection.h"
+#include <osuar_vision/blob_detection.h>
 #define ORIGIONALIMAGE 0
 #define HUEIMAGE 1
 #define SATIMAGE 2

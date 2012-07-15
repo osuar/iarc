@@ -1,0 +1,37 @@
+
+
+This is a quick port of the Windows cvblobs8.3 library to Linux.
+
+A make file is included which produces the static library: libblob.a
+
+Installation:
+-After extracting the files, go into the source directory.
+-Command: 
+	make
+ to compile the source code. The output file is: libblob.a
+-Copy this into /usr/local/lib
+      su
+      <write your root password>
+      cp libblob.a /usr/local/lib
+      ldconfig
+      exit
+The command 'ldconfig' registers the new library.
+
+You can also copy all header file to a suitable location such as:
+    /usr/local/include/cvblobs
+so that they are avilable for all programs.
+In that case, change the include lines (for example):
+from:
+   	#include "BlobResult.h"
+to:
+	#include <cvblobs/BlobResult.h>
+for all of your related source files.
+
+Comment:
+There was some major problem with the file:BlobProperties.h 
+Some surgery was reuired to make it compilable under g++.
+
+Ahmet Onat
+I can be reached at: ahmetonat <inthedomain> gmail
+Sorry about the obfuscation above to block out crawlers.
+
