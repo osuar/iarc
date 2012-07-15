@@ -41,6 +41,11 @@ endif (OpenCV_FOUND)
 # http://opencv.willowgarage.com/wiki/cvBlobsLib
 # We eventually need to use the cvblobs library from here instead:
 # http://code.google.com/p/cvblob/
-find_library(CVBLOB_LIBRARY libblob.a)
-target_link_libraries(vision ${CVBLOB_LIBRARY})
+rosbuild_add_library(cvblob include/cvblobs/blob.cpp
+                            include/cvblobs/BlobContour.cpp
+                            include/cvblobs/BlobOperators.cpp
+                            include/cvblobs/BlobProperties.cpp
+                            include/cvblobs/BlobResult.cpp
+                            include/cvblobs/ComponentLabeling.cpp)
+target_link_libraries(vision cvblob)
 
