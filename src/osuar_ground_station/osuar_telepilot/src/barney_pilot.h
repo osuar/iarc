@@ -7,6 +7,8 @@
 #include "rxtx_server/heading_pos.h"
 #include "osuar_telepilot/altitude_request.h"
 #include "osuar_telepilot/altitude_command.h"
+#include "osuar_telepilot/wall_command.h"
+#include "osuar_telepilot/wall_request.h"
 #include "altitude.h"
 
 /*
@@ -75,7 +77,9 @@ void joystick::joyCallback(const sensor_msgs::Joy::ConstPtr& joy){
 class distance{
 	public:
 		distance();
-		int vertical;
+		unsigned int vertical;
+		unsigned int prev;
+		unsigned int horizontal_1;
 		char updateFlag;
 	private: void lidarCallback(const rxtx_server::distance::ConstPtr& lidardata);
 		ros::NodeHandle n;
@@ -88,7 +92,24 @@ distance::distance(){
 void distance::lidarCallback(const rxtx_server::distance::ConstPtr& lidardata){
 	//ROS_INFO("Lidar is %d\n", lidardata->vertical);
 	updateFlag = 1;
-	vertical = lidardata->vertical;
+	vertical = ((2 * lidardata->vertical) + vertical)/3;
+	horizontal_1 = lidardata->horizontal_1;
+	horizontal_1 = ((2 * lidardata->horizontal_1) + horizontal_1)/3;
+
+	if(vertical > 120){
+		vertical = 0;
+	}
+
+	if(vertical > (prev + 5)){
+		vertical = prev + 5;
+	}
+	else if(prev > 5){
+		if(vertical < (prev - 5)){
+			vertical = prev - 5;
+		}
+	}
+	prev = vertical;
+	
 }
 
 class angular_pos{
@@ -134,8 +155,29 @@ void altitude_handler::altitude_handlerCallback(const osuar_telepilot::altitude_
 	throttle_big= altitude_command_data->throttle_big;
 	status = altitude_command_data->status;
 
-	mvprintw(21,0,"RECEIVING THROTTLE_LITTLE %4d\n", throttle_little);
-	mvprintw(22,0,"RECEIVING THROTTLE_BIG %4d\n", throttle_big);
+	mvprintw(21,0,"RECEIVING THROTTLE_LITTLE %4d", throttle_little);
+	mvprintw(22,0,"RECEIVING THROTTLE_BIG %4d", throttle_big);
+}
+
+class wall_handler{
+	public:
+		wall_handler();
+		int tilt;
+		char status;
+	private:
+		void wall_handlerCallback(const osuar_telepilot::wall_command::ConstPtr& wall_command_data);
+		ros::NodeHandle n;
+		ros::Subscriber wall_handler_sub;
+};
+wall_handler::wall_handler(){
+	wall_handler_sub = n.subscribe<osuar_telepilot::wall_command>("wall_info", 1, &wall_handler::wall_handlerCallback, this);
+}
+
+void wall_handler::wall_handlerCallback(const osuar_telepilot::wall_command::ConstPtr& wall_command_data){
+	tilt = wall_command_data->tilt;
+	status = wall_command_data->status;
+
+	mvprintw(21,40,"RECEIVING TILT %4d\n", tilt);
 }
 
 
