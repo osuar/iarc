@@ -42,10 +42,10 @@ int main(int argc, char ** argv){
 
 	ros::Publisher altitude_handler_pub = n.advertise<osuar_telepilot::altitude_request>("altitude_request", 1);
 	osuar_telepilot::altitude_request altitude_request_data;
-	altitude_request_data.p = 60;
+	altitude_request_data.p = 28;
 	altitude_request_data.d = 0;
-	altitude_request_data.i = 10;
-	altitude_request_data.target = 50;
+	altitude_request_data.i = 15;
+	altitude_request_data.target = 40;
 	altitude_request_data.status = STARTING;
 
 
@@ -292,7 +292,8 @@ int main(int argc, char ** argv){
 			commandData.button = sent_status;
 		}
 */
-		if(commandData.button == prev){
+		/*Make sure it doesn't repeat any commands but stop and reset*/
+		if((commandData.button == prev) && (prev != 4) && (prev != 9)){
 			commandData.button = 20;
 		}
 		else{

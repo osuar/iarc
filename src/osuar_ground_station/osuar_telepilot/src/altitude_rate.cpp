@@ -60,15 +60,18 @@ void altitude_handle::altitude_handleCallback(const osuar_telepilot::altitude_re
 			}
 			else{
 				read_number ++;
-				integral += 20;
+				integral += 25;
+
 			}
 		}
 		else{
 			comm_out.status = LAND;
 			read_number = 0;
+			integral += 25;
+
 		}
 
-			comm_out.throttle_big = TAKEOFF_SPEED + ((integral * altitude_input->p)/5000);
+			comm_out.throttle_big = TAKEOFF_SPEED + ((integral * altitude_input->i)/5000);
 		command_pub.publish(comm_out);
 
 	}
@@ -143,12 +146,12 @@ void altitude_handle::altitude_handleCallback(const osuar_telepilot::altitude_re
 
 		rate_position = (rate_position * altitude_input->p)/5;
 		throttle_buffer = rate_position;// + (differential));
-		throttle_big_buffer = integral * altitude_input->i / 5000;
-		if(throttle_big_buffer > 32){
-			throttle_big_buffer = 32;
+		throttle_big_buffer = (integral * altitude_input->i) / 5000;
+		if(throttle_big_buffer > 60){
+			throttle_big_buffer = 60;
 		}
-		else if(throttle_big_buffer < -32){
-			throttle_big_buffer = -32;
+		else if(throttle_big_buffer < -60){
+			throttle_big_buffer = -60;
 		}
 		if(throttle_buffer > THROTTLE_MAX){
 			throttle_buffer = THROTTLE_MAX;
