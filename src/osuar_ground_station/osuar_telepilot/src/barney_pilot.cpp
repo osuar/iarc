@@ -130,6 +130,7 @@ int main(int argc, char ** argv){
 				mvprintw(0,0,"LAND       \n");
 			}
 			else if(keyboard == 'r'){
+				altitude_request_data.target = 40;
 				altitude_request_data.status = STARTING;
 				mvprintw(0,0,"STARTING   \n");
 			}
