@@ -28,17 +28,14 @@ altitude_handle::altitude_handle(){
 }
 
 void altitude_handle::altitude_handleCallback(const osuar_telepilot::altitude_request::ConstPtr& altitude_input){
-/*
-	comm_out.throttle_little = -200;
-	comm_out.throttle_big = 55;
-	command_pub.publish(comm_out);
-*/
-
+	
 	int i;
 	int differential = 0;
 	int position = 0;;
 	int throttle_buffer;
 	int throttle_big_buffer;
+	int rate_position;
+	int rate_target;
 	target = altitude_input->target;
 	if(altitude_input->status == STARTING){
 		integral = 0;
@@ -53,9 +50,9 @@ void altitude_handle::altitude_handleCallback(const osuar_telepilot::altitude_re
 		command_pub.publish(comm_out);
 
 	}
+
 	else if(altitude_input->status == TAKEOFF){
 		comm_out.throttle_little = 0;
-		comm_out.throttle_big = TAKEOFF_SPEED;
 		if(((altitude_input->distance) > 18) && ((altitude_input->distance) < 200)){
 			if(read_number > 10){
 				comm_out.status = HOVER;
@@ -63,69 +60,98 @@ void altitude_handle::altitude_handleCallback(const osuar_telepilot::altitude_re
 			}
 			else{
 				read_number ++;
+				integral += 25;
+
 			}
 		}
 		else{
 			comm_out.status = LAND;
 			read_number = 0;
+			integral += 25;
+
 		}
+
+			comm_out.throttle_big = TAKEOFF_SPEED + ((integral * altitude_input->i)/5000);
 		command_pub.publish(comm_out);
 
 	}
 
 	else if(altitude_input->status == HOVER){
 		//If close to ground, don't modify throttle
-		if((altitude_input->distance > 200) || (altitude_input->distance < 20)){
+		if((altitude_input->distance > 200) || (altitude_input->distance < 16)){
 			comm_out.status = LAND; 
 		}
 		//Otherwise, should make constance, but setting basic height to 80 (~4ft)
 		else{
 			comm_out.status = HOVER; 
 		}
-		if(altitude_input->distance > 200){
-
+		if(read_number < 5){
+			distance_cache[read_number] = altitude_input->distance;
+			read_number ++;
+			differential = 0;
 		}
 		else{
-			if(read_number < 5){
-				distance_cache[read_number] = altitude_input->distance;
-				read_number ++;
-				differential = 0;
+
+			for(i=0;i<4;i++){
+				distance_cache[i] = distance_cache[i+1];
+			}
+			distance_cache[4] = altitude_input->distance;
+			differential = 0;
+			differential += distance_cache[4] - distance_cache[3];
+			differential += distance_cache[3] - distance_cache[2];
+			differential += distance_cache[2] - distance_cache[1];
+			differential += distance_cache[1] - distance_cache[0];
+			//differential = differential * altitude_input->d/5;
+		}
+
+		position = target - distance_cache[4];
+		integral += position;
+		//position = (position * altitude_input->p /5);
+
+		if(abs(position) < 5){
+			rate_target = 0;
+		}
+		else if(position > 0){
+			if(position < 10){
+				rate_target = 2;
+			}
+			else if(position < 15){
+				rate_target = 3;
+			}
+			else if(position < 20){
+				rate_target = 5;
 			}
 			else{
-
-				for(i=0;i<4;i++){
-					distance_cache[i] = distance_cache[i+1];
-				}
-				distance_cache[4] = altitude_input->distance;
-				differential = 0;
-				differential -= distance_cache[4] - distance_cache[3];
-				differential = differential * altitude_input->d/5;
+				rate_target = 6;
 			}
-			
-			position = target - distance_cache[4];
-			integral += position;
-			position = (position * altitude_input->p /5);
+		}
+		else{
+			if(position > -10){
+				rate_target = -1;
+			}
+			else if(position > -15){
+				rate_target = -2;
+			}
+			else if(position > -20){
+				rate_target = -3;
+			}
+			else if(position > -30){
+				rate_target = -4;
+			}
+			else{
+				rate_target = -6;
+			}
+		}
+		rate_position = rate_target - differential;	
 
+		rate_position = (rate_position * altitude_input->p)/5;
+		throttle_buffer = rate_position;// + (differential));
+		throttle_big_buffer = (integral * altitude_input->i) / 5000;
+		if(throttle_big_buffer > 60){
+			throttle_big_buffer = 60;
 		}
-		if(differential > DIF_MAX){
-			differential = DIF_MAX;
-		}
-		else if(differential < -DIF_MAX){
-			differential = -DIF_MAX;
-		}
-		if(position > POS_MAX){
-			position = POS_MAX;
-		}
-		else if(position < -POS_MAX){
-			position = -POS_MAX;
-		}
-		throttle_buffer = int((position) + (differential));
-		throttle_big_buffer = integral * altitude_input->i / 5000;
-		if(throttle_big_buffer > 32){
-			throttle_big_buffer = 32;
-		}
-		else if(throttle_big_buffer < -32){
-			throttle_big_buffer = -32;
+		else if(throttle_big_buffer < -60){
+			throttle_big_buffer = -60;
 		}
 		if(throttle_buffer > THROTTLE_MAX){
 			throttle_buffer = THROTTLE_MAX;
