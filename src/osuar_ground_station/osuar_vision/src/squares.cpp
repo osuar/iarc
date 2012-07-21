@@ -140,7 +140,8 @@ static void drawSquares( Mat& image, const vector<vector<Point> >& squares )
 
 
 int main(int /*argc*/, char** /*argv*/) {
-    // Instantiate VideoCapture object.
+    // Instantiate VideoCapture object. See here for details:
+    // http://opencv.willowgarage.com/documentation/cpp/reading_and_writing_images_and_video.html
     VideoCapture cap(0);
 
     // Configure video.
