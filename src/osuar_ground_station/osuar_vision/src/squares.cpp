@@ -139,29 +139,34 @@ static void drawSquares( Mat& image, const vector<vector<Point> >& squares )
 }
 
 
-int main(int /*argc*/, char** /*argv*/)
-{
-    static const char* names[] = { "pic1.png", "pic2.png", "pic3.png",
-        "pic4.png", "pic5.png", "pic6.png", 0 };
-    help();
-    namedWindow( wndname, 1 );
+int main(int /*argc*/, char** /*argv*/) {
+    // Instantiate VideoCapture object.
+    VideoCapture cap(0);
+
+    // Configure video.
+    cap.set(CV_CAP_PROP_FRAME_WIDTH, 320);
+    cap.set(CV_CAP_PROP_FRAME_HEIGHT, 240);
+    cap.set(CV_CAP_PROP_FPS, 20);
+
+    // Instantiate a Mat in which to store each video frame.
+    Mat frame;
+
+    namedWindow(wndname, 1);
     vector<vector<Point> > squares;
 
-    for( int i = 0; names[i] != 0; i++ )
-    {
-        Mat image = imread(names[i], 1);
-        if( image.empty() )
-        {
-            cout << "Couldn't load " << names[i] << endl;
-            continue;
-        }
+    while (true) {
+        // Capture image.
+        cap >> frame;
 
-        findSquares(image, squares);
-        drawSquares(image, squares);
+        // Find and draw squares.
+        findSquares(frame, squares);
+        drawSquares(frame, squares);
 
-        int c = waitKey();
-        if( (char)c == 27 )
-            break;
+        // Show the image, with the squares overlaid.
+        imshow(wndname, frame);
+
+        // Wait 5 milliseconds.
+        waitKey(5);
     }
 
     return 0;
