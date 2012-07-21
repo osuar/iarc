@@ -30,18 +30,20 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #target_link_libraries(example ${PROJECT_NAME})
 
 rosbuild_add_executable(vision src/vision.cpp)
+rosbuild_add_executable(squares src/squares.cpp)
 
-find_package(OpenCV required)
+find_package(OpenCV REQUIRED)
 if (OpenCV_FOUND)
     include_directories(${OpenCV_INCLUDE_DIR})
     target_link_libraries(vision ${OpenCV_LIBS})
+    target_link_libraries(squares ${OpenCV_LIBS})
 endif (OpenCV_FOUND)
 
 # We are currently using an old version of cvblobs from here:
 # http://opencv.willowgarage.com/wiki/cvBlobsLib
 # We eventually need to use the cvblobs library from here instead:
 # http://code.google.com/p/cvblob/
-find_package(cvBlob required)
+find_package(cvBlob REQUIRED)
 if (cvBlob_FOUND)
     target_link_libraries(vision ${cvBlob_LIBS})
 endif (cvBlob_FOUND)
