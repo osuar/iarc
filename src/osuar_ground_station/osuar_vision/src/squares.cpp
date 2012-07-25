@@ -13,6 +13,19 @@
 using namespace cv;
 
 int thresh = 50, N = 11;
+
+// Find colors of any hue...
+int wallHueLow  = 0;
+int wallHueHigh = 179;
+
+// ...of low saturation...
+int wallSatLow  = 0;
+int wallSatHigh = 40;
+
+// ...ranging down to gray, but not completely dark. That is to say, white.
+int wallValLow  = 50;
+int wallValHigh = 255;
+
 const char* wndname = "Square Detection Demo";
 
 // helper function:
@@ -41,10 +54,10 @@ static void findSquares( const Mat& image, vector<vector<Point> >& squares )
     vector<vector<Point> > contours;
 
     // find squares in every color plane of the image
-    for( int c = 0; c < 3; c++ )
-    {
-        int ch[] = {c, 0};
-        mixChannels(&timg, 1, &gray0, 1, ch, 1);
+    //for( int c = 0; c < 3; c++ )
+    //{
+        //int ch[] = {c, 0};
+        //mixChannels(&timg, 1, &gray0, 1, ch, 1);
 
         // try several threshold levels
         for( int l = 0; l < N; l++ )
@@ -106,7 +119,7 @@ static void findSquares( const Mat& image, vector<vector<Point> >& squares )
                 }
             }
         }
-    }
+    //}
 }
 
 
@@ -119,8 +132,6 @@ static void drawSquares( Mat& image, const vector<vector<Point> >& squares )
         int n = (int)squares[i].size();
         polylines(image, &p, &n, 1, true, Scalar(0,255,0), 3, CV_AA);
     }
-
-    imshow(wndname, image);
 }
 
 
@@ -137,11 +148,21 @@ int main(int /*argc*/, char** /*argv*/) {
 
     // Instantiate a Mat in which to store each video frame.
     Mat origFrame;
-    Mat resizedFrame;
+    Mat resizedFrame;   // Scaled-down from origFrame by factor of 2.
+    Mat hsvFrame;   // Converted to HSV space from resizedFrame.
+    Mat bwFrame;   // Black/white image after thresholding hsvFrame.
 
-    namedWindow(wndname, 1);
+    namedWindow("origImage", 1);
+    namedWindow("hsvImage", 1);
+    namedWindow("bwImage", 1);
     cvNamedWindow("control panel");
-    cvCreateTrackbar("threshold", "control panel", &thresh, 300, NULL);
+    cvCreateTrackbar("threshold",   "control panel", &thresh,      300, NULL);
+    cvCreateTrackbar("wallHueLow",  "control panel", &wallHueLow,  179, NULL);
+    cvCreateTrackbar("wallHueHigh", "control panel", &wallHueHigh, 179, NULL);
+    cvCreateTrackbar("wallSatLow",  "control panel", &wallSatLow,  255, NULL);
+    cvCreateTrackbar("wallSatHigh", "control panel", &wallSatHigh, 255, NULL);
+    cvCreateTrackbar("wallValLow",  "control panel", &wallValLow,  255, NULL);
+    cvCreateTrackbar("wallValHigh", "control panel", &wallValHigh, 255, NULL);
     vector<vector<Point> > squares;
 
     while (true) {
@@ -152,12 +173,22 @@ int main(int /*argc*/, char** /*argv*/) {
         // http://opencv.willowgarage.com/documentation/cpp/image_filtering.html
         pyrDown(origFrame, resizedFrame, Size(origFrame.cols/2, origFrame.rows/2));
 
+        // Convert the frame to HSV. TODO: combine this with more filtering and
+        // turn into function.
+        cvtColor(resizedFrame, hsvFrame, CV_BGR2HSV);
+
+        // Threshold hsvFrame for color of maze walls.
+        inRange(hsvFrame, Scalar(wallHueLow,  wallSatLow,  wallValLow),
+                          Scalar(wallHueHigh, wallSatHigh, wallValHigh), bwFrame);
+
         // Find and draw squares.
-        findSquares(resizedFrame, squares);
+        findSquares(bwFrame, squares);
         drawSquares(resizedFrame, squares);
 
         // Show the image, with the squares overlaid.
-        imshow(wndname, resizedFrame);
+        imshow("origImage", resizedFrame);
+        imshow("hsvImage", hsvFrame);
+        imshow("bwImage", bwFrame);
 
         // Wait 5 milliseconds for a keypress.
         int c = waitKey(5);
