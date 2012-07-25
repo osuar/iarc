@@ -159,8 +159,14 @@ int main(int /*argc*/, char** /*argv*/) {
         // Show the image, with the squares overlaid.
         imshow(wndname, resizedFrame);
 
-        // Wait 5 milliseconds.
-        waitKey(5);
+        // Wait 5 milliseconds for a keypress.
+        int c = waitKey(5);
+        // Exit if the spacebar is pressed. NOTE: killing the program with
+        // Ctrl+C sometimes stops OpenCV at a bad place and effects a kernel
+        // panic! If you really like Ctrl+C, do so at your own risk!
+        if ((char) c == 32) {
+            return 0;
+        }
     }
 
     return 0;
