@@ -148,9 +148,9 @@ int main(int /*argc*/, char** /*argv*/) {
         // Capture image.
         cap >> origFrame;
 
-        // Resize image to increase processing rate. See here for details:
-        // http://opencv.willowgarage.com/documentation/cpp/geometric_image_transformations.html
-        resize(origFrame, resizedFrame, Size(origFrame.cols/2, origFrame.rows/2), 0, 0, INTER_LINEAR);
+        // Resize the image to increase processing rate. See here for details:
+        // http://opencv.willowgarage.com/documentation/cpp/image_filtering.html
+        pyrDown(origFrame, resizedFrame, Size(origFrame.cols/2, origFrame.rows/2));
 
         // Find and draw squares.
         findSquares(resizedFrame, squares);
