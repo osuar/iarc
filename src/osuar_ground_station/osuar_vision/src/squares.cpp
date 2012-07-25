@@ -11,21 +11,6 @@
 #include <string.h>
 
 using namespace cv;
-using namespace std;
-
-static void help()
-{
-    cout <<
-    "\nA program using pyramid scaling, Canny, contours, contour simpification and\n"
-    "memory storage (it's got it all folks) to find\n"
-    "squares in a list of images pic1-6.png\n"
-    "Returns sequence of squares detected on the image.\n"
-    "the sequence is stored in the specified memory storage\n"
-    "Call:\n"
-    "./squares\n"
-    "Using OpenCV version %s\n" << CV_VERSION << "\n" << endl;
-}
-
 
 int thresh = 50, N = 11;
 const char* wndname = "Square Detection Demo";
@@ -142,29 +127,37 @@ static void drawSquares( Mat& image, const vector<vector<Point> >& squares )
 int main(int /*argc*/, char** /*argv*/) {
     // Instantiate VideoCapture object. See here for details:
     // http://opencv.willowgarage.com/documentation/cpp/reading_and_writing_images_and_video.html
-    VideoCapture cap(0);
+    VideoCapture cap(1);
 
-    // Configure video.
-    cap.set(CV_CAP_PROP_FRAME_WIDTH, 320);
-    cap.set(CV_CAP_PROP_FRAME_HEIGHT, 240);
-    cap.set(CV_CAP_PROP_FPS, 20);
+    // Configure video. Our camera NEEDS the frame width to be set to 720
+    // pixels.
+    cap.set(CV_CAP_PROP_FRAME_WIDTH, 720);
+    cap.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
+    //cap.set(CV_CAP_PROP_FPS, 20);
 
     // Instantiate a Mat in which to store each video frame.
-    Mat frame;
+    Mat origFrame;
+    Mat resizedFrame;
 
     namedWindow(wndname, 1);
+    cvNamedWindow("control panel");
+    cvCreateTrackbar("threshold", "control panel", &thresh, 300, NULL);
     vector<vector<Point> > squares;
 
     while (true) {
         // Capture image.
-        cap >> frame;
+        cap >> origFrame;
+
+        // Resize image to increase processing rate. See here for details:
+        // http://opencv.willowgarage.com/documentation/cpp/geometric_image_transformations.html
+        resize(origFrame, resizedFrame, Size(origFrame.cols/2, origFrame.rows/2), 0, 0, INTER_LINEAR);
 
         // Find and draw squares.
-        findSquares(frame, squares);
-        drawSquares(frame, squares);
+        findSquares(resizedFrame, squares);
+        drawSquares(resizedFrame, squares);
 
         // Show the image, with the squares overlaid.
-        imshow(wndname, frame);
+        imshow(wndname, resizedFrame);
 
         // Wait 5 milliseconds.
         waitKey(5);
