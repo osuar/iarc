@@ -110,7 +110,9 @@ static void findSquares( const Mat& image, vector<vector<Point> >& squares )
                     isContourConvex(Mat(approx)) )
                 {
                     double maxCosine = 0;
-                    double maxDiff = 0;
+                    double minSideLen = 100000;
+                    double maxSideLen = 0;
+                    double sideRatio = 0;
 
                     for( int j = 2; j < 5; j++ )
                     {
@@ -120,14 +122,19 @@ static void findSquares( const Mat& image, vector<vector<Point> >& squares )
 
                         // Find the maximum difference in length of adjacent
                         // sides
-                        double diff = sqrt(pow((approx[j%4].x - approx[(j+1)%4].x), 2) + pow((approx[j%4].y - approx[(j+1)%4].y), 2));
-                        maxDiff = MAX(maxDiff, diff);
+                        double sideLen = sqrt(pow((approx[j%4].x - approx[(j+1)%4].x), 2) + pow((approx[j%4].y - approx[(j+1)%4].y), 2));
+                        minSideLen = MIN(minSideLen, sideLen);
+                        maxSideLen = MAX(maxSideLen, sideLen);
                     }
+
+                    sideRatio = minSideLen / maxSideLen;
+
+                    std::cout << minSideLen << "  " << maxSideLen << "\n";
 
                     // if cosines of all angles are small
                     // (all angles are ~90 degree) then write quandrange
                     // vertices to resultant sequence
-                    if( maxCosine < ((double) maxCosineThresh)/100 && maxDiff < (double) maxDiffThresh )
+                    if( maxCosine < ((double) maxCosineThresh)/100 && sideRatio >= (double) sideRatioThresh/100 )
                         squares.push_back(approx);
                 }
             }
