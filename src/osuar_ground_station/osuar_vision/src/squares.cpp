@@ -11,6 +11,9 @@
 #include <string.h>
 #include <stdio.h>
 
+#include <ros/ros.h>
+#include <osuar_vision/windowCoordinates.h>
+
 using namespace cv;
 
 int thresh = 50, N = 11;
@@ -23,13 +26,14 @@ int wallHueHigh = 179;
 
 // ...of low saturation...
 int wallSatLow  = 0;
-int wallSatHigh = 40;
+int wallSatHigh = 60;
 
 // ...ranging down to gray, but not completely dark. That is to say, white.
 int wallValLow  = 50;
 int wallValHigh = 255;
 
-const char* wndname = "Square Detection Demo";
+ros::Publisher visPub;
+osuar_vision::windowCoordinates winCoords;
 
 // helper function:
 // finds a cosine of angle between vectors
@@ -141,12 +145,26 @@ static void drawSquares( Mat& image, const vector<vector<Point> >& squares )
         int n = (int)squares[i].size();
         polylines(image, &p, &n, 1, true, Scalar(0,255,0), 3, CV_AA);
 
-        std::cout << "x: " << squares[i][2].x << "  y: " << squares[i][2].y << "\n";
+        std::cout << "x: " << squares[i][0].x << "  y: " << squares[i][0].y << "\n";
+
+        // Only publish coordinates for one of the squares. Coordinates are
+        // shifted over by half the camera resolution (which itself is scaled
+        // down by a factor of two!) on each axis. The y coordinate is inverted
+        // so up is positive.
+        if (i == 0) {
+            winCoords.x =   (squares[0][0].x + squares[0][2].x)/2 - 180;
+            winCoords.y = -((squares[0][0].y + squares[0][2].y)/2 - 120);
+            visPub.publish(winCoords);
+        }
     }
 }
 
 
-int main(int /*argc*/, char** /*argv*/) {
+int main(int argc, char** argv) {
+    ros::init(argc, argv, "vision");
+    ros::NodeHandle nh;
+    visPub = nh.advertise<osuar_vision::windowCoordinates>("window_coordinates", 1);
+
     // Instantiate VideoCapture object. See here for details:
     // http://opencv.willowgarage.com/documentation/cpp/reading_and_writing_images_and_video.html
     VideoCapture cap(1);
