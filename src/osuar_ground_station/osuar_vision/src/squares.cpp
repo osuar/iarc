@@ -163,6 +163,10 @@ static void drawSquares( Mat& image, const vector<vector<Point> >& squares )
         // down by a factor of two!) on each axis. The y coordinate is inverted
         // so up is positive.
         if (i == 0) {
+            putText(image, "0", squares[0][0], FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255,0,0));
+            putText(image, "1", squares[0][1], FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255,0,0));
+            putText(image, "2", squares[0][2], FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255,0,0));
+            putText(image, "3", squares[0][3], FONT_HERSHEY_SIMPLEX, 0.5, Scalar(255,0,0));
             winCoords.x =   (squares[0][0].x + squares[0][2].x)/2 - 180;
             winCoords.y = -((squares[0][0].y + squares[0][2].y)/2 - 120);
             visPub.publish(winCoords);
