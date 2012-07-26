@@ -22,7 +22,10 @@ int thresh = 50, N = 11;
 int maxCosineThresh = 25;
 
 // Threshold for ratio of shortest side / longest side (x100).
-int sideRatioThresh = 75;
+int sideRatioThresh = 85;
+
+// Maximum square area.
+int maxSquareArea = 41000;
 
 // Find colors of any hue...
 int wallHueLow  = 0;
@@ -111,6 +114,7 @@ static void findSquares( const Mat& image, vector<vector<Point> >& squares )
                 // contour orientation
                 if( approx.size() == 4 &&
                     fabs(contourArea(Mat(approx))) > 1000 &&
+                    fabs(contourArea(Mat(approx))) < maxSquareArea &&
                     isContourConvex(Mat(approx)) )
                 {
                     double maxCosine = 0;
@@ -203,6 +207,7 @@ int main(int argc, char** argv) {
     cvCreateTrackbar("threshold",   "control panel", &thresh,      300, NULL);
     cvCreateTrackbar("maxCosineThresh (x100)", "control panel", &maxCosineThresh, 100, NULL);
     cvCreateTrackbar("sideRatioThresh (x100)", "control panel", &sideRatioThresh, 100, NULL);
+    cvCreateTrackbar("maxSquareArea", "control panel", &maxSquareArea, 100000, NULL);
     cvCreateTrackbar("wallHueLow",  "control panel", &wallHueLow,  179, NULL);
     cvCreateTrackbar("wallHueHigh", "control panel", &wallHueHigh, 179, NULL);
     cvCreateTrackbar("wallSatLow",  "control panel", &wallSatLow,  255, NULL);
