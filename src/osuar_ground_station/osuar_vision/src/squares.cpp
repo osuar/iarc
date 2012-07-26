@@ -9,10 +9,13 @@
 #include <iostream>
 #include <math.h>
 #include <string.h>
+#include <stdio.h>
 
 using namespace cv;
 
 int thresh = 50, N = 11;
+int maxCosineThresh = 25;
+int maxDiffThresh = 300;
 
 // Find colors of any hue...
 int wallHueLow  = 0;
@@ -103,18 +106,24 @@ static void findSquares( const Mat& image, vector<vector<Point> >& squares )
                     isContourConvex(Mat(approx)) )
                 {
                     double maxCosine = 0;
+                    double maxDiff = 0;
 
                     for( int j = 2; j < 5; j++ )
                     {
                         // find the maximum cosine of the angle between joint edges
                         double cosine = fabs(angle(approx[j%4], approx[j-2], approx[j-1]));
                         maxCosine = MAX(maxCosine, cosine);
+
+                        // Find the maximum difference in length of adjacent
+                        // sides
+                        double diff = sqrt(pow((approx[j%4].x - approx[(j+1)%4].x), 2) + pow((approx[j%4].y - approx[(j+1)%4].y), 2));
+                        maxDiff = MAX(maxDiff, diff);
                     }
 
                     // if cosines of all angles are small
                     // (all angles are ~90 degree) then write quandrange
                     // vertices to resultant sequence
-                    if( maxCosine < 0.3 )
+                    if( maxCosine < ((double) maxCosineThresh)/100 && maxDiff < (double) maxDiffThresh )
                         squares.push_back(approx);
                 }
             }
@@ -131,6 +140,8 @@ static void drawSquares( Mat& image, const vector<vector<Point> >& squares )
         const Point* p = &squares[i][0];
         int n = (int)squares[i].size();
         polylines(image, &p, &n, 1, true, Scalar(0,255,0), 3, CV_AA);
+
+        std::cout << "x: " << squares[i][2].x << "  y: " << squares[i][2].y << "\n";
     }
 }
 
@@ -157,6 +168,8 @@ int main(int /*argc*/, char** /*argv*/) {
     namedWindow("bwImage", 1);
     cvNamedWindow("control panel");
     cvCreateTrackbar("threshold",   "control panel", &thresh,      300, NULL);
+    cvCreateTrackbar("maxCosineThresh (x100)",   "control panel", &maxCosineThresh,      100, NULL);
+    cvCreateTrackbar("maxDiffThresh",   "control panel", &maxDiffThresh,      1000, NULL);
     cvCreateTrackbar("wallHueLow",  "control panel", &wallHueLow,  179, NULL);
     cvCreateTrackbar("wallHueHigh", "control panel", &wallHueHigh, 179, NULL);
     cvCreateTrackbar("wallSatLow",  "control panel", &wallSatLow,  255, NULL);
