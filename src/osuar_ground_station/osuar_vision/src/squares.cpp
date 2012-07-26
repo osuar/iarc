@@ -238,7 +238,6 @@ int main(int argc, char** argv) {
 
         // Show the image, with the squares overlaid.
         imshow("origImage", resizedFrame);
-        imshow("hsvImage", hsvFrame);
         imshow("bwImage", bwFrame);
 
         // Wait 5 milliseconds for a keypress.
