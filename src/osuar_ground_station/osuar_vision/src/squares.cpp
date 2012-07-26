@@ -68,7 +68,7 @@ static void findSquares( const Mat& image, vector<vector<Point> >& squares )
             {
                 // apply Canny. Take the upper threshold from slider
                 // and set the lower to 0 (which forces edges merging)
-                Canny(gray0, gray, 0, thresh, 5);
+                Canny(image, gray, 0, thresh, 5);
                 // dilate canny output to remove potential
                 // holes between edge segments
                 dilate(gray, gray, Mat(), Point(-1,-1));
@@ -77,7 +77,7 @@ static void findSquares( const Mat& image, vector<vector<Point> >& squares )
             {
                 // apply threshold if l!=0:
                 //     tgray(x,y) = gray(x,y) < (l+1)*255/N ? 255 : 0
-                gray = gray0 >= (l+1)*255/N;
+                gray = image >= (l+1)*255/N;
             }
 
             // find contours and store them all as a list
@@ -114,7 +114,7 @@ static void findSquares( const Mat& image, vector<vector<Point> >& squares )
                     // if cosines of all angles are small
                     // (all angles are ~90 degree) then write quandrange
                     // vertices to resultant sequence
-                    if( maxCosine < 0.1 )
+                    if( maxCosine < 0.3 )
                         squares.push_back(approx);
                 }
             }
