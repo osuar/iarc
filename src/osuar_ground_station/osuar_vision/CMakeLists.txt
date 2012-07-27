@@ -31,12 +31,14 @@ rosbuild_genmsg()
 
 rosbuild_add_executable(vision src/vision.cpp)
 rosbuild_add_executable(squares src/squares.cpp)
+rosbuild_add_executable(hough src/hough.cpp)
 
 find_package(OpenCV REQUIRED)
 if (OpenCV_FOUND)
     include_directories(${OpenCV_INCLUDE_DIR})
     target_link_libraries(vision ${OpenCV_LIBS})
     target_link_libraries(squares ${OpenCV_LIBS})
+    target_link_libraries(hough ${OpenCV_LIBS})
 endif (OpenCV_FOUND)
 
 # We are currently using an old version of cvblobs from here:
