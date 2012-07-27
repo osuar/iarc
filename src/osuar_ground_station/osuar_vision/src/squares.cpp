@@ -19,24 +19,24 @@ using namespace cv;
 int thresh = 50, N = 11;
 
 // Threshold for maximum cosine between angles (x100).
-int maxCosineThresh = 25;
+int maxCosineThresh = 20;
 
 // Threshold for ratio of shortest side / longest side (x100).
-int sideRatioThresh = 85;
+int sideRatioThresh = 75;
 
 // Maximum square area.
 int maxSquareArea = 41000;
 
 // Find colors of any hue...
-int wallHueLow  = 0;
-int wallHueHigh = 179;
+int wallHueLow  = 50;
+int wallHueHigh = 132;
 
 // ...of low saturation...
 int wallSatLow  = 0;
-int wallSatHigh = 40;
+int wallSatHigh = 100;
 
 // ...ranging down to gray, but not completely dark. That is to say, white.
-int wallValLow  = 50;
+int wallValLow  = 90;
 int wallValHigh = 255;
 
 ros::Publisher visPub;
