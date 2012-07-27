@@ -200,10 +200,15 @@ int main(int argc, char** argv) {
     Mat hsvFrame;   // Converted to HSV space from resizedFrame.
     Mat bwFrame;   // Black/white image after thresholding hsvFrame.
 
-    namedWindow("origImage", 1);
-    namedWindow("hsvImage", 1);
-    namedWindow("bwImage", 1);
-    cvNamedWindow("control panel");
+    cvNamedWindow("control panel", 1);
+    cvMoveWindow("control panel", 450, 20);
+
+    cvNamedWindow("origImage", 1);
+    cvMoveWindow("origImage", 20, 20);
+
+    cvNamedWindow("bwImage", 1);
+    cvMoveWindow("bwImage", 20, 270);
+
     cvCreateTrackbar("threshold",   "control panel", &thresh,      300, NULL);
     cvCreateTrackbar("maxCosineThresh (x100)", "control panel", &maxCosineThresh, 100, NULL);
     cvCreateTrackbar("sideRatioThresh (x100)", "control panel", &sideRatioThresh, 100, NULL);
