@@ -1,0 +1,10 @@
+<launch>
+    <node name    = "tx_node"
+          pkg     = "rxtx_server"
+          type    = "tx_node"/>
+
+    <node name    = "rx_node"
+          pkg     = "rxtx_server"
+          type    = "rx_node" />
+</launch>
+
