@@ -86,28 +86,35 @@ static void findSquares( const Mat& image, vector<vector<Point> >& squares )
         //mixChannels(&timg, 1, &gray0, 1, ch, 1);
 
         // try several threshold levels
-        for( int l = 0; l < N; l++ )
-        {
+        //for( int l = 0; l < N; l++ )
+        //{
             // hack: use Canny instead of zero threshold level.
             // Canny helps to catch squares with gradient shading
-            if( l == 0 )
-            {
-                // apply Canny. Take the upper threshold from slider
-                // and set the lower to 0 (which forces edges merging)
-                Canny(image, gray, 0, thresh, 5);
-                // dilate canny output to remove potential
-                // holes between edge segments
-                dilate(gray, gray, Mat(), Point(-1,-1));
-            }
-            else
-            {
-                // apply threshold if l!=0:
-                //     tgray(x,y) = gray(x,y) < (l+1)*255/N ? 255 : 0
-                gray = image >= (l+1)*255/N;
-            }
+            //if( l == 0 )
+            //{
+            //    // apply Canny. Take the upper threshold from slider
+            //    // and set the lower to 0 (which forces edges merging)
+            //    Canny(image, cannyFrame, 0, thresh2, 5);
+            //    // dilate canny output to remove potential
+            //    // holes between edge segments
+            //    dilate(cannyFrame, cannyFrame, Mat(), Point(-1,-1));
+            //}
+            //else
+            //{
+            //    // apply threshold if l!=0:
+            //    //     tgray(x,y) = gray(x,y) < (l+1)*255/N ? 255 : 0
+            //    cannyFrame = image >= (l+1)*255/N;
+            //}
 
             // find contours and store them all as a list
-            findContours(gray, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
+            findContours(cannyFrame, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
+
+            // Draw the contours.
+            //for (int i=0; i<contours.size(); i++) {
+            //    for (int j=0; j<contours[i].size(); j++) {
+            //        line(resizedFrame, contours[i][j], contours[i][j+1], Scalar(0,0,255), 1, 8 );
+            //    }
+            //}
 
             vector<Point> approx;
 
@@ -216,7 +223,11 @@ int main(int argc, char** argv) {
     cvNamedWindow("bwImage", 1);
     cvMoveWindow("bwImage", 20, 270);
 
-    cvCreateTrackbar("threshold",   "control panel", &thresh,      300, NULL);
+    cvNamedWindow("cannyImage", 1);
+    cvMoveWindow("cannyImage", 20, 520);
+
+    cvCreateTrackbar("thresh1",   "control panel", &thresh1,      2000, NULL);
+    cvCreateTrackbar("thresh2",   "control panel", &thresh2,      2000, NULL);
     cvCreateTrackbar("maxCosineThresh (x100)", "control panel", &maxCosineThresh, 100, NULL);
     cvCreateTrackbar("sideRatioThresh (x100)", "control panel", &sideRatioThresh, 100, NULL);
     cvCreateTrackbar("maxSquareArea", "control panel", &maxSquareArea, 100000, NULL);
@@ -226,7 +237,12 @@ int main(int argc, char** argv) {
     cvCreateTrackbar("wallSatHigh", "control panel", &wallSatHigh, 255, NULL);
     cvCreateTrackbar("wallValLow",  "control panel", &wallValLow,  255, NULL);
     cvCreateTrackbar("wallValHigh", "control panel", &wallValHigh, 255, NULL);
+    cvCreateTrackbar("minLineLen", "control panel", &minLineLen, 150, NULL);
+    cvCreateTrackbar("maxLineGap", "control panel", &maxLineGap, 150, NULL);
+
     vector<vector<Point> > squares;
+    vector<Vec4i> houghLines;
+    vector<Vec4i> windowLines;
 
     while (true) {
         // Capture image.
@@ -236,21 +252,56 @@ int main(int argc, char** argv) {
         // http://opencv.willowgarage.com/documentation/cpp/image_filtering.html
         pyrDown(origFrame, resizedFrame, Size(origFrame.cols/2, origFrame.rows/2));
 
-        // Convert the frame to HSV. TODO: combine this with more filtering and
-        // turn into function.
+        // Convert the frame to HSV and save to hsvFrame.
         cvtColor(resizedFrame, hsvFrame, CV_BGR2HSV);
 
-        // Threshold hsvFrame for color of maze walls.
+        // Threshold hsvFrame for color of maze walls and save to bwFrame.
         inRange(hsvFrame, Scalar(wallHueLow,  wallSatLow,  wallValLow),
                           Scalar(wallHueHigh, wallSatHigh, wallValHigh), bwFrame);
 
-        // Find and draw squares.
-        findSquares(bwFrame, squares);
+        // Convert resizedFrame to grayscale and save to grayFrame.
+        cvtColor(resizedFrame, grayFrame, CV_BGR2GRAY);
+
+        // Run Canny on grayFrame and save to cannyFrame.
+        Canny(bwFrame, cannyFrame, thresh1, thresh2, 5);
+        dilate(cannyFrame, cannyFrame, Mat(), Point(-1,-1));
+
+        // Run probabilistic Hough Transform on cannyFrame and save results to
+        // houghLines.
+        HoughLinesP(cannyFrame, houghLines,
+                1,              // rho
+                CV_PI/180,      // theta
+                80,             // Accumulator threshold
+                minLineLen,     // Minimum line length
+                maxLineGap      // Maximum line gap
+                );
+
+        // Save (relatively) horizontal and vertical lines to windowLines.
+        for (size_t i=0; i<houghLines.size(); i++) {
+            if (fabs((houghLines[i][1]-houghLines[i][3]) / (fabs(houghLines[i][0]-houghLines[i][2]))+1) > 10 ||
+                    fabs((houghLines[i][0]-houghLines[i][2]) / (fabs(houghLines[i][1]-houghLines[i][3]))+1) > 10) {
+                windowLines.push_back(houghLines[i]);
+            }
+        }
+
+        // Draw windowLines on the original image.
+        for (size_t i=0; i<windowLines.size(); i++) {
+            line(resizedFrame, Point(windowLines[i][0], windowLines[i][1]), Point(windowLines[i][2], windowLines[i][3]), Scalar(0,0,255), 1, 8 );
+            //line(bwFrame, Point(windowLines[i][0], windowLines[i][1]), Point(windowLines[i][2], windowLines[i][3]), Scalar(255,255,255), 1, 8 );
+        }
+
+        // Clear vectors.
+        houghLines.clear();
+        windowLines.clear();
+
+        // Find squares in cannyFrame and draw them on resizedFrame.
+        findSquares(cannyFrame, squares);
         drawSquares(resizedFrame, squares);
 
         // Show the image, with the squares overlaid.
         imshow("origImage", resizedFrame);
         imshow("bwImage", bwFrame);
+        imshow("cannyImage", cannyFrame);
 
         // Wait 5 milliseconds for a keypress.
         int c = waitKey(5);
