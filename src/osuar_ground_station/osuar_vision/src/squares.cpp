@@ -157,7 +157,7 @@ static void findSquares( const Mat& image, vector<vector<Point> >& squares )
 
                     sideRatio = minSideLen / maxSideLen;
 
-                    std::cout << minSideLen << "  " << maxSideLen << "\n";
+                    //std::cout << minSideLen << "  " << maxSideLen << "\n";
 
                     // if cosines of all angles are small
                     // (all angles are ~90 degree) then write quandrange
@@ -166,7 +166,7 @@ static void findSquares( const Mat& image, vector<vector<Point> >& squares )
                         squares.push_back(approx);
                 }
             }
-        }
+        //}
     //}
 }
 
@@ -180,7 +180,7 @@ static void drawSquares( Mat& image, const vector<vector<Point> >& squares )
         int n = (int)squares[i].size();
         polylines(image, &p, &n, 1, true, Scalar(0,255,0), 3, CV_AA);
 
-        std::cout << "x: " << squares[i][0].x << "  y: " << squares[i][0].y << "\n";
+        //std::cout << "x: " << squares[i][0].x << "  y: " << squares[i][0].y << "\n";
 
         // Only publish coordinates for one of the squares. Coordinates are
         // shifted over by half the camera resolution (which itself is scaled
