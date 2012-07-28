@@ -16,7 +16,8 @@
 
 using namespace cv;
 
-int thresh = 50, N = 11;
+int thresh1 = 100;
+int thresh2 = 500, N = 11;
 
 // Threshold for maximum cosine between angles (x100).
 int maxCosineThresh = 20;
