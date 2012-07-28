@@ -28,16 +28,28 @@ int sideRatioThresh = 75;
 int maxSquareArea = 41000;
 
 // Find colors of any hue...
-int wallHueLow  = 50;
-int wallHueHigh = 132;
+int wallHueLow  = 0;
+int wallHueHigh = 179;
 
 // ...of low saturation...
 int wallSatLow  = 0;
-int wallSatHigh = 100;
+int wallSatHigh = 50;
 
 // ...ranging down to gray, but not completely dark. That is to say, white.
 int wallValLow  = 90;
 int wallValHigh = 255;
+
+// Hough transform thresholds
+int minLineLen = 5;
+int maxLineGap = 10;
+
+// Instantiate a Mat in which to store each video frame.
+Mat origFrame;
+Mat resizedFrame;   // Scaled-down from origFrame by factor of 2.
+Mat hsvFrame;   // Converted to HSV space from resizedFrame.
+Mat bwFrame;   // Black/white image after thresholding hsvFrame.
+Mat grayFrame;
+Mat cannyFrame;
 
 ros::Publisher visPub;
 osuar_vision::windowCoordinates winCoords;
@@ -60,7 +72,7 @@ static void findSquares( const Mat& image, vector<vector<Point> >& squares )
 {
     squares.clear();
 
-    Mat pyr, timg, gray0(image.size(), CV_8U), gray;
+    Mat pyr, timg;
 
     // down-scale and upscale the image to filter out the noise
     pyrDown(image, pyr, Size(image.cols/2, image.rows/2));
@@ -194,12 +206,6 @@ int main(int argc, char** argv) {
     cap.set(CV_CAP_PROP_FRAME_WIDTH, 720);
     cap.set(CV_CAP_PROP_FRAME_HEIGHT, 480);
     //cap.set(CV_CAP_PROP_FPS, 20);
-
-    // Instantiate a Mat in which to store each video frame.
-    Mat origFrame;
-    Mat resizedFrame;   // Scaled-down from origFrame by factor of 2.
-    Mat hsvFrame;   // Converted to HSV space from resizedFrame.
-    Mat bwFrame;   // Black/white image after thresholding hsvFrame.
 
     cvNamedWindow("control panel", 1);
     cvMoveWindow("control panel", 450, 20);
