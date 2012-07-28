@@ -17,7 +17,7 @@ set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
 set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 
 #uncomment if you have defined messages
-#rosbuild_genmsg()
+rosbuild_genmsg()
 #uncomment if you have defined services
 #rosbuild_gensrv()
 
@@ -30,22 +30,29 @@ set(LIBRARY_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/lib)
 #target_link_libraries(example ${PROJECT_NAME})
 
 rosbuild_add_executable(vision src/vision.cpp)
+rosbuild_add_executable(squares src/squares.cpp)
+rosbuild_add_executable(hough src/hough.cpp)
 
-find_package(OpenCV)
+find_package(OpenCV REQUIRED)
 if (OpenCV_FOUND)
     include_directories(${OpenCV_INCLUDE_DIR})
     target_link_libraries(vision ${OpenCV_LIBS})
+    target_link_libraries(squares ${OpenCV_LIBS})
+    target_link_libraries(hough ${OpenCV_LIBS})
 endif (OpenCV_FOUND)
 
 # We are currently using an old version of cvblobs from here:
 # http://opencv.willowgarage.com/wiki/cvBlobsLib
 # We eventually need to use the cvblobs library from here instead:
 # http://code.google.com/p/cvblob/
-rosbuild_add_library(cvblob include/cvblobs/blob.cpp
-                            include/cvblobs/BlobContour.cpp
-                            include/cvblobs/BlobOperators.cpp
-                            include/cvblobs/BlobProperties.cpp
-                            include/cvblobs/BlobResult.cpp
-                            include/cvblobs/ComponentLabeling.cpp)
-target_link_libraries(vision cvblob)
+find_package(cvBlob REQUIRED)
+if (cvBlob_FOUND)
+    target_link_libraries(vision ${cvBlob_LIBS})
+endif (cvBlob_FOUND)
 
+#rosbuild_add_library(cvblob include/cvblobs/blob.cpp
+#                            include/cvblobs/BlobContour.cpp
+#                            include/cvblobs/BlobOperators.cpp
+#                            include/cvblobs/BlobProperties.cpp
+#                            include/cvblobs/BlobResult.cpp
+#                            include/cvblobs/ComponentLabeling.cpp)

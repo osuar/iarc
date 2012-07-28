@@ -4,10 +4,15 @@
 *.elf
 *.hex
 *.map
+*.cmd
 dep
 *.out
 bin
 msg_gen
 build
 *.un~
+*.aux
+*.bbl
+*.blg
+*.log
 

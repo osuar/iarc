@@ -1,0 +1,59 @@
+WARNING:
+This software is an alpha version, and may crash or permanently damage your
+computer and/or USB devices.
+
+---------------------------------------------------------------------------
+
+This is a part of a USB driver implementation for the Easycap DC60
+video capture device with USB id 1c88:0007
+
+This driver is capable of uploading a firmware for the device using the kernel
+firmware API, and will register a V4L2 Driver for the device.
+
+To use this driver you need a copy of the firmware file. Due to legal
+complications, the firmware cannot be distributed with this package, but it
+can be extracted from UsbSnoop logs, that you can generate when you plug
+the device into a Windows machine. 
+
+Your log file should include many outgoing packets called "Control_URB".
+The packets are 128 Bytes long, and you are interested in the last 62 bytes
+of each packet.
+
+Example:
+0000  80 e6 ee 2e 01 88 ff ff 53 02 00 4f 02 00 00 00   ........S..O....
+0010  e3 e2 dc 4e 00 00 00 00 d0 41 0f 00 8d ff ff ff   ...N.....A......
+0020  40 00 00 00 40 00 00 00 40 01 05 00 00 00 40 00   @...@...@.....@.
+0030  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00   ................
+0040  05 ff 0c 94 ce 00 ff ff ff ff ff ff ff ff ff ff   ................
+0050  ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff ff   ................
+0060  ff ff ff ff ff ff ff ff ff ff ff ff ff ff 0c 94   ................
+0070  72 06 ff ff ff ff ff ff ff ff ff ff ff ff ff ff   r...............
+
+You will have to extract the bytes from offset 0x0042 to the end of each
+packet. You can identify the correct location by the two bytes "0x05 0xff",
+and extract the rest of the bytes.
+
+This should result in a file 7502 bytes in size. The resulting firmware
+file size must be evenly dividable by 62.
+
+The firmware file used for development has the following md5sum:
+90f78491e831e8db44cfdd6204a2b602
+The Windows driver CD used for development was Version 2.1C.
+
+The firmware should be named somagic_firmware.bin, and placed in
+/lib/firmware
+
+USAGE:
+make
+sudo insmod somagic.ko
+
+This driver has been tested and developed on an OpenSUSE 11.4 (Tumbleweed) box
+with at least the following kernels:
+* 3.1.0-46-desktop
+* 3.2.10-15-defaulti
+
+
+The USBVision driver (linux/drivers/media/video/usbvision) is was used as a base in the initial development of this driver.
+
+Jon Arne Jørgensen <jonjon.arnearne@gmail.com>
+
