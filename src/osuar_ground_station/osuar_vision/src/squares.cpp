@@ -52,6 +52,11 @@ Mat bwFrame;   // Black/white image after thresholding hsvFrame.
 Mat grayFrame;
 Mat cannyFrame;
 
+vector<vector<Point> > squares;
+vector<Vec4i> houghLines;
+vector<Vec4i> windowLines;
+vector<Vec4i> hierarchy;
+
 ros::Publisher visPub;
 osuar_vision::windowCoordinates winCoords;
 
@@ -240,10 +245,6 @@ int main(int argc, char** argv) {
     cvCreateTrackbar("wallValHigh", "control panel", &wallValHigh, 255, NULL);
     cvCreateTrackbar("minLineLen", "control panel", &minLineLen, 150, NULL);
     cvCreateTrackbar("maxLineGap", "control panel", &maxLineGap, 150, NULL);
-
-    vector<vector<Point> > squares;
-    vector<Vec4i> houghLines;
-    vector<Vec4i> windowLines;
 
     while (true) {
         // Capture image.
