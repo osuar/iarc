@@ -44,6 +44,9 @@ int wallValHigh = 255;
 int minLineLen = 5;
 int maxLineGap = 10;
 
+// Hierarchy levels for findContours()
+int hierarchyLevels = 0;
+
 // Instantiate a Mat in which to store each video frame.
 Mat origFrame;
 Mat resizedFrame;   // Scaled-down from origFrame by factor of 2.
@@ -113,14 +116,10 @@ static void findSquares( const Mat& image, vector<vector<Point> >& squares )
             //}
 
             // find contours and store them all as a list
-            findContours(cannyFrame, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
+            findContours(cannyFrame, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
 
             // Draw the contours.
-            //for (int i=0; i<contours.size(); i++) {
-            //    for (int j=0; j<contours[i].size(); j++) {
-            //        line(resizedFrame, contours[i][j], contours[i][j+1], Scalar(0,0,255), 1, 8 );
-            //    }
-            //}
+            drawContours(resizedFrame, contours, -1, Scalar(255,255,0), 1, CV_AA);
 
             vector<Point> approx;
 
@@ -234,6 +233,7 @@ int main(int argc, char** argv) {
 
     cvCreateTrackbar("thresh1",   "control panel", &thresh1,      2000, NULL);
     cvCreateTrackbar("thresh2",   "control panel", &thresh2,      2000, NULL);
+    cvCreateTrackbar("hierarchyLevels", "control panel", &hierarchyLevels, 6, NULL);
     cvCreateTrackbar("maxCosineThresh (x100)", "control panel", &maxCosineThresh, 100, NULL);
     cvCreateTrackbar("sideRatioThresh (x100)", "control panel", &sideRatioThresh, 100, NULL);
     cvCreateTrackbar("maxSquareArea", "control panel", &maxSquareArea, 100000, NULL);
