@@ -14,31 +14,41 @@
 #include <ros/ros.h>
 #include <osuar_vision/windowCoordinates.h>
 
+
+#define FIND_WINDOW         0
+#define FIND_SECURITY_LIGHT 1
+#define FIND_FLASH_DRIVE    2
+
+
 using namespace cv;
 
-int thresh1 = 100;
-int thresh2 = 500, N = 11;
+
+// SQUARES
+
+// Thresholds for Canny edge detector.
+int cannyThres1 = 100;
+int cannyThres2 = 500;
 
 // Threshold for maximum cosine between angles (x100).
-int maxCosineThresh = 20;
+int maxCosineThres = 20;
 
 // Threshold for ratio of shortest side / longest side (x100).
-int sideRatioThresh = 75;
+int sideRatioThres = 75;
 
 // Maximum square area.
 int maxSquareArea = 41000;
 
 // Find colors of any hue...
-int wallHueLow  = 0;
-int wallHueHigh = 179;
+int hueLow  = 0;
+int hueHigh = 179;
 
 // ...of low saturation...
-int wallSatLow  = 0;
-int wallSatHigh = 50;
+int satLow  = 0;
+int satHigh = 50;
 
 // ...ranging down to gray, but not completely dark. That is to say, white.
-int wallValLow  = 90;
-int wallValHigh = 255;
+int valLow  = 90;
+int valHigh = 255;
 
 // Hough transform thresholds
 int accThres   = 60;
@@ -57,6 +67,7 @@ Mat grayFrame;
 Mat cannyFrame;
 
 vector<vector<Point> > squares;
+vector<vector<Point> > contours;
 vector<Vec4i> houghLines;
 vector<Vec4i> windowLines;
 vector<Vec4i> hierarchy;
@@ -81,13 +92,13 @@ static double angle( Point pt1, Point pt2, Point pt0 )
 static void findSquares( const Mat& image, vector<vector<Point> >& squares )
 {
     squares.clear();
+    contours.clear();
 
     Mat pyr, timg;
 
     // down-scale and upscale the image to filter out the noise
     pyrDown(image, pyr, Size(image.cols/2, image.rows/2));
     pyrUp(pyr, timg, image.size());
-    vector<vector<Point> > contours;
 
     // find squares in every color plane of the image
     //for( int c = 0; c < 3; c++ )
@@ -104,7 +115,7 @@ static void findSquares( const Mat& image, vector<vector<Point> >& squares )
             //{
             //    // apply Canny. Take the upper threshold from slider
             //    // and set the lower to 0 (which forces edges merging)
-            //    Canny(image, cannyFrame, 0, thresh2, 5);
+            //    Canny(image, cannyFrame, 0, cannyThres2, 5);
             //    // dilate canny output to remove potential
             //    // holes between edge segments
             //    dilate(cannyFrame, cannyFrame, Mat(), Point(-1,-1));
@@ -120,7 +131,7 @@ static void findSquares( const Mat& image, vector<vector<Point> >& squares )
             findContours(cannyFrame, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
 
             // Draw the contours.
-            drawContours(resizedFrame, contours, -1, Scalar(255,255,0), 1, CV_AA);
+            //drawContours(resizedFrame, contours, -1, Scalar(255,255,0), 1, CV_AA);
 
             vector<Point> approx;
 
@@ -167,7 +178,7 @@ static void findSquares( const Mat& image, vector<vector<Point> >& squares )
                     // if cosines of all angles are small
                     // (all angles are ~90 degree) then write quandrange
                     // vertices to resultant sequence
-                    if( maxCosine < ((double) maxCosineThresh)/100 && sideRatio >= (double) sideRatioThresh/100 )
+                    if( maxCosine < ((double) maxCosineThres)/100 && sideRatio >= (double) sideRatioThres/100 )
                         squares.push_back(approx);
                 }
             }
@@ -232,18 +243,18 @@ int main(int argc, char** argv) {
     cvNamedWindow("cannyImage", 1);
     cvMoveWindow("cannyImage", 20, 520);
 
-    cvCreateTrackbar("thresh1",   "control panel", &thresh1,      2000, NULL);
-    cvCreateTrackbar("thresh2",   "control panel", &thresh2,      2000, NULL);
+    cvCreateTrackbar("cannyThres1",     "control panel", &cannyThres1, 2000, NULL);
+    cvCreateTrackbar("cannyThres2",     "control panel", &cannyThres2, 2000, NULL);
     cvCreateTrackbar("hierarchyLevels", "control panel", &hierarchyLevels, 6, NULL);
-    cvCreateTrackbar("maxCosineThresh (x100)", "control panel", &maxCosineThresh, 100, NULL);
-    cvCreateTrackbar("sideRatioThresh (x100)", "control panel", &sideRatioThresh, 100, NULL);
+    cvCreateTrackbar("maxCosineThres (x100)", "control panel", &maxCosineThres, 100, NULL);
+    cvCreateTrackbar("sideRatioThres (x100)", "control panel", &sideRatioThres, 100, NULL);
     cvCreateTrackbar("maxSquareArea", "control panel", &maxSquareArea, 100000, NULL);
-    cvCreateTrackbar("wallHueLow",  "control panel", &wallHueLow,  179, NULL);
-    cvCreateTrackbar("wallHueHigh", "control panel", &wallHueHigh, 179, NULL);
-    cvCreateTrackbar("wallSatLow",  "control panel", &wallSatLow,  255, NULL);
-    cvCreateTrackbar("wallSatHigh", "control panel", &wallSatHigh, 255, NULL);
-    cvCreateTrackbar("wallValLow",  "control panel", &wallValLow,  255, NULL);
-    cvCreateTrackbar("wallValHigh", "control panel", &wallValHigh, 255, NULL);
+    cvCreateTrackbar("hueLow",     "control panel", &hueLow,  179, NULL);
+    cvCreateTrackbar("hueHigh",    "control panel", &hueHigh, 179, NULL);
+    cvCreateTrackbar("satLow",     "control panel", &satLow,  255, NULL);
+    cvCreateTrackbar("satHigh",    "control panel", &satHigh, 255, NULL);
+    cvCreateTrackbar("valLow",     "control panel", &valLow,  255, NULL);
+    cvCreateTrackbar("valHigh",    "control panel", &valHigh, 255, NULL);
     cvCreateTrackbar("accThres",   "control panel", &accThres,   100, NULL);
     cvCreateTrackbar("minLineLen", "control panel", &minLineLen, 150, NULL);
     cvCreateTrackbar("maxLineGap", "control panel", &maxLineGap, 150, NULL);
@@ -259,15 +270,15 @@ int main(int argc, char** argv) {
         // Convert the frame to HSV and save to hsvFrame.
         cvtColor(resizedFrame, hsvFrame, CV_BGR2HSV);
 
-        // Threshold hsvFrame for color of maze walls and save to bwFrame.
-        inRange(hsvFrame, Scalar(wallHueLow,  wallSatLow,  wallValLow),
-                          Scalar(wallHueHigh, wallSatHigh, wallValHigh), bwFrame);
+        // Threshold hsvFrame for color of maze s and save to bwFrame.
+        inRange(hsvFrame, Scalar(hueLow,  satLow,  valLow),
+                          Scalar(hueHigh, satHigh, valHigh), bwFrame);
 
         // Convert resizedFrame to grayscale and save to grayFrame.
         cvtColor(resizedFrame, grayFrame, CV_BGR2GRAY);
 
         // Run Canny on grayFrame and save to cannyFrame.
-        Canny(bwFrame, cannyFrame, thresh1, thresh2, 5);
+        Canny(bwFrame, cannyFrame, cannyThres1, cannyThres2, 5);
         dilate(cannyFrame, cannyFrame, Mat(), Point(-1,-1));
 
         // Run probabilistic Hough Transform on cannyFrame and save results to
