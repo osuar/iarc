@@ -41,8 +41,9 @@ int wallValLow  = 90;
 int wallValHigh = 255;
 
 // Hough transform thresholds
+int accThres   = 60;
 int minLineLen = 5;
-int maxLineGap = 10;
+int maxLineGap = 70;
 
 // Hierarchy levels for findContours()
 int hierarchyLevels = 0;
@@ -243,6 +244,7 @@ int main(int argc, char** argv) {
     cvCreateTrackbar("wallSatHigh", "control panel", &wallSatHigh, 255, NULL);
     cvCreateTrackbar("wallValLow",  "control panel", &wallValLow,  255, NULL);
     cvCreateTrackbar("wallValHigh", "control panel", &wallValHigh, 255, NULL);
+    cvCreateTrackbar("accThres",   "control panel", &accThres,   100, NULL);
     cvCreateTrackbar("minLineLen", "control panel", &minLineLen, 150, NULL);
     cvCreateTrackbar("maxLineGap", "control panel", &maxLineGap, 150, NULL);
 
@@ -271,11 +273,11 @@ int main(int argc, char** argv) {
         // Run probabilistic Hough Transform on cannyFrame and save results to
         // houghLines.
         HoughLinesP(cannyFrame, houghLines,
-                1,              // rho
-                CV_PI/180,      // theta
-                80,             // Accumulator threshold
-                minLineLen,     // Minimum line length
-                maxLineGap      // Maximum line gap
+                1,                  // rho
+                CV_PI/180,          // theta
+                MAX(accThres, 1),   // Accumulator threshold (must be > 0)
+                minLineLen,         // Minimum line length
+                maxLineGap          // Maximum line gap
                 );
 
         // Save (relatively) horizontal and vertical lines to windowLines.
