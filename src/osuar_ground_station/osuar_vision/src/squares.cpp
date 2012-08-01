@@ -247,6 +247,7 @@ int main(int argc, char** argv) {
     cvCreateTrackbar("satHigh",    "control panel", &satHigh, 255, NULL);
     cvCreateTrackbar("valLow",     "control panel", &valLow,  255, NULL);
     cvCreateTrackbar("valHigh",    "control panel", &valHigh, 255, NULL);
+    cvCreateTrackbar("blurSize",   "control panel", &blurSize, 20, NULL);
     cvCreateTrackbar("accThres",   "control panel", &accThres,   100, NULL);
     cvCreateTrackbar("minLineLen", "control panel", &minLineLen, 150, NULL);
     cvCreateTrackbar("maxLineGap", "control panel", &maxLineGap, 150, NULL);
@@ -258,20 +259,25 @@ int main(int argc, char** argv) {
         // Resize the image to increase processing rate. See here for details:
         // http://opencv.willowgarage.com/documentation/cpp/image_filtering.html
         pyrDown(origFrame, resizedFrame, Size(origFrame.cols/2, origFrame.rows/2));
+        //erode(resizedFrame, dilatedFrame, Mat(), Point(-1,-1), 2);
+        blur(resizedFrame, dilatedFrame, Size(MAX(1,blurSize),MAX(1,blurSize)));
 
         // Convert the frame to HSV and save to hsvFrame.
-        cvtColor(resizedFrame, hsvFrame, CV_BGR2HSV);
+        cvtColor(dilatedFrame, hsvFrame, CV_BGR2HSV);
 
         // Threshold hsvFrame for color of maze s and save to bwFrame.
         inRange(hsvFrame, Scalar(hueLow,  satLow,  valLow),
                           Scalar(hueHigh, satHigh, valHigh), bwFrame);
+
+        // Dilate bwFrame.
+        //dilate(bwFrame, bwFrame, Mat(), Point(-1,-1), 2);
 
         // Convert resizedFrame to grayscale and save to grayFrame.
         cvtColor(resizedFrame, grayFrame, CV_BGR2GRAY);
 
         // Run Canny on grayFrame and save to cannyFrame.
         Canny(bwFrame, cannyFrame, cannyThres1, cannyThres2, 5);
-        dilate(cannyFrame, cannyFrame, Mat(), Point(-1,-1));
+        //dilate(cannyFrame, cannyFrame, Mat(), Point(-1,-1));
 
         // Run probabilistic Hough Transform on cannyFrame and save results to
         // houghLines.
