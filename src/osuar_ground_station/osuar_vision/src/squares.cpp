@@ -14,43 +14,67 @@
 #include <ros/ros.h>
 #include <osuar_vision/windowCoordinates.h>
 
+
+#define FIND_WINDOW         0
+#define FIND_SECURITY_LIGHT 1
+#define FIND_FLASH_DRIVE    2
+
+
 using namespace cv;
 
-int thresh1 = 100;
-int thresh2 = 500, N = 11;
+
+// SQUARES
+
+// Thresholds for Canny edge detector.
+int cannyThres1 = 100;
+int cannyThres2 = 500;
+
+// Hierarchy levels for findContours()
+int hierarchyLevels = 0;
 
 // Threshold for maximum cosine between angles (x100).
-int maxCosineThresh = 20;
+int maxCosineThres = 20;
 
 // Threshold for ratio of shortest side / longest side (x100).
-int sideRatioThresh = 75;
+int sideRatioThres = 75;
 
 // Maximum square area.
 int maxSquareArea = 41000;
 
 // Find colors of any hue...
-int wallHueLow  = 0;
-int wallHueHigh = 179;
+int hueLow  = 100;
+int hueHigh = 160;
 
 // ...of low saturation...
-int wallSatLow  = 0;
-int wallSatHigh = 50;
+int satLow  = 10;
+int satHigh = 80;
 
 // ...ranging down to gray, but not completely dark. That is to say, white.
-int wallValLow  = 90;
-int wallValHigh = 255;
+int valLow  = 60;
+int valHigh = 255;
+
+// Blur size
+int blurSize = 10;
 
 // Hough transform thresholds
+int accThres   = 60;
 int minLineLen = 5;
-int maxLineGap = 10;
+int maxLineGap = 70;
 
 // Instantiate a Mat in which to store each video frame.
 Mat origFrame;
 Mat resizedFrame;   // Scaled-down from origFrame by factor of 2.
 Mat hsvFrame;   // Converted to HSV space from resizedFrame.
 Mat bwFrame;   // Black/white image after thresholding hsvFrame.
+Mat dilatedFrame;
 Mat grayFrame;
 Mat cannyFrame;
+
+vector<vector<Point> > squares;
+vector<vector<Point> > contours;
+vector<Vec4i> houghLines;
+vector<Vec4i> windowLines;
+vector<Vec4i> hierarchy;
 
 ros::Publisher visPub;
 osuar_vision::windowCoordinates winCoords;
@@ -72,102 +96,64 @@ static double angle( Point pt1, Point pt2, Point pt0 )
 static void findSquares( const Mat& image, vector<vector<Point> >& squares )
 {
     squares.clear();
+    contours.clear();
 
     Mat pyr, timg;
 
     // down-scale and upscale the image to filter out the noise
     pyrDown(image, pyr, Size(image.cols/2, image.rows/2));
     pyrUp(pyr, timg, image.size());
-    vector<vector<Point> > contours;
 
-    // find squares in every color plane of the image
-    //for( int c = 0; c < 3; c++ )
-    //{
-        //int ch[] = {c, 0};
-        //mixChannels(&timg, 1, &gray0, 1, ch, 1);
+    // find contours and store them all as a list
+    findContours(cannyFrame, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
 
-        // try several threshold levels
-        //for( int l = 0; l < N; l++ )
-        //{
-            // hack: use Canny instead of zero threshold level.
-            // Canny helps to catch squares with gradient shading
-            //if( l == 0 )
-            //{
-            //    // apply Canny. Take the upper threshold from slider
-            //    // and set the lower to 0 (which forces edges merging)
-            //    Canny(image, cannyFrame, 0, thresh2, 5);
-            //    // dilate canny output to remove potential
-            //    // holes between edge segments
-            //    dilate(cannyFrame, cannyFrame, Mat(), Point(-1,-1));
-            //}
-            //else
-            //{
-            //    // apply threshold if l!=0:
-            //    //     tgray(x,y) = gray(x,y) < (l+1)*255/N ? 255 : 0
-            //    cannyFrame = image >= (l+1)*255/N;
-            //}
+    vector<Point> approx;
 
-            // find contours and store them all as a list
-            findContours(cannyFrame, contours, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
+    // test each contour
+    for( size_t i = 0; i < contours.size(); i++ )
+    {
+        // approximate contour with accuracy proportional
+        // to the contour perimeter
+        approxPolyDP(Mat(contours[i]), approx, arcLength(Mat(contours[i]), true)*0.02, true);
 
-            // Draw the contours.
-            //for (int i=0; i<contours.size(); i++) {
-            //    for (int j=0; j<contours[i].size(); j++) {
-            //        line(resizedFrame, contours[i][j], contours[i][j+1], Scalar(0,0,255), 1, 8 );
-            //    }
-            //}
+        // square contours should have 4 vertices after approximation
+        // relatively large area (to filter out noisy contours)
+        // and be convex.
+        // Note: absolute value of an area is used because
+        // area may be positive or negative - in accordance with the
+        // contour orientation
+        if( approx.size() == 4 &&
+            fabs(contourArea(Mat(approx))) > 1000 &&
+            fabs(contourArea(Mat(approx))) < maxSquareArea &&
+            isContourConvex(Mat(approx)) )
+        {
+            double maxCosine = 0;
+            double minSideLen = 100000;
+            double maxSideLen = 0;
+            double sideRatio = 0;
 
-            vector<Point> approx;
-
-            // test each contour
-            for( size_t i = 0; i < contours.size(); i++ )
+            for( int j = 2; j < 5; j++ )
             {
-                // approximate contour with accuracy proportional
-                // to the contour perimeter
-                approxPolyDP(Mat(contours[i]), approx, arcLength(Mat(contours[i]), true)*0.02, true);
+                // find the maximum cosine of the angle between joint edges
+                double cosine = fabs(angle(approx[j%4], approx[j-2], approx[j-1]));
+                maxCosine = MAX(maxCosine, cosine);
 
-                // square contours should have 4 vertices after approximation
-                // relatively large area (to filter out noisy contours)
-                // and be convex.
-                // Note: absolute value of an area is used because
-                // area may be positive or negative - in accordance with the
-                // contour orientation
-                if( approx.size() == 4 &&
-                    fabs(contourArea(Mat(approx))) > 1000 &&
-                    fabs(contourArea(Mat(approx))) < maxSquareArea &&
-                    isContourConvex(Mat(approx)) )
-                {
-                    double maxCosine = 0;
-                    double minSideLen = 100000;
-                    double maxSideLen = 0;
-                    double sideRatio = 0;
-
-                    for( int j = 2; j < 5; j++ )
-                    {
-                        // find the maximum cosine of the angle between joint edges
-                        double cosine = fabs(angle(approx[j%4], approx[j-2], approx[j-1]));
-                        maxCosine = MAX(maxCosine, cosine);
-
-                        // Find the maximum difference in length of adjacent
-                        // sides
-                        double sideLen = sqrt(pow((approx[j%4].x - approx[(j+1)%4].x), 2) + pow((approx[j%4].y - approx[(j+1)%4].y), 2));
-                        minSideLen = MIN(minSideLen, sideLen);
-                        maxSideLen = MAX(maxSideLen, sideLen);
-                    }
-
-                    sideRatio = minSideLen / maxSideLen;
-
-                    //std::cout << minSideLen << "  " << maxSideLen << "\n";
-
-                    // if cosines of all angles are small
-                    // (all angles are ~90 degree) then write quandrange
-                    // vertices to resultant sequence
-                    if( maxCosine < ((double) maxCosineThresh)/100 && sideRatio >= (double) sideRatioThresh/100 )
-                        squares.push_back(approx);
-                }
+                // Find the maximum difference in length of adjacent
+                // sides
+                double sideLen = sqrt(pow((approx[j%4].x - approx[(j+1)%4].x), 2) + pow((approx[j%4].y - approx[(j+1)%4].y), 2));
+                minSideLen = MIN(minSideLen, sideLen);
+                maxSideLen = MAX(maxSideLen, sideLen);
             }
-        //}
-    //}
+
+            sideRatio = minSideLen / maxSideLen;
+
+            // if cosines of all angles are small
+            // (all angles are ~90 degree) then write quandrange
+            // vertices to resultant sequence
+            if( maxCosine < ((double) maxCosineThres)/100 && sideRatio >= (double) sideRatioThres/100 )
+                squares.push_back(approx);
+        }
+    }
 }
 
 
@@ -200,6 +186,28 @@ static void drawSquares( Mat& image, const vector<vector<Point> >& squares )
 }
 
 
+static void findBlobs (const Mat& image) {
+    // Run Canny on bwFrame and save to cannyFrame.
+    Canny(bwFrame, cannyFrame, cannyThres1, cannyThres2, 5);
+    dilate(cannyFrame, cannyFrame, Mat(), Point(-1,-1), 3);
+
+    // Find contours.
+    findContours(cannyFrame, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
+
+    if (!contours.empty() && !hierarchy.empty()) {                                   
+    int i, b, g, r;
+        for (i=0; i>=0; i=hierarchy[i][0]) {
+            b = rand()&255;
+            g = rand()&255;
+            r = rand()&255;
+            drawContours(resizedFrame, contours, i, Scalar(b,g,r), CV_FILLED, 8, hierarchy);
+        }
+    }
+}
+
+
+
+
 int main(int argc, char** argv) {
     ros::init(argc, argv, "vision");
     ros::NodeHandle nh;
@@ -227,23 +235,22 @@ int main(int argc, char** argv) {
     cvNamedWindow("cannyImage", 1);
     cvMoveWindow("cannyImage", 20, 520);
 
-    cvCreateTrackbar("thresh1",   "control panel", &thresh1,      2000, NULL);
-    cvCreateTrackbar("thresh2",   "control panel", &thresh2,      2000, NULL);
-    cvCreateTrackbar("maxCosineThresh (x100)", "control panel", &maxCosineThresh, 100, NULL);
-    cvCreateTrackbar("sideRatioThresh (x100)", "control panel", &sideRatioThresh, 100, NULL);
+    cvCreateTrackbar("cannyThres1",     "control panel", &cannyThres1, 2000, NULL);
+    cvCreateTrackbar("cannyThres2",     "control panel", &cannyThres2, 2000, NULL);
+    cvCreateTrackbar("hierarchyLevels", "control panel", &hierarchyLevels, 6, NULL);
+    cvCreateTrackbar("maxCosineThres (x100)", "control panel", &maxCosineThres, 100, NULL);
+    cvCreateTrackbar("sideRatioThres (x100)", "control panel", &sideRatioThres, 100, NULL);
     cvCreateTrackbar("maxSquareArea", "control panel", &maxSquareArea, 100000, NULL);
-    cvCreateTrackbar("wallHueLow",  "control panel", &wallHueLow,  179, NULL);
-    cvCreateTrackbar("wallHueHigh", "control panel", &wallHueHigh, 179, NULL);
-    cvCreateTrackbar("wallSatLow",  "control panel", &wallSatLow,  255, NULL);
-    cvCreateTrackbar("wallSatHigh", "control panel", &wallSatHigh, 255, NULL);
-    cvCreateTrackbar("wallValLow",  "control panel", &wallValLow,  255, NULL);
-    cvCreateTrackbar("wallValHigh", "control panel", &wallValHigh, 255, NULL);
+    cvCreateTrackbar("hueLow",     "control panel", &hueLow,  179, NULL);
+    cvCreateTrackbar("hueHigh",    "control panel", &hueHigh, 179, NULL);
+    cvCreateTrackbar("satLow",     "control panel", &satLow,  255, NULL);
+    cvCreateTrackbar("satHigh",    "control panel", &satHigh, 255, NULL);
+    cvCreateTrackbar("valLow",     "control panel", &valLow,  255, NULL);
+    cvCreateTrackbar("valHigh",    "control panel", &valHigh, 255, NULL);
+    cvCreateTrackbar("blurSize",   "control panel", &blurSize, 20, NULL);
+    cvCreateTrackbar("accThres",   "control panel", &accThres,   100, NULL);
     cvCreateTrackbar("minLineLen", "control panel", &minLineLen, 150, NULL);
     cvCreateTrackbar("maxLineGap", "control panel", &maxLineGap, 150, NULL);
-
-    vector<vector<Point> > squares;
-    vector<Vec4i> houghLines;
-    vector<Vec4i> windowLines;
 
     while (true) {
         // Capture image.
@@ -252,29 +259,34 @@ int main(int argc, char** argv) {
         // Resize the image to increase processing rate. See here for details:
         // http://opencv.willowgarage.com/documentation/cpp/image_filtering.html
         pyrDown(origFrame, resizedFrame, Size(origFrame.cols/2, origFrame.rows/2));
+        //erode(resizedFrame, dilatedFrame, Mat(), Point(-1,-1), 2);
+        blur(resizedFrame, dilatedFrame, Size(MAX(1,blurSize),MAX(1,blurSize)));
 
         // Convert the frame to HSV and save to hsvFrame.
-        cvtColor(resizedFrame, hsvFrame, CV_BGR2HSV);
+        cvtColor(dilatedFrame, hsvFrame, CV_BGR2HSV);
 
-        // Threshold hsvFrame for color of maze walls and save to bwFrame.
-        inRange(hsvFrame, Scalar(wallHueLow,  wallSatLow,  wallValLow),
-                          Scalar(wallHueHigh, wallSatHigh, wallValHigh), bwFrame);
+        // Threshold hsvFrame for color of maze s and save to bwFrame.
+        inRange(hsvFrame, Scalar(hueLow,  satLow,  valLow),
+                          Scalar(hueHigh, satHigh, valHigh), bwFrame);
+
+        // Dilate bwFrame.
+        //dilate(bwFrame, bwFrame, Mat(), Point(-1,-1), 2);
 
         // Convert resizedFrame to grayscale and save to grayFrame.
         cvtColor(resizedFrame, grayFrame, CV_BGR2GRAY);
 
         // Run Canny on grayFrame and save to cannyFrame.
-        Canny(bwFrame, cannyFrame, thresh1, thresh2, 5);
-        dilate(cannyFrame, cannyFrame, Mat(), Point(-1,-1));
+        Canny(bwFrame, cannyFrame, cannyThres1, cannyThres2, 5);
+        //dilate(cannyFrame, cannyFrame, Mat(), Point(-1,-1));
 
         // Run probabilistic Hough Transform on cannyFrame and save results to
         // houghLines.
         HoughLinesP(cannyFrame, houghLines,
-                1,              // rho
-                CV_PI/180,      // theta
-                80,             // Accumulator threshold
-                minLineLen,     // Minimum line length
-                maxLineGap      // Maximum line gap
+                1,                  // rho
+                CV_PI/180,          // theta
+                MAX(accThres, 1),   // Accumulator threshold (must be > 0)
+                minLineLen,         // Minimum line length
+                maxLineGap          // Maximum line gap
                 );
 
         // Save (relatively) horizontal and vertical lines to windowLines.
