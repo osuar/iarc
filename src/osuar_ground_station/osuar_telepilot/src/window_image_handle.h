@@ -1,0 +1,2 @@
+#define SMALL_THRESHOLD 25
+#define BIG_THRESHOLD 60
