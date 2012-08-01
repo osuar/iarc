@@ -186,6 +186,28 @@ static void drawSquares( Mat& image, const vector<vector<Point> >& squares )
 }
 
 
+static void findBlobs (const Mat& image) {
+    // Run Canny on bwFrame and save to cannyFrame.
+    Canny(bwFrame, cannyFrame, cannyThres1, cannyThres2, 5);
+    dilate(cannyFrame, cannyFrame, Mat(), Point(-1,-1), 3);
+
+    // Find contours.
+    findContours(cannyFrame, contours, hierarchy, CV_RETR_CCOMP, CV_CHAIN_APPROX_SIMPLE);
+
+    if (!contours.empty() && !hierarchy.empty()) {                                   
+    int i, b, g, r;
+        for (i=0; i>=0; i=hierarchy[i][0]) {
+            b = rand()&255;
+            g = rand()&255;
+            r = rand()&255;
+            drawContours(resizedFrame, contours, i, Scalar(b,g,r), CV_FILLED, 8, hierarchy);
+        }
+    }
+}
+
+
+
+
 int main(int argc, char** argv) {
     ros::init(argc, argv, "vision");
     ros::NodeHandle nh;
