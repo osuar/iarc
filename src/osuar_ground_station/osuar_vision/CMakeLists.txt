@@ -29,14 +29,14 @@ rosbuild_genmsg()
 #rosbuild_add_executable(example examples/example.cpp)
 #target_link_libraries(example ${PROJECT_NAME})
 
-rosbuild_add_executable(vision src/vision.cpp)
+#rosbuild_add_executable(vision src/vision.cpp)
 rosbuild_add_executable(squares src/squares.cpp)
 rosbuild_add_executable(hough src/hough.cpp)
 
 find_package(OpenCV REQUIRED)
 if (OpenCV_FOUND)
     include_directories(${OpenCV_INCLUDE_DIR})
-    target_link_libraries(vision ${OpenCV_LIBS})
+    #target_link_libraries(vision ${OpenCV_LIBS})
     target_link_libraries(squares ${OpenCV_LIBS})
     target_link_libraries(hough ${OpenCV_LIBS})
 endif (OpenCV_FOUND)
@@ -45,10 +45,10 @@ endif (OpenCV_FOUND)
 # http://opencv.willowgarage.com/wiki/cvBlobsLib
 # We eventually need to use the cvblobs library from here instead:
 # http://code.google.com/p/cvblob/
-find_package(cvBlob REQUIRED)
-if (cvBlob_FOUND)
-    target_link_libraries(vision ${cvBlob_LIBS})
-endif (cvBlob_FOUND)
+#find_package(cvBlob REQUIRED)
+#if (cvBlob_FOUND)
+#    target_link_libraries(vision ${cvBlob_LIBS})
+#endif (cvBlob_FOUND)
 
 #rosbuild_add_library(cvblob include/cvblobs/blob.cpp
 #                            include/cvblobs/BlobContour.cpp
