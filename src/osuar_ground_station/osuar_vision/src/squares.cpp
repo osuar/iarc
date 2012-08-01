@@ -29,6 +29,9 @@ using namespace cv;
 int cannyThres1 = 100;
 int cannyThres2 = 500;
 
+// Hierarchy levels for findContours()
+int hierarchyLevels = 0;
+
 // Threshold for maximum cosine between angles (x100).
 int maxCosineThres = 20;
 
@@ -39,30 +42,31 @@ int sideRatioThres = 75;
 int maxSquareArea = 41000;
 
 // Find colors of any hue...
-int hueLow  = 0;
-int hueHigh = 179;
+int hueLow  = 100;
+int hueHigh = 160;
 
 // ...of low saturation...
-int satLow  = 0;
-int satHigh = 50;
+int satLow  = 10;
+int satHigh = 80;
 
 // ...ranging down to gray, but not completely dark. That is to say, white.
-int valLow  = 90;
+int valLow  = 60;
 int valHigh = 255;
+
+// Blur size
+int blurSize = 10;
 
 // Hough transform thresholds
 int accThres   = 60;
 int minLineLen = 5;
 int maxLineGap = 70;
 
-// Hierarchy levels for findContours()
-int hierarchyLevels = 0;
-
 // Instantiate a Mat in which to store each video frame.
 Mat origFrame;
 Mat resizedFrame;   // Scaled-down from origFrame by factor of 2.
 Mat hsvFrame;   // Converted to HSV space from resizedFrame.
 Mat bwFrame;   // Black/white image after thresholding hsvFrame.
+Mat dilatedFrame;
 Mat grayFrame;
 Mat cannyFrame;
 
@@ -100,90 +104,56 @@ static void findSquares( const Mat& image, vector<vector<Point> >& squares )
     pyrDown(image, pyr, Size(image.cols/2, image.rows/2));
     pyrUp(pyr, timg, image.size());
 
-    // find squares in every color plane of the image
-    //for( int c = 0; c < 3; c++ )
-    //{
-        //int ch[] = {c, 0};
-        //mixChannels(&timg, 1, &gray0, 1, ch, 1);
+    // find contours and store them all as a list
+    findContours(cannyFrame, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
 
-        // try several threshold levels
-        //for( int l = 0; l < N; l++ )
-        //{
-            // hack: use Canny instead of zero threshold level.
-            // Canny helps to catch squares with gradient shading
-            //if( l == 0 )
-            //{
-            //    // apply Canny. Take the upper threshold from slider
-            //    // and set the lower to 0 (which forces edges merging)
-            //    Canny(image, cannyFrame, 0, cannyThres2, 5);
-            //    // dilate canny output to remove potential
-            //    // holes between edge segments
-            //    dilate(cannyFrame, cannyFrame, Mat(), Point(-1,-1));
-            //}
-            //else
-            //{
-            //    // apply threshold if l!=0:
-            //    //     tgray(x,y) = gray(x,y) < (l+1)*255/N ? 255 : 0
-            //    cannyFrame = image >= (l+1)*255/N;
-            //}
+    vector<Point> approx;
 
-            // find contours and store them all as a list
-            findContours(cannyFrame, contours, hierarchy, CV_RETR_LIST, CV_CHAIN_APPROX_SIMPLE);
+    // test each contour
+    for( size_t i = 0; i < contours.size(); i++ )
+    {
+        // approximate contour with accuracy proportional
+        // to the contour perimeter
+        approxPolyDP(Mat(contours[i]), approx, arcLength(Mat(contours[i]), true)*0.02, true);
 
-            // Draw the contours.
-            //drawContours(resizedFrame, contours, -1, Scalar(255,255,0), 1, CV_AA);
+        // square contours should have 4 vertices after approximation
+        // relatively large area (to filter out noisy contours)
+        // and be convex.
+        // Note: absolute value of an area is used because
+        // area may be positive or negative - in accordance with the
+        // contour orientation
+        if( approx.size() == 4 &&
+            fabs(contourArea(Mat(approx))) > 1000 &&
+            fabs(contourArea(Mat(approx))) < maxSquareArea &&
+            isContourConvex(Mat(approx)) )
+        {
+            double maxCosine = 0;
+            double minSideLen = 100000;
+            double maxSideLen = 0;
+            double sideRatio = 0;
 
-            vector<Point> approx;
-
-            // test each contour
-            for( size_t i = 0; i < contours.size(); i++ )
+            for( int j = 2; j < 5; j++ )
             {
-                // approximate contour with accuracy proportional
-                // to the contour perimeter
-                approxPolyDP(Mat(contours[i]), approx, arcLength(Mat(contours[i]), true)*0.02, true);
+                // find the maximum cosine of the angle between joint edges
+                double cosine = fabs(angle(approx[j%4], approx[j-2], approx[j-1]));
+                maxCosine = MAX(maxCosine, cosine);
 
-                // square contours should have 4 vertices after approximation
-                // relatively large area (to filter out noisy contours)
-                // and be convex.
-                // Note: absolute value of an area is used because
-                // area may be positive or negative - in accordance with the
-                // contour orientation
-                if( approx.size() == 4 &&
-                    fabs(contourArea(Mat(approx))) > 1000 &&
-                    fabs(contourArea(Mat(approx))) < maxSquareArea &&
-                    isContourConvex(Mat(approx)) )
-                {
-                    double maxCosine = 0;
-                    double minSideLen = 100000;
-                    double maxSideLen = 0;
-                    double sideRatio = 0;
-
-                    for( int j = 2; j < 5; j++ )
-                    {
-                        // find the maximum cosine of the angle between joint edges
-                        double cosine = fabs(angle(approx[j%4], approx[j-2], approx[j-1]));
-                        maxCosine = MAX(maxCosine, cosine);
-
-                        // Find the maximum difference in length of adjacent
-                        // sides
-                        double sideLen = sqrt(pow((approx[j%4].x - approx[(j+1)%4].x), 2) + pow((approx[j%4].y - approx[(j+1)%4].y), 2));
-                        minSideLen = MIN(minSideLen, sideLen);
-                        maxSideLen = MAX(maxSideLen, sideLen);
-                    }
-
-                    sideRatio = minSideLen / maxSideLen;
-
-                    //std::cout << minSideLen << "  " << maxSideLen << "\n";
-
-                    // if cosines of all angles are small
-                    // (all angles are ~90 degree) then write quandrange
-                    // vertices to resultant sequence
-                    if( maxCosine < ((double) maxCosineThres)/100 && sideRatio >= (double) sideRatioThres/100 )
-                        squares.push_back(approx);
-                }
+                // Find the maximum difference in length of adjacent
+                // sides
+                double sideLen = sqrt(pow((approx[j%4].x - approx[(j+1)%4].x), 2) + pow((approx[j%4].y - approx[(j+1)%4].y), 2));
+                minSideLen = MIN(minSideLen, sideLen);
+                maxSideLen = MAX(maxSideLen, sideLen);
             }
-        //}
-    //}
+
+            sideRatio = minSideLen / maxSideLen;
+
+            // if cosines of all angles are small
+            // (all angles are ~90 degree) then write quandrange
+            // vertices to resultant sequence
+            if( maxCosine < ((double) maxCosineThres)/100 && sideRatio >= (double) sideRatioThres/100 )
+                squares.push_back(approx);
+        }
+    }
 }
 
 
