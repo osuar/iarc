@@ -17,13 +17,32 @@ struct GyroData {
 	  */
 	int64_t timestamp;
 
-	/** @brief The rotational velocity about the X axes (robot-local).
+	/** @brief The angular position of the arm.
+	  * This is measured off of the x axis.
+	  */
+	double  pos;
+
+	/** @brief The rotational velocity of the arm.
 	  * In rad/s
 	  */
-	double  xAngRate;
-	double  yAngRate;
-	double  zAngRate;
+	double  rate;
 };
+
+/** @brief Contains information about new accelerometer data.
+  */
+struct AccelData {
+	/** @brief The approximate time at which this data was taken.
+	  * In ns.
+	  */
+	int64_t timestamp;
+
+	/** @brief The x acceleration.
+	  * In m/s^2
+	  */
+	double  xAccel;
+	double  yAccel;
+	double  zAccel;
+}
 
 }
 
